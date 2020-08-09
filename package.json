@@ -21,7 +21,8 @@
     "AWS DynamoDB",
     "DocumentClient",
     "AWS Lambda",
-    "Serverless"
+    "Serverless",
+    "Dynatron"
   ],
   "author": {
     "name": "93v",
