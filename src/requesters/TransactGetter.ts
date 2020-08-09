@@ -72,9 +72,9 @@ export class TransactGetter extends Requester {
             new Error(TAKING_TOO_LONG_EXCEPTION),
           ),
         ]);
-        return returnRawResponse
+        return (returnRawResponse
           ? response
-          : (response.Responses?.map((r) => r.Item) as any);
+          : response.Responses?.map((r) => r.Item)) as any;
       } catch (ex) {
         if (!isRetryableDBError(ex)) {
           bail(ex);

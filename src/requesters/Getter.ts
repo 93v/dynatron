@@ -94,7 +94,7 @@ export class Getter extends Requester {
             new Error(TAKING_TOO_LONG_EXCEPTION),
           ),
         ]);
-        return returnRawResponse ? response : (response.Item as any);
+        return (returnRawResponse ? response : response.Item) as any;
       } catch (ex) {
         if (!isRetryableDBError(ex)) {
           bail(ex);

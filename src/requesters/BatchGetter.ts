@@ -204,7 +204,7 @@ export class BatchGetter extends Requester {
       }
       return p;
     });
-    return returnRawResponse ? results : (results?.Responses?.[table] as any);
+    return (returnRawResponse ? results : results?.Responses?.[table]) as any;
   };
 
   $ = this.$execute;

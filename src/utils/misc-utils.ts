@@ -38,7 +38,7 @@ export const assertNever = (obj: never): never => {
 export const isRetryableDBError = (error: Error) =>
   error.message === TAKING_TOO_LONG_EXCEPTION ||
   (Object.prototype.hasOwnProperty.call(error, "retryable") &&
-    (error as any).retryable) ||
+    (error as AWSError).retryable) ||
   error.toString().toUpperCase().includes("ECONN") ||
   error.toString().toUpperCase().includes("NetworkingError") ||
   error.toString().toUpperCase().includes("InternalServerError") ||

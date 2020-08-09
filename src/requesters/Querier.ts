@@ -121,7 +121,7 @@ export class Querier extends MultiGetter {
             scanCompleted = true;
           }
         }
-        return returnRawResponse ? response : (response.Items as any);
+        return (returnRawResponse ? response : response.Items) as any;
       } catch (ex) {
         if (!isRetryableDBError(ex)) {
           bail(ex);

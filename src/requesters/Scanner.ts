@@ -176,9 +176,9 @@ export class Scanner extends MultiGetter {
       );
       consolidatedResponse.Count = consolidatedResponse.Items?.length || 0;
     }
-    return returnRawResponse
+    return (returnRawResponse
       ? consolidatedResponse
-      : (consolidatedResponse.Items as any);
+      : consolidatedResponse.Items) as any;
   };
 
   $ = this.$execute;

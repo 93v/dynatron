@@ -90,7 +90,7 @@ export class Putter extends Mutator {
             new Error(TAKING_TOO_LONG_EXCEPTION),
           ),
         ]);
-        return returnRawResponse ? response : (requestParams.Item as any);
+        return (returnRawResponse ? response : requestParams.Item) as any;
       } catch (ex) {
         if (!isRetryableDBError(ex)) {
           bail(ex);

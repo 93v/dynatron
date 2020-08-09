@@ -30,7 +30,7 @@ export class Deleter extends Checker {
             new Error(TAKING_TOO_LONG_EXCEPTION),
           ),
         ]);
-        return returnRawResponse ? response : (response.Attributes as any);
+        return (returnRawResponse ? response : response.Attributes) as any;
       } catch (ex) {
         if (!isRetryableDBError(ex)) {
           bail(ex);

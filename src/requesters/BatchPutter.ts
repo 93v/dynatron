@@ -185,11 +185,11 @@ export class BatchPutter extends Requester {
       }
       return p;
     });
-    return returnRawResponse
+    return (returnRawResponse
       ? results
-      : (params.RequestItems[table].map(
+      : params.RequestItems[table].map(
           (input) => input.PutRequest?.Item,
-        ) as any);
+        )) as any;
   };
 
   $ = this.$execute;
