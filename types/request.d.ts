@@ -80,11 +80,22 @@ interface ConnectionTimeout {
   timeout?: number;
 }
 
-interface DirectConnection extends ConnectionTimeout {
+interface DirectConnectionWithProfile extends ConnectionTimeout {
   mode: "direct";
   profile: string;
   region: string;
 }
+
+interface DirectConnectionWithCredentials extends ConnectionTimeout {
+  mode: "direct";
+  accessKeyId: string;
+  secretAccessKey: string;
+  region: string;
+}
+
+type DirectConnection =
+  | DirectConnectionWithProfile
+  | DirectConnectionWithCredentials;
 
 interface LocalhostConnection {
   mode: "localhost";
