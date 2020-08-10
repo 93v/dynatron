@@ -14,6 +14,12 @@
 
 Bridge between AWS DynamoDB Document Client and Real World usage.
 
+## Installation
+
+```bash
+npm install dynatron
+```
+
 ## Introduction
 
 This library provides a number of abstractions, tools and functions designed to
