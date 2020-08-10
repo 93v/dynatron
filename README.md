@@ -494,7 +494,7 @@ await db("users-table")
 #### Full usage of `query`
 
 ```typescript
-const users = await db(TABLE)
+const users = await db("users-table")
   // Pass in the partition key
   .query({ id: "613243ec-04db-450b-b654-108231637ca5" })
   // Receives a Condition Expression built with functions provided by the library
@@ -540,7 +540,7 @@ const users = await db(TABLE)
 #### Usual usage of `query`
 
 ```typescript
-const users = await db(TABLE)
+const users = await db("users-table")
   .query({ id: "613243ec-04db-450b-b654-108231637ca5" })
   // You cannot pass in true and set the type at the same time. The typescript will complain about the parameter type.
   // Pay attention to the fact that your type must state that it is an array
@@ -552,7 +552,7 @@ const users = await db(TABLE)
 #### Full usage of `scan`
 
 ```typescript
-const users = await db(TABLE)
+const users = await db("users-table")
   .scan()
   // The index name which should be scanned
   .indexName("names-index") // optional
@@ -597,7 +597,7 @@ const users = await db(TABLE)
 #### Usual usage of `scan`
 
 ```typescript
-const users = await db(TABLE)
+const users = await db("users-table")
   .scan()
   // You cannot pass in true and set the type at the same time. The typescript will complain about the parameter type.
   // Pay attention to the fact that your type must state that it is an array
