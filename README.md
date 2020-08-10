@@ -25,6 +25,8 @@ npm install dynatron
 This library provides a number of abstractions, tools and functions designed to
 make dealing with Amazon DynamoDB easier and more natural for developers.
 
+Works with both `node` and `browser` code.
+
 This library provides utilities for automatically submitting arbitrarily-sized
 batches of reads and writes to DynamoDB using well-formed BatchGetItem and
 BatchWriteItem operations, correct and reliable Scan and Query operations.
@@ -204,20 +206,21 @@ the following list of functions:
 
 ### Configuration Options
 
-The library can work in 3 modes `localhost`, `direct` and `normal` mode.
+The library can work in 3 modes `local`, `direct` and `normal` mode.
 
 #### `Normal` mode
 
 This mode is the default for your server code. When deployed to AWS and specifically
 to AWS Lambda the necessary configs are inherited automatically.
 
-#### `localhost` mode
+#### `local` mode
 
 This mode allows connecting to the local instance of the DynamoDB server
 
 #### `direct` mode
 
-This mode allows to directly connect to the AWS DynamoDB service with an IAM profile.
+This mode allows to directly connect to the AWS DynamoDB service with an IAM profile
+or credentials.
 
 ## Usage
 
@@ -234,16 +237,26 @@ export const db = (table: string) => {
 
   if (process.env.IS_OFFLINE) {
     clientConfigs = {
-      mode: "localhost",
+      mode: "local",
       port: 8888, // optional - defaults to 8000
       accessKeyId: "localhost", // optional - defaults to "localAwsAccessKeyId"
       secretAccessKey: "localhost", // optional - defaults to "localAwsSecretAccessKey"
     };
   } else if (process.env.IS_DIRECT) {
+    // Usually used within node.js code. Cannot be used in the browsers
     clientConfigs = {
       mode: "direct",
       profile: "default",
       region: "us-east-1",
+    };
+
+    // or
+    // Usually used withing browser code. Can also be used in node.js code.
+    clientConfigs = {
+      mode: "direct",
+      region: "us-east-1",
+      accessKeyId: "AKISIWVFZTIYONFVTXTQ",
+      secretAccessKey: "LYGqgVXDfOT8EfdSAj189TLfC79lge6HNJnagjNHB",
     };
   }
 

@@ -101,7 +101,7 @@ export const initDocumentClient = (params?: DynatronDocumentClientParams) => {
     options.region = params.region;
   }
 
-  if (params?.mode === "localhost") {
+  if (params?.mode === "local") {
     options.endpoint = `http://${params?.host || "localhost"}:${
       params?.port || 8000
     }`;

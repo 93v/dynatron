@@ -97,8 +97,8 @@ type DirectConnection =
   | DirectConnectionWithProfile
   | DirectConnectionWithCredentials;
 
-interface LocalhostConnection {
-  mode: "localhost";
+interface LocalConnection extends ConnectionTimeout {
+  mode: "local";
   accessKeyId?: string;
   secretAccessKey?: string;
   host?: string;
@@ -106,9 +106,7 @@ interface LocalhostConnection {
   profile?: string;
 }
 
-export type DynatronDocumentClientParams =
-  | DirectConnection
-  | LocalhostConnection;
+export type DynatronDocumentClientParams = DirectConnection | LocalConnection;
 
 export interface DynatronConstructorParams {
   table: string;
