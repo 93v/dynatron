@@ -80,13 +80,13 @@ interface ConnectionTimeout {
   timeout?: number;
 }
 
-interface DirectConnectionWithProfile extends ConnectionTimeout {
+export interface DirectConnectionWithProfile extends ConnectionTimeout {
   mode: "direct";
   profile: string;
   region: string;
 }
 
-interface DirectConnectionWithCredentials extends ConnectionTimeout {
+export interface DirectConnectionWithCredentials extends ConnectionTimeout {
   mode: "direct";
   accessKeyId: string;
   secretAccessKey: string;

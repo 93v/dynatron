@@ -4,7 +4,11 @@ import { ServiceConfigurationOptions } from "aws-sdk/lib/service";
 import https from "https";
 import { v4 } from "uuid";
 
-import { DynatronDocumentClientParams } from "../../types/request";
+import {
+  DirectConnectionWithCredentials,
+  DirectConnectionWithProfile,
+  DynatronDocumentClientParams,
+} from "../../types/request";
 import { LONG_MAX_LATENCY, TAKING_TOO_LONG_EXCEPTION } from "./constants";
 
 export const serializeExpressionValue = (
@@ -82,10 +86,19 @@ export const initDocumentClient = (params?: DynatronDocumentClientParams) => {
   }
 
   if (params?.mode === "direct") {
-    options.credentials = new SharedIniFileCredentials({
-      profile: params?.profile,
-    });
-    options.region = params?.region;
+    if ((params as DirectConnectionWithProfile).profile) {
+      options.credentials = new SharedIniFileCredentials({
+        profile: (params as DirectConnectionWithProfile).profile,
+      });
+    } else {
+      options.credentials = new Credentials({
+        accessKeyId: (params as DirectConnectionWithCredentials).accessKeyId,
+        secretAccessKey: (params as DirectConnectionWithCredentials)
+          .secretAccessKey,
+      });
+    }
+
+    options.region = params.region;
   }
 
   if (params?.mode === "localhost") {
