@@ -136,6 +136,7 @@ export const optimizeRequestParams = (requestParams: RequestParams) => {
     Object.keys(requestParams.ExpressionAttributeNames).length > 0
   ) {
     const attributeNames = requestParams.ExpressionAttributeNames;
+    const optimizedAttributeNames = {};
     Object.keys(attributeNames).forEach((key, index) => {
       const newKey = `#n${index}`;
       Object.keys(expressions).forEach((expressionType) => {
@@ -144,12 +145,9 @@ export const optimizeRequestParams = (requestParams: RequestParams) => {
           .join(newKey);
       });
 
-      attributeNames[newKey] = attributeNames[key];
-      if (key !== newKey) {
-        delete attributeNames[key];
-      }
+      optimizedAttributeNames[newKey] = attributeNames[key];
     });
-    requestParams.ExpressionAttributeNames = attributeNames;
+    requestParams.ExpressionAttributeNames = optimizedAttributeNames;
   }
 
   if (
@@ -157,6 +155,7 @@ export const optimizeRequestParams = (requestParams: RequestParams) => {
     Object.keys(requestParams.ExpressionAttributeValues).length > 0
   ) {
     const attributeValues = requestParams.ExpressionAttributeValues;
+    const optimizedAttributeValues = {};
     Object.keys(attributeValues).forEach((key, index) => {
       const newKey = `:v${index}`;
       Object.keys(expressions).forEach((expressionType) => {
@@ -165,12 +164,9 @@ export const optimizeRequestParams = (requestParams: RequestParams) => {
           .join(newKey);
       });
 
-      attributeValues[newKey] = attributeValues[key];
-      if (key !== newKey) {
-        delete attributeValues[key];
-      }
+      optimizedAttributeValues[newKey] = attributeValues[key];
     });
-    requestParams.ExpressionAttributeValues = attributeValues;
+    requestParams.ExpressionAttributeValues = optimizedAttributeValues;
   }
 
   Object.keys(expressions).forEach((expressionType) => {
