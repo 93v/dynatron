@@ -145,7 +145,9 @@ export const optimizeRequestParams = (requestParams: RequestParams) => {
       });
 
       attributeNames[newKey] = attributeNames[key];
-      delete attributeNames[key];
+      if (key !== newKey) {
+        delete attributeNames[key];
+      }
     });
     requestParams.ExpressionAttributeNames = attributeNames;
   }
@@ -164,7 +166,9 @@ export const optimizeRequestParams = (requestParams: RequestParams) => {
       });
 
       attributeValues[newKey] = attributeValues[key];
-      delete attributeValues[key];
+      if (key !== newKey) {
+        delete attributeValues[key];
+      }
     });
     requestParams.ExpressionAttributeValues = attributeValues;
   }
