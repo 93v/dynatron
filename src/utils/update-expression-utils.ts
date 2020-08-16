@@ -9,7 +9,7 @@ export const serializeUpdateExpression = (
   const { expression: path, expressionAttributeNames } = serializeAttributePath(
     update.path,
   );
-  const attributeValue = serializeExpressionValue(update["value"] || "");
+  const attributeValue = serializeExpressionValue(update["value"] ?? null);
 
   switch (update.kind) {
     case UpdateKind.Add:
