@@ -1,6 +1,18 @@
 import { DocumentClient } from "aws-sdk/lib/dynamodb/document_client";
 
-import { AttributeTypesEnum, ExpressionKind } from "../src/utils/constants";
+import { ExpressionKind } from "../src/utils/constants";
+
+export type AttributeType =
+  | "binary"
+  | "binarySet"
+  | "boolean"
+  | "list"
+  | "map"
+  | "null"
+  | "number"
+  | "numberSet"
+  | "string"
+  | "stringSet";
 
 export interface AndCondition {
   kind: ExpressionKind.And;
@@ -20,7 +32,7 @@ export interface AttributeNotExistsCondition {
 export interface AttributeTypeCondition {
   path: string;
   kind: ExpressionKind.AttributeType;
-  value: AttributeTypesEnum;
+  value: string;
 }
 
 export interface BeginsWithCondition {

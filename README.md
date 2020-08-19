@@ -89,21 +89,20 @@ attributeExists("tags");
 // Check if the attribute does not exist on the item
 attributeNotExists("tags");
 // Check if the attribute type matches to the provided value
-attributeType("tags", AttributeTypesEnum);
+attributeType("tags", AttributeType);
 
 // where
-enum AttributeTypesEnum {
-  Binary = "B",
-  BinarySet = "BS",
-  Boolean = "BOOL",
-  List = "L",
-  Map = "M",
-  Null = "NULL",
-  Number = "N",
-  NumberSet = "NS",
-  String = "S",
-  StringSet = "SS",
-}
+type AttributeType =
+  | "binary"
+  | "binarySet"
+  | "boolean"
+  | "list"
+  | "map"
+  | "null"
+  | "number"
+  | "numberSet"
+  | "string"
+  | "stringSet";
 ```
 
 #### Size Function

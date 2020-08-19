@@ -8,6 +8,7 @@ import {
   AndCondition,
   AttributeExistsCondition,
   AttributeNotExistsCondition,
+  AttributeType,
   AttributeTypeCondition,
   BeginsWithCondition,
   BetweenCondition,
@@ -25,7 +26,7 @@ import {
   SizeCondition,
 } from "../../types/conditions";
 import { serializeAttributePath } from "./attribute-path-utils";
-import { AttributeTypesEnum, ExpressionKind } from "./constants";
+import { ExpressionKind } from "./constants";
 import { assertNever, serializeExpressionValue } from "./misc-utils";
 
 export const and = (...args: (Condition | Condition[])[]): AndCondition => ({
@@ -50,12 +51,27 @@ export const attributeNotExists = (
 
 export const attributeType = (
   path: string,
-  type: AttributeTypesEnum,
-): AttributeTypeCondition => ({
-  kind: ExpressionKind.AttributeType,
-  path,
-  value: type,
-});
+  type: AttributeType,
+): AttributeTypeCondition => {
+  const shortAttributeTypes: Record<AttributeType, string> = {
+    binary: "B",
+    binarySet: "BS",
+    boolean: "BOOL",
+    list: "L",
+    map: "M",
+    null: "NULL",
+    number: "N",
+    numberSet: "NS",
+    string: "S",
+    stringSet: "SS",
+  };
+
+  return {
+    kind: ExpressionKind.AttributeType,
+    path,
+    value: shortAttributeTypes[type],
+  };
+};
 
 export const beginsWith = (
   path: string,

@@ -23,19 +23,6 @@ export const enum ExpressionKind {
   Size = "size",
 }
 
-export const enum AttributeTypesEnum {
-  Binary = "B",
-  BinarySet = "BS",
-  Boolean = "BOOL",
-  List = "L",
-  Map = "M",
-  Null = "NULL",
-  Number = "N",
-  NumberSet = "NS",
-  String = "S",
-  StringSet = "SS",
-}
-
 export const MILLISECONDS_IN_SECOND = 1000;
 
 export const TAKING_TOO_LONG_EXCEPTION = "TakingTooLongException";

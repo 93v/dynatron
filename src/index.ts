@@ -1,6 +1,5 @@
 export { DynatronConstructorParams } from "../types/request";
 export { Dynatron } from "./Dynatron";
-export { AttributeTypesEnum } from "./utils/constants";
 export { setOfValues } from "./utils/misc-utils";
 
 export {
