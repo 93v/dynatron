@@ -26,7 +26,6 @@ import {
   RETRY_OPTIONS,
   SHORT_MAX_LATENCY,
   TAKING_TOO_LONG_EXCEPTION,
-  UpdateKind,
 } from "../utils/constants";
 import { optimizeRequestParams } from "../utils/expression-optimization-utils";
 import { isRetryableDBError, quickFail } from "../utils/misc-utils";
@@ -48,7 +47,7 @@ export class Updater extends Checker {
     ifNotExist = false,
   ) {
     const expression: UpdateSet = {
-      kind: UpdateKind.Set,
+      kind: "set",
       path,
       value,
       ifNotExist,
@@ -64,7 +63,7 @@ export class Updater extends Checker {
 
     path.forEach((p) => {
       const expression: UpdateRemove = {
-        kind: UpdateKind.Remove,
+        kind: "remove",
         path: p,
       };
       this.#UpdateExpression.push(expression);
@@ -82,7 +81,7 @@ export class Updater extends Checker {
       throw new Error("DELETE can only be used on top-level attributes");
     }
     const expression: UpdateDelete = {
-      kind: UpdateKind.Delete,
+      kind: "delete",
       path,
       value,
     };
@@ -112,7 +111,7 @@ export class Updater extends Checker {
         : (value as DocumentClient.DynamoDbSet);
 
     const expression: UpdateAdd = {
-      kind: UpdateKind.Add,
+      kind: "add",
       path,
       value: setValue,
     };
@@ -123,12 +122,12 @@ export class Updater extends Checker {
   increment(path: string, value: number, attributeExists = true) {
     const expression = attributeExists
       ? ({
-          kind: UpdateKind.Increment,
+          kind: "increment",
           path,
           value,
         } as UpdateIncrement)
       : ({
-          kind: UpdateKind.Add,
+          kind: "add",
           path,
           value,
         } as UpdateAdd);
@@ -139,12 +138,12 @@ export class Updater extends Checker {
   decrement(path: string, value: number, attributeExists = true) {
     const expression = attributeExists
       ? ({
-          kind: UpdateKind.Decrement,
+          kind: "decrement",
           path,
           value,
         } as UpdateDecrement)
       : ({
-          kind: UpdateKind.Add,
+          kind: "add",
           path,
           value: -1 * value,
         } as UpdateAdd);
@@ -164,7 +163,7 @@ export class Updater extends Checker {
     value: DocumentClient.AttributeValue | DocumentClient.AttributeValue[],
   ) {
     const expression: UpdateAppend = {
-      kind: UpdateKind.Append,
+      kind: "append",
       path,
       value: Array.isArray(value) ? value : [value],
     };
@@ -177,7 +176,7 @@ export class Updater extends Checker {
     value: DocumentClient.AttributeValue | DocumentClient.AttributeValue[],
   ) {
     const expression: UpdatePrepend = {
-      kind: UpdateKind.Prepend,
+      kind: "prepend",
       path,
       value: Array.isArray(value) ? value : [value],
     };

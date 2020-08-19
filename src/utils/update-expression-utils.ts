@@ -1,6 +1,5 @@
 import { RawUpdate, RawUpdateType, Update } from "../../types/update";
 import { serializeAttributePath } from "./attribute-path-utils";
-import { UpdateKind } from "./constants";
 import { assertNever, serializeExpressionValue } from "./misc-utils";
 
 export const serializeUpdateExpression = (
@@ -12,47 +11,47 @@ export const serializeUpdateExpression = (
   const attributeValue = serializeExpressionValue(update["value"] ?? null);
 
   switch (update.kind) {
-    case UpdateKind.Add:
-    case UpdateKind.Delete:
+    case "add":
+    case "delete":
       return {
-        Type: update.kind === UpdateKind.Add ? "ADD" : "DELETE",
+        Type: update.kind === "add" ? "ADD" : "DELETE",
         Expression: `${path} ${attributeValue.name}`,
         ExpressionAttributeNames: expressionAttributeNames,
         ExpressionAttributeValues: {
           [attributeValue.name]: attributeValue.value,
         },
       };
-    case UpdateKind.Append:
-    case UpdateKind.Prepend:
+    case "append":
+    case "prepend":
       return {
         Type: "SET",
         Expression: `${path}=list_append(${
-          update.kind === UpdateKind.Append ? path : attributeValue.name
-        },${update.kind === UpdateKind.Append ? attributeValue.name : path})`,
+          update.kind === "append" ? path : attributeValue.name
+        },${update.kind === "append" ? attributeValue.name : path})`,
         ExpressionAttributeNames: expressionAttributeNames,
         ExpressionAttributeValues: {
           [attributeValue.name]: attributeValue.value,
         },
       };
-    case UpdateKind.Decrement:
-    case UpdateKind.Increment:
+    case "decrement":
+    case "increment":
       return {
         Type: "SET",
-        Expression: `${path}=${path}${
-          update.kind === UpdateKind.Increment ? "+" : "-"
-        }${attributeValue.name}`,
+        Expression: `${path}=${path}${update.kind === "increment" ? "+" : "-"}${
+          attributeValue.name
+        }`,
         ExpressionAttributeNames: expressionAttributeNames,
         ExpressionAttributeValues: {
           [attributeValue.name]: attributeValue.value,
         },
       };
-    case UpdateKind.Remove:
+    case "remove":
       return {
         Type: "REMOVE",
         Expression: `${path}`,
         ExpressionAttributeNames: expressionAttributeNames,
       };
-    case UpdateKind.Set:
+    case "set":
       return {
         Type: "SET",
         Expression: `${path}=${

@@ -52,15 +52,3 @@ export const RETRY_OPTIONS: Options = {
 
 export const SHORT_MAX_LATENCY = MILLISECONDS_IN_SECOND;
 export const LONG_MAX_LATENCY = 10 * MILLISECONDS_IN_SECOND;
-
-export const enum UpdateKind {
-  Add = "add",
-  Append = "append",
-  Assign = "assign",
-  Decrement = "decrement",
-  Delete = "delete",
-  Increment = "increment",
-  Prepend = "prepend",
-  Remove = "remove",
-  Set = "set",
-}

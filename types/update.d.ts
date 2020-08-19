@@ -6,56 +6,69 @@ import {
 } from "aws-sdk/clients/dynamodb";
 import { DocumentClient } from "aws-sdk/lib/dynamodb/document_client";
 
-import { UpdateKind } from "../src/utils/constants";
+export type UpdateKind =
+  | "add"
+  | "append"
+  | "assign"
+  | "decrement"
+  | "delete"
+  | "increment"
+  | "prepend"
+  | "remove"
+  | "set";
 
-export interface UpdateAdd {
-  kind: UpdateKind.Add;
+interface IUpdate {
+  kind: UpdateKind;
+}
+
+export interface UpdateAdd extends IUpdate {
+  kind: "add";
   path: string;
   value: DocumentClient.DynamoDbSet | number;
 }
 
-export interface UpdateAppend {
-  kind: UpdateKind.Append;
+export interface UpdateAppend extends IUpdate {
+  kind: "append";
   path: string;
   value: DocumentClient.AttributeValue | DocumentClient.AttributeValue[];
 }
 
-export interface UpdateAssign {
-  kind: UpdateKind.Assign;
+export interface UpdateAssign extends IUpdate {
+  kind: "assign";
   item: AttributeMap;
 }
 
-export interface UpdateDecrement {
-  kind: UpdateKind.Decrement;
+export interface UpdateDecrement extends IUpdate {
+  kind: "decrement";
   path: string;
   value: number;
 }
 
-export interface UpdateDelete {
-  kind: UpdateKind.Delete;
+export interface UpdateDelete extends IUpdate {
+  kind: "delete";
   path: string;
   value: DocumentClient.DynamoDbSet;
 }
 
-export interface UpdateIncrement {
-  kind: UpdateKind.Increment;
+export interface UpdateIncrement extends IUpdate {
+  kind: "increment";
   path: string;
   value: number;
 }
 
-export interface UpdatePrepend {
-  kind: UpdateKind.Prepend;
+export interface UpdatePrepend extends IUpdate {
+  kind: "prepend";
   path: string;
   value: DocumentClient.AttributeValue | DocumentClient.AttributeValue[];
 }
 
-export interface UpdateRemove {
-  kind: UpdateKind.Remove;
+export interface UpdateRemove extends IUpdate {
+  kind: "remove";
   path: string;
 }
 
-export interface UpdateSet {
-  kind: UpdateKind.Set;
+export interface UpdateSet extends IUpdate {
+  kind: "set";
   path: string;
   value: DocumentClient.AttributeValue;
   ifNotExist: BooleanObject;
