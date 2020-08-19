@@ -1,7 +1,5 @@
 import { DocumentClient } from "aws-sdk/lib/dynamodb/document_client";
 
-import { ExpressionKind } from "../src/utils/constants";
-
 export type AttributeType =
   | "binary"
   | "binarySet"
@@ -14,100 +12,123 @@ export type AttributeType =
   | "string"
   | "stringSet";
 
-export interface AndCondition {
-  kind: ExpressionKind.And;
+export type ExpressionKind =
+  | "AND"
+  | "attribute_exists"
+  | "attribute_not_exists"
+  | "attribute_type"
+  | "begins_with"
+  | "BETWEEN"
+  | "contains"
+  | "="
+  | ">"
+  | ">="
+  | "IN"
+  | "<"
+  | "<="
+  | "NOT"
+  | "<>"
+  | "OR"
+  | "size";
+
+interface IConditionExpression {
+  kind: ExpressionKind;
+}
+
+export interface AndCondition extends IConditionExpression {
+  kind: "AND";
   conditions: Condition[];
 }
 
-export interface AttributeExistsCondition {
-  kind: ExpressionKind.AttributeExists;
+export interface AttributeExistsCondition extends IConditionExpression {
+  kind: "attribute_exists";
   path: string;
 }
 
-export interface AttributeNotExistsCondition {
-  kind: ExpressionKind.AttributeNotExists;
+export interface AttributeNotExistsCondition extends IConditionExpression {
+  kind: "attribute_not_exists";
   path: string;
 }
 
-export interface AttributeTypeCondition {
+export interface AttributeTypeCondition extends IConditionExpression {
   path: string;
-  kind: ExpressionKind.AttributeType;
+  kind: "attribute_type";
   value: string;
 }
 
-export interface BeginsWithCondition {
+export interface BeginsWithCondition extends IConditionExpression {
   path: string;
-  kind: ExpressionKind.BeginsWith;
+  kind: "begins_with";
   value: string;
 }
 
-export interface BetweenCondition {
+export interface BetweenCondition extends IConditionExpression {
   path: string | SizeCondition;
-  kind: ExpressionKind.Between;
+  kind: "BETWEEN";
   values: [DocumentClient.AttributeValue, DocumentClient.AttributeValue];
 }
 
-export interface ContainsCondition {
+export interface ContainsCondition extends IConditionExpression {
   path: string;
-  kind: ExpressionKind.Contains;
+  kind: "contains";
   value: string;
 }
 
-export interface EqualsCondition {
+export interface EqualsCondition extends IConditionExpression {
   path: string | SizeCondition;
-  kind: ExpressionKind.Equals;
+  kind: "=";
   value: DocumentClient.AttributeValue;
 }
 
-export interface GreaterThanCondition {
+export interface GreaterThanCondition extends IConditionExpression {
   path: string | SizeCondition;
-  kind: ExpressionKind.GreaterThan;
+  kind: ">";
   value: DocumentClient.AttributeValue;
 }
 
-export interface GreaterThanOrEqualsCondition {
+export interface GreaterThanOrEqualsCondition extends IConditionExpression {
   path: string | SizeCondition;
-  kind: ExpressionKind.GreaterThanOrEquals;
+  kind: ">=";
   value: DocumentClient.AttributeValue;
 }
 
-export interface InCondition {
+export interface InCondition extends IConditionExpression {
   path: string | SizeCondition;
-  kind: ExpressionKind.In;
+  kind: "IN";
   values: DocumentClient.AttributeValue[];
 }
 
-export interface LessThanCondition {
+export interface LessThanCondition extends IConditionExpression {
   path: string | SizeCondition;
-  kind: ExpressionKind.LessThan;
+  kind: "<";
   value: DocumentClient.AttributeValue;
 }
 
-export interface LessThanOrEqualsCondition {
+export interface LessThanOrEqualsCondition extends IConditionExpression {
   path: string | SizeCondition;
-  kind: ExpressionKind.LessThanOrEquals;
+  kind: "<=";
   value: DocumentClient.AttributeValue;
 }
 
-export interface NotCondition {
-  kind: ExpressionKind.Not;
+export interface NotCondition extends IConditionExpression {
+  kind: "NOT";
   condition: Condition;
 }
 
-export interface NotEqualsCondition {
+export interface NotEqualsCondition extends IConditionExpression {
   path: string | SizeCondition;
-  kind: ExpressionKind.NotEquals;
+  kind: "<>";
   value: DocumentClient.AttributeValue;
 }
 
-export interface OrCondition {
-  kind: ExpressionKind.Or;
+export interface OrCondition extends IConditionExpression {
+  kind: "OR";
   conditions: Condition[];
 }
 
-export interface SizeCondition {
+export interface SizeCondition extends IConditionExpression {
   path: string;
-  kind: ExpressionKind.Size;
+  kind: "size";
 }
 
 type KeyCondition =

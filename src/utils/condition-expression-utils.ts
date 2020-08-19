@@ -26,11 +26,10 @@ import {
   SizeCondition,
 } from "../../types/conditions";
 import { serializeAttributePath } from "./attribute-path-utils";
-import { ExpressionKind } from "./constants";
 import { assertNever, serializeExpressionValue } from "./misc-utils";
 
 export const and = (...args: (Condition | Condition[])[]): AndCondition => ({
-  kind: ExpressionKind.And,
+  kind: "AND",
   conditions: args.reduce(
     (p: Condition[], c) => [...p, ...(Array.isArray(c) ? c : [c])],
     [],
@@ -38,14 +37,14 @@ export const and = (...args: (Condition | Condition[])[]): AndCondition => ({
 });
 
 export const attributeExists = (path: string): AttributeExistsCondition => ({
-  kind: ExpressionKind.AttributeExists,
+  kind: "attribute_exists",
   path,
 });
 
 export const attributeNotExists = (
   path: string,
 ): AttributeNotExistsCondition => ({
-  kind: ExpressionKind.AttributeNotExists,
+  kind: "attribute_not_exists",
   path,
 });
 
@@ -67,7 +66,7 @@ export const attributeType = (
   };
 
   return {
-    kind: ExpressionKind.AttributeType,
+    kind: "attribute_type",
     path,
     value: shortAttributeTypes[type],
   };
@@ -77,7 +76,7 @@ export const beginsWith = (
   path: string,
   substr: string,
 ): BeginsWithCondition => ({
-  kind: ExpressionKind.BeginsWith,
+  kind: "begins_with",
   path,
   value: substr,
 });
@@ -86,13 +85,13 @@ export const between = (
   path: string | SizeCondition,
   bounds: [DocumentClient.AttributeValue, DocumentClient.AttributeValue],
 ): BetweenCondition => ({
-  kind: ExpressionKind.Between,
+  kind: "BETWEEN",
   path,
   values: bounds,
 });
 
 export const contains = (path: string, substr: string): ContainsCondition => ({
-  kind: ExpressionKind.Contains,
+  kind: "contains",
   path,
   value: substr,
 });
@@ -101,7 +100,7 @@ export const equals = (
   path: string | SizeCondition,
   value: DocumentClient.AttributeValue,
 ): EqualsCondition => ({
-  kind: ExpressionKind.Equals,
+  kind: "=",
   path,
   value,
 });
@@ -111,7 +110,7 @@ export const greaterThan = (
   path: string | SizeCondition,
   value: DocumentClient.AttributeValue,
 ): GreaterThanCondition => ({
-  kind: ExpressionKind.GreaterThan,
+  kind: ">",
   path,
   value,
 });
@@ -121,7 +120,7 @@ export const greaterThanOrEquals = (
   path: string | SizeCondition,
   value: DocumentClient.AttributeValue,
 ): GreaterThanOrEqualsCondition => ({
-  kind: ExpressionKind.GreaterThanOrEquals,
+  kind: ">=",
   path,
   value,
 });
@@ -131,7 +130,7 @@ export const isIn = (
   path: string | SizeCondition,
   values: DocumentClient.AttributeValue[],
 ): InCondition => ({
-  kind: ExpressionKind.In,
+  kind: "IN",
   path,
   values,
 });
@@ -140,7 +139,7 @@ export const lessThan = (
   path: string | SizeCondition,
   value: DocumentClient.AttributeValue,
 ): LessThanCondition => ({
-  kind: ExpressionKind.LessThan,
+  kind: "<",
   path,
   value,
 });
@@ -150,14 +149,14 @@ export const lessThanOrEquals = (
   path: string | SizeCondition,
   value: DocumentClient.AttributeValue,
 ): LessThanOrEqualsCondition => ({
-  kind: ExpressionKind.LessThanOrEquals,
+  kind: "<=",
   path,
   value,
 });
 export const lte = lessThanOrEquals;
 
 export const not = (condition: Condition): NotCondition => ({
-  kind: ExpressionKind.Not,
+  kind: "NOT",
   condition,
 });
 
@@ -165,14 +164,14 @@ export const notEquals = (
   path: string | SizeCondition,
   value: DocumentClient.AttributeValue,
 ): NotEqualsCondition => ({
-  kind: ExpressionKind.NotEquals,
+  kind: "<>",
   path,
   value,
 });
 export const ne = notEquals;
 
 export const or = (...args: (Condition | Condition[])[]): OrCondition => ({
-  kind: ExpressionKind.Or,
+  kind: "OR",
   conditions: args.reduce(
     (p: Condition[], c) => [...p, ...(Array.isArray(c) ? c : [c])],
     [],
@@ -180,7 +179,7 @@ export const or = (...args: (Condition | Condition[])[]): OrCondition => ({
 });
 
 export const size = (path: string): SizeCondition => ({
-  kind: ExpressionKind.Size,
+  kind: "size",
   path,
 });
 
@@ -193,17 +192,17 @@ export const serializeConditionExpression = (
   ExpressionAttributeValues?: ExpressionAttributeValueMap;
 } => {
   switch (condition.kind) {
-    case ExpressionKind.AttributeExists:
-    case ExpressionKind.AttributeNotExists: {
+    case "attribute_exists":
+    case "attribute_not_exists": {
       const aPath = serializeAttributePath(condition.path);
       return {
         Expression: `${condition.kind}(${aPath.expression})`,
         ExpressionAttributeNames: aPath.expressionAttributeNames,
       };
     }
-    case ExpressionKind.AttributeType:
-    case ExpressionKind.BeginsWith:
-    case ExpressionKind.Contains: {
+    case "attribute_type":
+    case "begins_with":
+    case "contains": {
       const aPath = serializeAttributePath(condition.path);
       const aValue = serializeExpressionValue(condition.value);
       return {
@@ -212,7 +211,7 @@ export const serializeConditionExpression = (
         ExpressionAttributeValues: { [aValue.name]: aValue.value },
       };
     }
-    case ExpressionKind.Between: {
+    case "BETWEEN": {
       const path =
         typeof condition.path === "string"
           ? condition.path
@@ -226,7 +225,7 @@ export const serializeConditionExpression = (
           aPath.expression
         }${typeof condition.path !== "string" ? ")" : ""} ${
           condition.kind
-        } ${aValues.map((v) => v.name).join(` ${ExpressionKind.And} `)}`,
+        } ${aValues.map((v) => v.name).join(` AND `)}`,
         ExpressionAttributeNames: aPath.expressionAttributeNames,
         ExpressionAttributeValues: aValues.reduce(
           (p, c) => ({ ...p, [c.name]: c.value }),
@@ -234,12 +233,12 @@ export const serializeConditionExpression = (
         ),
       };
     }
-    case ExpressionKind.Equals:
-    case ExpressionKind.GreaterThan:
-    case ExpressionKind.GreaterThanOrEquals:
-    case ExpressionKind.LessThan:
-    case ExpressionKind.LessThanOrEquals:
-    case ExpressionKind.NotEquals: {
+    case "=":
+    case ">":
+    case ">=":
+    case "<":
+    case "<=":
+    case "<>": {
       const path =
         typeof condition.path === "string"
           ? condition.path
@@ -256,7 +255,7 @@ export const serializeConditionExpression = (
         ExpressionAttributeValues: { [aValue.name]: aValue.value },
       };
     }
-    case ExpressionKind.In: {
+    case "IN": {
       const path =
         typeof condition.path === "string"
           ? condition.path
@@ -278,7 +277,7 @@ export const serializeConditionExpression = (
         ),
       };
     }
-    case ExpressionKind.Not: {
+    case "NOT": {
       const serialized = serializeConditionExpression(
         condition.condition,
         level + 1,
@@ -289,8 +288,8 @@ export const serializeConditionExpression = (
         ExpressionAttributeValues: serialized.ExpressionAttributeValues,
       };
     }
-    case ExpressionKind.And:
-    case ExpressionKind.Or: {
+    case "AND":
+    case "OR": {
       const serializedConditions = condition.conditions.map((c) =>
         serializeConditionExpression(
           c,

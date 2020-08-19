@@ -8,7 +8,6 @@ import {
   and,
   serializeConditionExpression,
 } from "./condition-expression-utils";
-import { ExpressionKind } from "./constants";
 import { optimizeExpression } from "./expression-optimization-utils";
 import { serializeUpdateExpression } from "./update-expression-utils";
 
@@ -77,7 +76,7 @@ export const convertRawConditionExpressions = (
     params.RawKeyConditionExpression = params.RawKeyConditionExpression || [];
 
     const partitionKeyCondition: EqualsCondition = {
-      kind: ExpressionKind.Equals,
+      kind: "=",
       path: Object.keys(queryKey)[0],
       value: queryKey[Object.keys(queryKey)[0]],
     };

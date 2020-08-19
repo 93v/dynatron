@@ -3,26 +3,6 @@ import { Options } from "async-retry";
 export const BUILD: unique symbol = Symbol("Build._build");
 export const BUILD_PARAMS: unique symbol = Symbol("BuildParams._buildParams");
 
-export const enum ExpressionKind {
-  And = "AND",
-  AttributeExists = "attribute_exists",
-  AttributeNotExists = "attribute_not_exists",
-  AttributeType = "attribute_type",
-  BeginsWith = "begins_with",
-  Between = "BETWEEN",
-  Contains = "contains",
-  Equals = "=",
-  GreaterThan = ">",
-  GreaterThanOrEquals = ">=",
-  In = "IN",
-  LessThan = "<",
-  LessThanOrEquals = "<=",
-  Not = "NOT",
-  NotEquals = "<>",
-  Or = "OR",
-  Size = "size",
-}
-
 export const MILLISECONDS_IN_SECOND = 1000;
 
 export const TAKING_TOO_LONG_EXCEPTION = "TakingTooLongException";
