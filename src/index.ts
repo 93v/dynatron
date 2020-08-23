@@ -1,4 +1,7 @@
-export { DynatronConstructorParams } from "../types/request";
+export {
+  DynatronConstructorParams,
+  DynatronDocumentClientParams,
+} from "../types/request";
 export { Dynatron } from "./Dynatron";
 export { setOfValues } from "./utils/misc-utils";
 
