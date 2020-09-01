@@ -20,26 +20,26 @@ export const convertRawProjectionExpression = (
     return params;
   }
 
-  const projectionObject = params.RawProjectionExpression?.map((projection) =>
-    serializeAttributePath(projection),
-  ).reduce(
-    (
-      p: {
-        expressions: string[];
-        expressionAttributeNames: Record<string, string>;
-      },
-      c,
-    ) => {
-      return {
-        expressions: [...new Set([...p.expressions, c.expression])],
-        expressionAttributeNames: {
-          ...p.expressionAttributeNames,
-          ...c.expressionAttributeNames,
+  const projectionObject = [...new Set(params.RawProjectionExpression || [])]
+    .map((projection) => serializeAttributePath(projection))
+    .reduce(
+      (
+        p: {
+          expressions: string[];
+          expressionAttributeNames: Record<string, string>;
         },
-      };
-    },
-    { expressions: [], expressionAttributeNames: {} },
-  );
+        c,
+      ) => {
+        return {
+          expressions: [...new Set([...p.expressions, c.expression])],
+          expressionAttributeNames: {
+            ...p.expressionAttributeNames,
+            ...c.expressionAttributeNames,
+          },
+        };
+      },
+      { expressions: [], expressionAttributeNames: {} },
+    );
   const projectionExpression = projectionObject?.expressions.join(", ");
   const projectionExpressionAttributeNames =
     projectionObject?.expressionAttributeNames;

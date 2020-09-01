@@ -388,7 +388,7 @@ const user = await db("users-table")
   // Merges the object into the DB entry
   // For each property a separate SET expression is serialized
   // As a second optional parameter can receive a boolean whether to apply only
-  // if the attribute does not exist and not overwrite a value bu accident
+  // if the attribute does not exist and not overwrite a value by accident
   .assign({ age: 35, type: "admin" }, true) // optional
 
   // VERY IMPORTANT TO REMEMBER THAT WHEN USING THE add FUNCTION IF THE ENTRY
