@@ -934,4 +934,126 @@ The database will return another array of items right after the
 
 ### Versioning
 
-This is WIP documentation. Follow issues for further updates.
+Many applications need to maintain a history of item-level revisions for audit
+or compliance purposes and to be able to retrieve the most recent version
+easily. There is an effective design pattern that accomplishes this using sort
+keys:
+
+- For each new item, create two copies of the item: One copy should have a
+  version-number of zero (such as v0) in the sort key, and should have a
+  version-number of one (such as v1).
+- Every time the item is updated, use the next higher version in the sort key of
+  the updated version, and copy the updated contents into the item with version
+  zero. This means that the latest version of any item can be located easily using
+  the zero version.
+
+For example the user profile edits can be updated using this pattern.
+
+Let's assume the user profile is stored in a single table pattern with `pk`
+partition key and `sk` sort key as the primary key as such.
+
+```typescript
+interface TableEntry {
+  pk: string;
+  sk: string;
+}
+
+interface User {
+  name: string;
+}
+
+interface VersionControlled {
+  version: number;
+  author: string;
+}
+```
+
+Getting the user's latest version of the profile is as simple as doing the following
+
+```typescript
+const userProfile = await db("users-table")
+  .get({
+    pk: "USER#de91c1fd-3d32-4d85-b4f3-2d78fa4940c0",
+    sk: "PROFILE#v0",
+  })
+  .$<User & VersionControlled & TableEntry>();
+```
+
+Getting the full history of all the changes is also very simple as shown below
+
+```typescript
+const userProfileHistory = await db("users-table")
+  .query({ pk: "USER#de91c1fd-3d32-4d85-b4f3-2d78fa4940c0" })
+  .having(beginsWith("sk", "PROFILE#v"))
+  .where(ne("sk", "PROFILE#v0")) // Here we are filtering out the v0 as it is a special case and not a part of the history
+  .$<(User & VersionControlled & TableEntry)[]>();
+```
+
+Now how do you update the version or add a new one. This is a multi step process
+involving reading the latest version and writing new items with transactions.
+
+The most complete approach would be the following:
+
+```typescript
+const newProfile: User = {
+  name: "John",
+};
+
+const userProfile = await db(SINGLE_TABLE)
+  .get({ pk, sk: `${skPrefix}${HASHTAG}v0` })
+  // On the next line we are only getting the "version" and the attributes we
+  // want to update
+  .select(["version", ...Object.keys(newProfile)])
+  .$<User & VersionControlled & TableEntry>();
+```
+
+In the code above we are getting the attributes that we are trying to update to
+compare with the new item and update if there are actual changes
+
+```typescript
+let doUpdate = true;
+if (userProfile != null) {
+  const { version, ...pureProfile } = userProfile;
+
+  if (deepEqual(pureProfile, newProfile)) {
+    // The new item matches with the data in the DB so no update is necessary
+    doUpdate = false;
+  }
+}
+
+if (doUpdate) {
+  const version = userProfile?.version || 0;
+
+  // This is some sort of a reference to an entity in the system, like an admin
+  const author = "ADMIN#b9539195-845f-48b4-9ad0-da8c83a6256e";
+
+  await db("")
+    .transactWrite([
+      db(SINGLE_TABLE)
+        .put({
+          ...newProfile,
+
+          pk,
+          sk: `${skPrefix}${HASHTAG}v0`,
+
+          version: version + 1,
+          author,
+        })
+        // These checks make sure you always work with the latest version and don't overwrite an existing one
+        .if(or(attributeNotExists("sk"), eq("version", version))),
+      db(SINGLE_TABLE)
+        .put({
+          ...newProfile,
+
+          pk,
+          sk: `${skPrefix}${HASHTAG}v${version + 1}`,
+
+          version: version + 1,
+          author,
+        })
+        // These checks make sure you always work with the latest version and don't overwrite an existing one
+        .if(or(attributeNotExists("sk"), eq("version", version))),
+    ])
+    .$();
+}
+```
