@@ -7,7 +7,6 @@ import {
   QueryOutput,
 } from "aws-sdk/clients/dynamodb";
 
-import { DynatronConstructorParams } from "..";
 import { KeyCondition } from "../../types/conditions";
 import {
   BUILD,
@@ -29,10 +28,11 @@ export class Querier extends MultiGetter {
   #ScanIndexForward?: BooleanObject;
 
   constructor(
-    params: DynatronConstructorParams,
+    DB: DocumentClient,
+    table: string,
     private key: DocumentClient.Key,
   ) {
-    super(params);
+    super(DB, table);
     validateKey(key);
   }
 
@@ -66,7 +66,7 @@ export class Querier extends MultiGetter {
     const requestParams = super[BUILD_PARAMS](this.key);
 
     return {
-      TableName: this.params.table,
+      TableName: this.table,
       ...optimizeRequestParams(requestParams),
     };
   }

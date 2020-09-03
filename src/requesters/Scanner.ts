@@ -107,7 +107,7 @@ export class Scanner extends MultiGetter {
     const requestParams = super[BUILD_PARAMS]();
 
     return {
-      TableName: this.params.table,
+      TableName: this.table,
       ...optimizeRequestParams(requestParams),
     };
   }

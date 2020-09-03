@@ -1,11 +1,7 @@
 import { DocumentClient } from "aws-sdk/clients/dynamodb";
 
 import { Condition } from "../../types/conditions";
-import {
-  DynatronConstructorParams,
-  FullReturnValues,
-  ReturnValues,
-} from "../../types/request";
+import { FullReturnValues, ReturnValues } from "../../types/request";
 import { BUILD, BUILD_PARAMS } from "../utils/constants";
 import { optimizeRequestParams } from "../utils/expression-optimization-utils";
 import { validateKey } from "../utils/misc-utils";
@@ -16,10 +12,11 @@ export class Checker extends Mutator {
   #ReturnValues?: ReturnValues;
 
   constructor(
-    params: DynatronConstructorParams,
+    DB: DocumentClient,
+    table: string,
     protected key: DocumentClient.Key,
   ) {
-    super(params);
+    super(DB, table);
     validateKey(key);
   }
 
@@ -58,7 +55,7 @@ export class Checker extends Mutator {
 
     return {
       Key: this.key,
-      TableName: this.params.table,
+      TableName: this.table,
       ...optimizeRequestParams(requestParams),
     };
   }

@@ -1,12 +1,12 @@
 import retry from "async-retry";
 import {
+  DocumentClient,
   ItemList,
   TransactGetItem,
   TransactGetItemsInput,
   TransactGetItemsOutput,
 } from "aws-sdk/clients/dynamodb";
 
-import { DynatronConstructorParams } from "../../types/request";
 import {
   BUILD_PARAMS,
   LONG_MAX_LATENCY,
@@ -19,8 +19,8 @@ import { Requester } from "./_Requester";
 import { Getter } from "./Getter";
 
 export class TransactGetter extends Requester {
-  constructor(params: DynatronConstructorParams, private items: Getter[]) {
-    super(params);
+  constructor(DB: DocumentClient, table: string, private items: Getter[]) {
+    super(DB, table);
   }
 
   [BUILD_PARAMS]() {
@@ -49,7 +49,9 @@ export class TransactGetter extends Requester {
         return { Get: transactItem } as TransactGetItem;
       }),
       ...(requestParams.ReturnConsumedCapacity
-        ? { ReturnConsumedCapacity: requestParams.ReturnConsumedCapacity }
+        ? {
+            ReturnConsumedCapacity: requestParams.ReturnConsumedCapacity,
+          }
         : {}),
     };
 

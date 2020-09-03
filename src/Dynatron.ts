@@ -13,35 +13,47 @@ import { Scanner } from "./requesters/Scanner";
 import { TransactGetter } from "./requesters/TransactGetter";
 import { TransactWriter } from "./requesters/TransactWriter";
 import { Updater } from "./requesters/Updater";
+import { initDocumentClient } from "./utils/misc-utils";
 
 export class Dynatron {
-  constructor(private readonly params: DynatronConstructorParams) {}
+  protected readonly DB: DocumentClient;
+
+  constructor(private readonly params: DynatronConstructorParams) {
+    this.DB = initDocumentClient(params.clientConfigs);
+  }
 
   batchDelete = (keys: DocumentClient.Key[]) =>
-    new BatchDeleter(this.params, keys);
+    new BatchDeleter(this.DB, this.params.table, keys);
 
-  batchGet = (keys: DocumentClient.Key[]) => new BatchGetter(this.params, keys);
+  batchGet = (keys: DocumentClient.Key[]) =>
+    new BatchGetter(this.DB, this.params.table, keys);
 
   batchPut = (items: DocumentClient.PutItemInputAttributeMap[]) =>
-    new BatchPutter(this.params, items);
+    new BatchPutter(this.DB, this.params.table, items);
 
-  check = (key: DocumentClient.Key) => new Checker(this.params, key);
+  check = (key: DocumentClient.Key) =>
+    new Checker(this.DB, this.params.table, key);
 
-  delete = (key: DocumentClient.Key) => new Deleter(this.params, key);
+  delete = (key: DocumentClient.Key) =>
+    new Deleter(this.DB, this.params.table, key);
 
-  get = (key: DocumentClient.Key) => new Getter(this.params, key);
+  get = (key: DocumentClient.Key) =>
+    new Getter(this.DB, this.params.table, key);
 
   put = (item: DocumentClient.PutItemInputAttributeMap) =>
-    new Putter(this.params, item);
+    new Putter(this.DB, this.params.table, item);
 
-  query = (key: DocumentClient.Key) => new Querier(this.params, key);
+  query = (key: DocumentClient.Key) =>
+    new Querier(this.DB, this.params.table, key);
 
-  scan = () => new Scanner(this.params);
+  scan = () => new Scanner(this.DB, this.params.table);
 
-  update = (key: DocumentClient.Key) => new Updater(this.params, key);
+  update = (key: DocumentClient.Key) =>
+    new Updater(this.DB, this.params.table, key);
 
-  transactGet = (items: Getter[]) => new TransactGetter(this.params, items);
+  transactGet = (items: Getter[]) =>
+    new TransactGetter(this.DB, this.params.table, items);
 
   transactWrite = (items: (Checker | Putter | Deleter | Updater)[]) =>
-    new TransactWriter(this.params, items);
+    new TransactWriter(this.DB, this.params.table, items);
 }

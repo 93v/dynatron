@@ -221,7 +221,7 @@ export class Updater extends Checker {
 
     return {
       Key: this.key,
-      TableName: this.params.table,
+      TableName: this.table,
       ...optimizeRequestParams(requestParams),
     };
   }

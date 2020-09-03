@@ -7,7 +7,6 @@ import {
 } from "aws-sdk/clients/dynamodb";
 
 import {
-  DynatronConstructorParams,
   IBatchDeleteItemRequestItem,
   RequestParams,
   ReturnItemCollectionMetrics,
@@ -32,10 +31,11 @@ export class BatchDeleter extends Requester {
   #ReturnItemCollectionMetrics?: ReturnItemCollectionMetrics;
 
   constructor(
-    params: DynatronConstructorParams,
+    DB: DocumentClient,
+    table: string,
     private keys: DocumentClient.Key[],
   ) {
-    super(params);
+    super(DB, table);
     keys.forEach((key) => validateKey(key));
   }
 
@@ -58,7 +58,7 @@ export class BatchDeleter extends Requester {
   [BUILD_PARAMS]() {
     let requestParams = super[BUILD_PARAMS]();
 
-    if (this.params.table == null) {
+    if (this.table == null) {
       throw new Error("Table name must be provided");
     }
 
@@ -70,7 +70,7 @@ export class BatchDeleter extends Requester {
       (key) => ({ DeleteRequest: { Key: key } }),
     );
     const batchParams: RequestParams = {
-      RequestItems: { [this.params.table]: requestItems },
+      RequestItems: { [this.table]: requestItems },
     };
     requestParams = {
       ...batchParams,

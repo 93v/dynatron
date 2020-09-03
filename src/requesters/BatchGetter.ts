@@ -7,11 +7,7 @@ import {
   ItemList,
 } from "aws-sdk/clients/dynamodb";
 
-import {
-  DynatronConstructorParams,
-  IBatchGetItemRequestItem,
-  RequestParams,
-} from "../../types/request";
+import { IBatchGetItemRequestItem, RequestParams } from "../../types/request";
 import {
   BATCH_OPTIONS,
   BUILD,
@@ -33,10 +29,11 @@ export class BatchGetter extends Requester {
   #ProjectionExpression?: string[];
 
   constructor(
-    params: DynatronConstructorParams,
+    DB: DocumentClient,
+    table: string,
     private keys: DocumentClient.Key[],
   ) {
-    super(params);
+    super(DB, table);
     keys.forEach((key) => validateKey(key));
   }
 
@@ -77,7 +74,7 @@ export class BatchGetter extends Requester {
   [BUILD_PARAMS]() {
     let requestParams = super[BUILD_PARAMS]();
 
-    if (this.params.table == null) {
+    if (this.table == null) {
       throw new Error("Table name must be provided");
     }
 
@@ -99,7 +96,7 @@ export class BatchGetter extends Requester {
         : {}),
     };
     const batchParams: RequestParams = {
-      RequestItems: { [this.params.table]: requestItems },
+      RequestItems: { [this.table]: requestItems },
     };
     requestParams = {
       ...batchParams,

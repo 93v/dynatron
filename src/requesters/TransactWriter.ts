@@ -1,11 +1,11 @@
 import retry from "async-retry";
 import {
   ClientRequestToken,
+  DocumentClient,
   TransactWriteItem,
   TransactWriteItemsInput,
 } from "aws-sdk/clients/dynamodb";
 
-import { DynatronConstructorParams } from "..";
 import {
   BUILD,
   BUILD_PARAMS,
@@ -25,10 +25,11 @@ export class TransactWriter extends Mutator {
   #ClientRequestToken?: ClientRequestToken;
 
   constructor(
-    params: DynatronConstructorParams,
+    DB: DocumentClient,
+    table: string,
     private items: (Checker | Putter | Deleter | Updater)[],
   ) {
-    super(params);
+    super(DB, table);
   }
 
   clientRequestToken = (clientRequestToken: ClientRequestToken) => {
@@ -62,7 +63,10 @@ export class TransactWriter extends Mutator {
       "ReturnValues",
     ];
     const transactWriteActionConfigs = {
-      Checker: { requestName: "ConditionCheck", supportedParams: ["Key"] },
+      Checker: {
+        requestName: "ConditionCheck",
+        supportedParams: ["Key"],
+      },
       Deleter: { requestName: "Delete", supportedParams: ["Key"] },
       Putter: { requestName: "Put", supportedParams: ["Item"] },
       Updater: {
@@ -97,7 +101,9 @@ export class TransactWriter extends Mutator {
         ? { ClientRequestToken: requestParams.ClientRequestToken }
         : {}),
       ...(requestParams.ReturnConsumedCapacity
-        ? { ReturnConsumedCapacity: requestParams.ReturnConsumedCapacity }
+        ? {
+            ReturnConsumedCapacity: requestParams.ReturnConsumedCapacity,
+          }
         : {}),
       ...(requestParams.ReturnItemCollectionMetrics
         ? {

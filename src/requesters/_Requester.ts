@@ -1,12 +1,7 @@
 import { DocumentClient } from "aws-sdk/clients/dynamodb";
 
-import {
-  DynatronConstructorParams,
-  RequestParams,
-  ReturnConsumedCapacity,
-} from "../../types/request";
+import { RequestParams, ReturnConsumedCapacity } from "../../types/request";
 import { BUILD, BUILD_PARAMS } from "../utils/constants";
-import { initDocumentClient } from "../utils/misc-utils";
 import {
   cleanupEmptyExpressions,
   convertRawConditionExpressions,
@@ -17,11 +12,7 @@ import {
 export class Requester {
   #ReturnConsumedCapacity?: ReturnConsumedCapacity;
 
-  protected readonly DB: DocumentClient;
-
-  constructor(protected params: DynatronConstructorParams) {
-    this.DB = initDocumentClient(params.clientConfigs);
-  }
+  constructor(protected readonly DB: DocumentClient, protected table: string) {}
 
   returnConsumedCapacity = (
     returnConsumedCapacity: ReturnConsumedCapacity = "TOTAL",

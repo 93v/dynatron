@@ -3,11 +3,11 @@ import {
   AttributeMap,
   BatchWriteItemInput,
   BatchWriteItemOutput,
+  DocumentClient,
   ItemList,
 } from "aws-sdk/clients/dynamodb";
 
 import {
-  DynatronConstructorParams,
   IBatchPutItemRequestItem,
   RequestParams,
   ReturnItemCollectionMetrics,
@@ -28,10 +28,11 @@ export class BatchPutter extends Requester {
   #ReturnItemCollectionMetrics?: ReturnItemCollectionMetrics;
 
   constructor(
-    params: DynatronConstructorParams,
+    DB: DocumentClient,
+    table: string,
     private items: AttributeMap[],
   ) {
-    super(params);
+    super(DB, table);
   }
 
   returnItemCollectionMetrics = (
@@ -45,7 +46,9 @@ export class BatchPutter extends Requester {
     return {
       ...super[BUILD](),
       ...(this.#ReturnItemCollectionMetrics
-        ? { ReturnItemCollectionMetrics: this.#ReturnItemCollectionMetrics }
+        ? {
+            ReturnItemCollectionMetrics: this.#ReturnItemCollectionMetrics,
+          }
         : {}),
     };
   }
@@ -53,7 +56,7 @@ export class BatchPutter extends Requester {
   [BUILD_PARAMS]() {
     let requestParams = super[BUILD_PARAMS]();
 
-    if (this.params.table == null) {
+    if (this.table == null) {
       throw new Error("Table name must be provided");
     }
 
@@ -65,12 +68,14 @@ export class BatchPutter extends Requester {
       PutRequest: { Item: item },
     }));
     const batchParams: RequestParams = {
-      RequestItems: { [this.params.table]: requestItems },
+      RequestItems: { [this.table]: requestItems },
     };
     requestParams = {
       ...batchParams,
       ...(requestParams.ReturnConsumedCapacity != null
-        ? { ReturnConsumedCapacity: requestParams.ReturnConsumedCapacity }
+        ? {
+            ReturnConsumedCapacity: requestParams.ReturnConsumedCapacity,
+          }
         : {}),
       ...(requestParams.ReturnItemCollectionMetrics != null
         ? {

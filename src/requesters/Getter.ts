@@ -7,7 +7,6 @@ import {
   GetItemOutput,
 } from "aws-sdk/clients/dynamodb";
 
-import { DynatronConstructorParams } from "..";
 import {
   BUILD,
   BUILD_PARAMS,
@@ -28,10 +27,11 @@ export class Getter extends Requester {
   #ProjectionExpression?: string[];
 
   constructor(
-    params: DynatronConstructorParams,
+    DB: DocumentClient,
+    table: string,
     private key: DocumentClient.Key,
   ) {
-    super(params);
+    super(DB, table);
     validateKey(key);
   }
 
@@ -74,7 +74,7 @@ export class Getter extends Requester {
 
     return {
       Key: this.key,
-      TableName: this.params.table,
+      TableName: this.table,
       ...optimizeRequestParams(requestParams),
     };
   }

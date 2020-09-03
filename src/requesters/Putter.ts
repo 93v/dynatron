@@ -7,11 +7,7 @@ import {
 } from "aws-sdk/clients/dynamodb";
 
 import { Condition } from "../../types/conditions";
-import {
-  DynatronConstructorParams,
-  FullReturnValues,
-  ReturnValues,
-} from "../../types/request";
+import { FullReturnValues, ReturnValues } from "../../types/request";
 import {
   BUILD,
   BUILD_PARAMS,
@@ -28,10 +24,11 @@ export class Putter extends Mutator {
   #ReturnValues?: ReturnValues;
 
   constructor(
-    params: DynatronConstructorParams,
+    DB: DocumentClient,
+    table: string,
     private item: DocumentClient.PutItemInputAttributeMap,
   ) {
-    super(params);
+    super(DB, table);
   }
 
   returnValues = (returnValues: ReturnValues = "ALL_OLD") => {
@@ -69,7 +66,7 @@ export class Putter extends Mutator {
 
     return {
       Item: this.item,
-      TableName: this.params.table,
+      TableName: this.table,
       ...optimizeRequestParams(requestParams),
     };
   }
