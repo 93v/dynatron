@@ -16,44 +16,48 @@ import { Updater } from "./requesters/Updater";
 import { initDocumentClient } from "./utils/misc-utils";
 
 export class Dynatron {
-  protected readonly DB: DocumentClient;
+  protected static readonly DB: Record<string, DocumentClient> = {};
 
-  constructor(private readonly params: DynatronConstructorParams) {
-    this.DB = initDocumentClient(params.clientConfigs);
+  constructor(
+    private readonly params: DynatronConstructorParams,
+    private instanceId = "default",
+  ) {
+    Dynatron.DB[this.instanceId] =
+      Dynatron.DB[this.instanceId] || initDocumentClient(params.clientConfigs);
   }
 
   batchDelete = (keys: DocumentClient.Key[]) =>
-    new BatchDeleter(this.DB, this.params.table, keys);
+    new BatchDeleter(Dynatron.DB[this.instanceId], this.params.table, keys);
 
   batchGet = (keys: DocumentClient.Key[]) =>
-    new BatchGetter(this.DB, this.params.table, keys);
+    new BatchGetter(Dynatron.DB[this.instanceId], this.params.table, keys);
 
   batchPut = (items: DocumentClient.PutItemInputAttributeMap[]) =>
-    new BatchPutter(this.DB, this.params.table, items);
+    new BatchPutter(Dynatron.DB[this.instanceId], this.params.table, items);
 
   check = (key: DocumentClient.Key) =>
-    new Checker(this.DB, this.params.table, key);
+    new Checker(Dynatron.DB[this.instanceId], this.params.table, key);
 
   delete = (key: DocumentClient.Key) =>
-    new Deleter(this.DB, this.params.table, key);
+    new Deleter(Dynatron.DB[this.instanceId], this.params.table, key);
 
   get = (key: DocumentClient.Key) =>
-    new Getter(this.DB, this.params.table, key);
+    new Getter(Dynatron.DB[this.instanceId], this.params.table, key);
 
   put = (item: DocumentClient.PutItemInputAttributeMap) =>
-    new Putter(this.DB, this.params.table, item);
+    new Putter(Dynatron.DB[this.instanceId], this.params.table, item);
 
   query = (key: DocumentClient.Key) =>
-    new Querier(this.DB, this.params.table, key);
+    new Querier(Dynatron.DB[this.instanceId], this.params.table, key);
 
-  scan = () => new Scanner(this.DB, this.params.table);
+  scan = () => new Scanner(Dynatron.DB[this.instanceId], this.params.table);
 
   update = (key: DocumentClient.Key) =>
-    new Updater(this.DB, this.params.table, key);
+    new Updater(Dynatron.DB[this.instanceId], this.params.table, key);
 
   transactGet = (items: Getter[]) =>
-    new TransactGetter(this.DB, this.params.table, items);
+    new TransactGetter(Dynatron.DB[this.instanceId], this.params.table, items);
 
   transactWrite = (items: (Checker | Putter | Deleter | Updater)[]) =>
-    new TransactWriter(this.DB, this.params.table, items);
+    new TransactWriter(Dynatron.DB[this.instanceId], this.params.table, items);
 }

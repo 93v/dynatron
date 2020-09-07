@@ -266,6 +266,44 @@ export const db = (table: string) => {
 };
 ```
 
+`Dynatron` initializer has a second optional parameter called `instanceId` which
+defaults to `"default"`. As Dynatron tries to optimize the connection pool to the
+database it uses a static map to store DynamoDBClient instances and reuse them.
+In most of the cases you don't need to pass in the `instanceId` as most of the
+applications will be connecting through the same DynamoDB region and profile.
+But in cases when you need to connect to multiple regions via multiple profiles
+Dynatron gives you an option to provide an instance identificator and with that
+effectively have multiple connections during the initialization process as shown
+below.
+
+```typescript
+export const db1 = (table: string) => {
+  let clientConfigs = {
+    mode: "direct",
+    profile: "dev",
+    region: "us-east-1",
+  };
+
+  return new Dynatron(
+    { table, ...(clientConfigs ? { clientConfigs } : {}) },
+    "dev",
+  );
+};
+
+export const db2 = (table: string) => {
+  let clientConfigs = {
+    mode: "direct",
+    profile: "staging",
+    region: "us-east-2",
+  };
+
+  return new Dynatron(
+    { table, ...(clientConfigs ? { clientConfigs } : {}) },
+    "staging",
+  );
+};
+```
+
 The rest of the examples will assume that you have followed the initialization step.
 
 ### Put
