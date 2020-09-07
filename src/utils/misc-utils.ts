@@ -98,7 +98,7 @@ export const initDocumentClient = (params?: DynatronDocumentClientParams) => {
       });
     }
 
-    options.region = params.region;
+    options.region = (params as DirectConnectionWithProfile).region;
   }
 
   if (params?.mode === "local") {
