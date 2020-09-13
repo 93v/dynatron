@@ -1,5 +1,5 @@
 import { AWSError, Credentials, SharedIniFileCredentials } from "aws-sdk";
-import { DocumentClient } from "aws-sdk/clients/dynamodb";
+import DynamoDB, { DocumentClient } from "aws-sdk/clients/dynamodb";
 import { ServiceConfigurationOptions } from "aws-sdk/lib/service";
 import https from "https";
 import { v4 } from "uuid";
@@ -59,7 +59,7 @@ export const setOfValues = (
     | (string | number | DocumentClient.binaryType)[],
 ) => new DocumentClient().createSet(Array.isArray(values) ? values : [values]);
 
-export const initDocumentClient = (params?: DynatronDocumentClientParams) => {
+const bootstrapDynamoDBOptions = (params?: DynatronDocumentClientParams) => {
   const options: DocumentClient.DocumentClientOptions &
     ServiceConfigurationOptions = {
     convertEmptyValues: true,
@@ -116,8 +116,14 @@ export const initDocumentClient = (params?: DynatronDocumentClientParams) => {
         });
   }
 
-  return new DocumentClient(options);
+  return options;
 };
+
+export const initDB = (params?: DynatronDocumentClientParams) =>
+  new DynamoDB(bootstrapDynamoDBOptions(params));
+
+export const initDocumentClient = (params?: DynatronDocumentClientParams) =>
+  new DocumentClient(bootstrapDynamoDBOptions(params));
 
 const pause = async (duration: number) =>
   new Promise((r) => setTimeout(r, duration));
