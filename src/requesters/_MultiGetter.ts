@@ -6,6 +6,7 @@ import {
 } from "aws-sdk/clients/dynamodb";
 
 import { Condition } from "../../types/conditions";
+import { isConditionEmptyDeep } from "../utils/condition-expression-utils";
 import { BUILD } from "../utils/constants";
 import { Requester } from "./_Requester";
 
@@ -23,7 +24,7 @@ export class MultiGetter extends Requester {
   };
 
   select = (...args: (string | string[] | undefined | null)[]) => {
-    if (args.every((arg) => arg == null)) {
+    if (args.every((arg) => arg == null) || args.flat().length === 0) {
       return this;
     }
 
@@ -42,7 +43,7 @@ export class MultiGetter extends Requester {
   };
 
   where = (...args: (Condition | Condition[] | undefined | null)[]) => {
-    if (args.every((arg) => arg == null)) {
+    if (isConditionEmptyDeep(args)) {
       return this;
     }
     this.#FilterExpression = args.reduce((p: Condition[], c) => {

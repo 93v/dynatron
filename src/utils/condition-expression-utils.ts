@@ -128,7 +128,9 @@ export const gte = greaterThanOrEquals;
 
 export const isIn = (
   path: string | SizeCondition,
-  values: DocumentClient.AttributeValue[],
+  values: {
+    0: DocumentClient.AttributeValue;
+  } & DocumentClient.AttributeValue[],
 ): InCondition => ({
   kind: "IN",
   path,
@@ -225,7 +227,10 @@ export const serializeConditionExpression = (
           aPath.expression
         }${typeof condition.path !== "string" ? ")" : ""} ${
           condition.kind
-        } ${aValues.map((v) => v.name).join(` AND `)}`,
+        } ${aValues
+          .map((v) => v.name)
+          .filter((t) => t.trim() !== "")
+          .join(` AND `)}`,
         ExpressionAttributeNames: aPath.expressionAttributeNames,
         ExpressionAttributeValues: aValues.reduce(
           (p, c) => ({ ...p, [c.name]: c.value }),
@@ -269,7 +274,10 @@ export const serializeConditionExpression = (
           aPath.expression
         }${typeof condition.path !== "string" ? ")" : ""} ${
           condition.kind
-        }(${aValues.map((v) => v.name).join(",")})`,
+        }(${aValues
+          .map((v) => v.name)
+          // .filter((t) => t.trim() !== "")
+          .join(",")})`,
         ExpressionAttributeNames: aPath.expressionAttributeNames,
         ExpressionAttributeValues: aValues.reduce(
           (p, c) => ({ ...p, [c.name]: c.value }),
@@ -301,6 +309,7 @@ export const serializeConditionExpression = (
           condition.conditions.length > 1 && level > 0 ? "(" : ""
         }${serializedConditions
           .map((c) => c.Expression)
+          .filter((t) => t.trim() !== "")
           .join(` ${condition.kind} `)}${
           condition.conditions.length > 1 && level > 0 ? ")" : ""
         }`,
@@ -323,4 +332,24 @@ export const serializeConditionExpression = (
     default:
       throw assertNever(condition);
   }
+};
+
+export const isConditionEmptyDeep = (
+  args: (Condition | Condition[] | undefined | null)[],
+): boolean => {
+  return args.every((arg) => {
+    if (arg == null) {
+      return true;
+    }
+
+    if (Array.isArray(arg)) {
+      return isConditionEmptyDeep(arg);
+    }
+
+    if (arg.kind === "OR" || arg.kind === "AND") {
+      return isConditionEmptyDeep(arg.conditions);
+    }
+
+    return false;
+  });
 };

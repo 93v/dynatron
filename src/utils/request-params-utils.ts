@@ -40,7 +40,9 @@ export const convertRawProjectionExpression = (
       },
       { expressions: [], expressionAttributeNames: {} },
     );
-  const projectionExpression = projectionObject?.expressions.join(", ");
+  const projectionExpression = projectionObject?.expressions
+    .filter((t) => t.trim() !== "")
+    .join(", ");
   const projectionExpressionAttributeNames =
     projectionObject?.expressionAttributeNames;
   if (

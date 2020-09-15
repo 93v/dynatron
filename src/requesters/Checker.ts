@@ -2,6 +2,7 @@ import { DocumentClient } from "aws-sdk/clients/dynamodb";
 
 import { Condition } from "../../types/conditions";
 import { FullReturnValues, ReturnValues } from "../../types/request";
+import { isConditionEmptyDeep } from "../utils/condition-expression-utils";
 import { BUILD, BUILD_PARAMS } from "../utils/constants";
 import { optimizeRequestParams } from "../utils/expression-optimization-utils";
 import { validateKey } from "../utils/misc-utils";
@@ -26,7 +27,7 @@ export class Checker extends Mutator {
   };
 
   if = (...args: (Condition | Condition[] | undefined | null)[]) => {
-    if (args.every((arg) => arg == null)) {
+    if (isConditionEmptyDeep(args)) {
       return this;
     }
     this.#ConditionExpression = args.reduce((p: Condition[], c) => {

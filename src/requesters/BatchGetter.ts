@@ -43,7 +43,7 @@ export class BatchGetter extends Requester {
   };
 
   select = (...args: (string | string[] | undefined | null)[]) => {
-    if (args.every((arg) => arg == null)) {
+    if (args.every((arg) => arg == null) || args.flat().length === 0) {
       return this;
     }
 

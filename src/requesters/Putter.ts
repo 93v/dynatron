@@ -8,6 +8,7 @@ import {
 
 import { Condition } from "../../types/conditions";
 import { FullReturnValues, ReturnValues } from "../../types/request";
+import { isConditionEmptyDeep } from "../utils/condition-expression-utils";
 import {
   BUILD,
   BUILD_PARAMS,
@@ -37,7 +38,7 @@ export class Putter extends Mutator {
   };
 
   if = (...args: (Condition | Condition[] | undefined | null)[]) => {
-    if (args.every((arg) => arg == null)) {
+    if (isConditionEmptyDeep(args)) {
       return this;
     }
     this.#ConditionExpression = args.reduce((p: Condition[], c) => {
