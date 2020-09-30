@@ -112,4 +112,12 @@ export class Dynatron {
       this.params.table,
       items,
     );
+
+  public get Tables() {
+    return {
+      create: (table: string) => {
+        console.log(`Creating table ${table}`);
+      },
+    };
+  }
 }
