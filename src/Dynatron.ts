@@ -1,4 +1,9 @@
-import DynamoDB, { DocumentClient } from "aws-sdk/clients/dynamodb";
+import DynamoDB, {
+  CreateTableInput,
+  DocumentClient,
+  UpdateTableInput,
+  UpdateTimeToLiveInput,
+} from "aws-sdk/clients/dynamodb";
 
 import { DynatronConstructorParams } from "../types/request";
 import { BatchDeleter } from "./requesters/BatchDeleter";
@@ -10,6 +15,13 @@ import { Getter } from "./requesters/Getter";
 import { Putter } from "./requesters/Putter";
 import { Querier } from "./requesters/Querier";
 import { Scanner } from "./requesters/Scanner";
+import { TableCreator } from "./requesters/tables/TableCreator";
+import { TableDeleter } from "./requesters/tables/TableDeleter";
+import { TableDescriber } from "./requesters/tables/TableDescriber";
+import { TablesLister } from "./requesters/tables/TablesLister";
+import { TableTTLDescriber } from "./requesters/tables/TableTTLDescriber";
+import { TableTTLUpdater } from "./requesters/tables/TableTTLUpdater";
+import { TableUpdater } from "./requesters/tables/TableUpdater";
 import { TransactGetter } from "./requesters/TransactGetter";
 import { TransactWriter } from "./requesters/TransactWriter";
 import { Updater } from "./requesters/Updater";
@@ -115,9 +127,19 @@ export class Dynatron {
 
   public get Tables() {
     return {
-      create: (table: string) => {
-        console.log(`Creating table ${table}`);
-      },
+      create: (params: CreateTableInput) =>
+        new TableCreator(Dynatron.DynamoDBs[this.instanceId], params),
+      delete: (table: string) =>
+        new TableDeleter(Dynatron.DynamoDBs[this.instanceId], table),
+      describe: (table: string) =>
+        new TableDescriber(Dynatron.DynamoDBs[this.instanceId], table),
+      describeTTL: (table: string) =>
+        new TableTTLDescriber(Dynatron.DynamoDBs[this.instanceId], table),
+      list: () => new TablesLister(Dynatron.DynamoDBs[this.instanceId]),
+      update: (params: UpdateTableInput) =>
+        new TableUpdater(Dynatron.DynamoDBs[this.instanceId], params),
+      updateTTL: (params: UpdateTimeToLiveInput) =>
+        new TableTTLUpdater(Dynatron.DynamoDBs[this.instanceId], params),
     };
   }
 }

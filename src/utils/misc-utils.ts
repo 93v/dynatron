@@ -125,10 +125,22 @@ export const initDB = (params?: DynatronDocumentClientParams) =>
 export const initDocumentClient = (params?: DynatronDocumentClientParams) =>
   new DocumentClient(bootstrapDynamoDBOptions(params));
 
-const pause = async (duration: number) =>
-  new Promise((r) => setTimeout(r, duration));
+export class QuickFail {
+  #timeoutReference: NodeJS.Timeout | null = null;
+  constructor(private duration: number, private error: Error) {}
 
-export const quickFail = async (duration: number, error: Error) => {
-  await pause(duration);
-  throw error;
-};
+  wait = async (): Promise<never> => {
+    return new Promise(() => {
+      this.#timeoutReference = setTimeout(() => {
+        throw this.error;
+      }, this.duration);
+    });
+  };
+
+  cancel = () => {
+    if (this.#timeoutReference == null) {
+      return;
+    }
+    clearTimeout(this.#timeoutReference);
+  };
+}

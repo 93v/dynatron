@@ -22,7 +22,7 @@ import {
 import { optimizeRequestParams } from "../utils/expression-optimization-utils";
 import {
   isRetryableDBError,
-  quickFail,
+  QuickFail,
   validateKey,
 } from "../utils/misc-utils";
 import { Requester } from "./_Requester";
@@ -96,14 +96,15 @@ export class BatchDeleter extends Requester {
     let scanCompleted = false;
 
     return retry(async (bail, attempt) => {
-      try {
-        while (!scanCompleted) {
+      while (!scanCompleted) {
+        const qf = new QuickFail(
+          attempt * LONG_MAX_LATENCY,
+          new Error(TAKING_TOO_LONG_EXCEPTION),
+        );
+        try {
           const result = await Promise.race([
             this.DB.batchWrite(params).promise(),
-            quickFail(
-              attempt * LONG_MAX_LATENCY,
-              new Error(TAKING_TOO_LONG_EXCEPTION),
-            ),
+            qf.wait(),
           ]);
           if (result.UnprocessedItems?.[table]) {
             params.RequestItems = result.UnprocessedItems;
@@ -131,15 +132,17 @@ export class BatchDeleter extends Requester {
               ];
             }
           }
+        } catch (ex) {
+          if (!isRetryableDBError(ex)) {
+            bail(ex);
+            return;
+          }
+          throw ex;
+        } finally {
+          qf.cancel();
         }
-        return response;
-      } catch (ex) {
-        if (!isRetryableDBError(ex)) {
-          bail(ex);
-          return;
-        }
-        throw ex;
       }
+      return response;
     }, RETRY_OPTIONS);
   };
 

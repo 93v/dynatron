@@ -14,7 +14,7 @@ import {
   TAKING_TOO_LONG_EXCEPTION,
 } from "../utils/constants";
 import { optimizeRequestParams } from "../utils/expression-optimization-utils";
-import { isRetryableDBError, quickFail } from "../utils/misc-utils";
+import { isRetryableDBError, QuickFail } from "../utils/misc-utils";
 import { MultiGetter } from "./_MultiGetter";
 
 const MIN_TOTAL_SEGMENTS = 1;
@@ -53,14 +53,15 @@ export class Scanner extends MultiGetter {
     }
     const response: ScanOutput = {};
     return retry(async (bail, attempt) => {
-      try {
-        while (!scanCompleted) {
+      while (!scanCompleted) {
+        const qf = new QuickFail(
+          attempt * LONG_MAX_LATENCY,
+          new Error(TAKING_TOO_LONG_EXCEPTION),
+        );
+        try {
           const result = await Promise.race([
             this.DB.scan(params).promise(),
-            quickFail(
-              attempt * LONG_MAX_LATENCY,
-              new Error(TAKING_TOO_LONG_EXCEPTION),
-            ),
+            qf.wait(),
           ]);
           if (result.LastEvaluatedKey == null) {
             scanCompleted = true;
@@ -91,15 +92,17 @@ export class Scanner extends MultiGetter {
             response.Count = response.Items?.length || 0;
             scanCompleted = true;
           }
+        } catch (ex) {
+          if (!isRetryableDBError(ex)) {
+            bail(ex);
+            return;
+          }
+          throw ex;
+        } finally {
+          qf.cancel();
         }
-        return response;
-      } catch (ex) {
-        if (!isRetryableDBError(ex)) {
-          bail(ex);
-          return;
-        }
-        throw ex;
       }
+      return response;
     }, RETRY_OPTIONS);
   };
 

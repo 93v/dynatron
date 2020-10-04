@@ -14,7 +14,7 @@ import {
   TAKING_TOO_LONG_EXCEPTION,
 } from "../utils/constants";
 import { optimizeRequestParams } from "../utils/expression-optimization-utils";
-import { isRetryableDBError, quickFail } from "../utils/misc-utils";
+import { isRetryableDBError, QuickFail } from "../utils/misc-utils";
 import { Mutator } from "./_Mutator";
 import { Checker } from "./Checker";
 import { Deleter } from "./Deleter";
@@ -118,22 +118,26 @@ export class TransactWriter extends Mutator {
 
   $execute = async () => {
     return retry(async (bail, attempt) => {
+      const qf = new QuickFail(
+        attempt * LONG_MAX_LATENCY,
+        new Error(TAKING_TOO_LONG_EXCEPTION),
+      );
       try {
-        return Promise.race([
+        const result = await Promise.race([
           this.DB.transactWrite(
             this[BUILD_PARAMS]() as TransactWriteItemsInput,
           ).promise(),
-          quickFail(
-            attempt * LONG_MAX_LATENCY,
-            new Error(TAKING_TOO_LONG_EXCEPTION),
-          ),
+          qf.wait(),
         ]);
+        return result;
       } catch (ex) {
         if (!isRetryableDBError(ex)) {
           bail(ex);
           return;
         }
         throw ex;
+      } finally {
+        qf.cancel();
       }
     }, RETRY_OPTIONS);
   };

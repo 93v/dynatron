@@ -18,7 +18,7 @@ import {
 import { optimizeRequestParams } from "../utils/expression-optimization-utils";
 import {
   isRetryableDBError,
-  quickFail,
+  QuickFail,
   validateKey,
 } from "../utils/misc-utils";
 import { MultiGetter } from "./_MultiGetter";
@@ -82,14 +82,15 @@ export class Querier extends MultiGetter {
     let scanCompleted = false;
     const response: QueryOutput = {};
     return retry(async (bail, attempt) => {
-      try {
-        while (!scanCompleted) {
+      while (!scanCompleted) {
+        const qf = new QuickFail(
+          attempt * LONG_MAX_LATENCY,
+          new Error(TAKING_TOO_LONG_EXCEPTION),
+        );
+        try {
           const result = await Promise.race([
             this.DB.query(params).promise(),
-            quickFail(
-              attempt * LONG_MAX_LATENCY,
-              new Error(TAKING_TOO_LONG_EXCEPTION),
-            ),
+            qf.wait(),
           ]);
           if (result.LastEvaluatedKey == null) {
             scanCompleted = true;
@@ -120,15 +121,17 @@ export class Querier extends MultiGetter {
             response.Count = response.Items?.length || 0;
             scanCompleted = true;
           }
+        } catch (ex) {
+          if (!isRetryableDBError(ex)) {
+            bail(ex);
+            return;
+          }
+          throw ex;
+        } finally {
+          qf.cancel();
         }
-        return (returnRawResponse ? response : response.Items) as any;
-      } catch (ex) {
-        if (!isRetryableDBError(ex)) {
-          bail(ex);
-          return;
-        }
-        throw ex;
       }
+      return (returnRawResponse ? response : response.Items) as any;
     }, RETRY_OPTIONS);
   };
 

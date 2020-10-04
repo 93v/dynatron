@@ -14,7 +14,7 @@ import {
   TAKING_TOO_LONG_EXCEPTION,
 } from "../utils/constants";
 import { optimizeRequestParams } from "../utils/expression-optimization-utils";
-import { isRetryableDBError, quickFail } from "../utils/misc-utils";
+import { isRetryableDBError, QuickFail } from "../utils/misc-utils";
 import { Requester } from "./_Requester";
 import { Getter } from "./Getter";
 
@@ -64,15 +64,16 @@ export class TransactGetter extends Requester {
     U extends true ? TransactGetItemsOutput : T | undefined | null
   > => {
     return retry(async (bail, attempt) => {
+      const qf = new QuickFail(
+        attempt * LONG_MAX_LATENCY,
+        new Error(TAKING_TOO_LONG_EXCEPTION),
+      );
       try {
         const response = await Promise.race([
           this.DB.transactGet(
             this[BUILD_PARAMS]() as TransactGetItemsInput,
           ).promise(),
-          quickFail(
-            attempt * LONG_MAX_LATENCY,
-            new Error(TAKING_TOO_LONG_EXCEPTION),
-          ),
+          qf.wait(),
         ]);
         return (returnRawResponse
           ? response
@@ -83,6 +84,8 @@ export class TransactGetter extends Requester {
           return;
         }
         throw ex;
+      } finally {
+        qf.cancel();
       }
     }, RETRY_OPTIONS);
   };

@@ -11,7 +11,7 @@ import {
   SHORT_MAX_LATENCY,
   TAKING_TOO_LONG_EXCEPTION,
 } from "../utils/constants";
-import { isRetryableDBError, quickFail } from "../utils/misc-utils";
+import { isRetryableDBError, QuickFail } from "../utils/misc-utils";
 import { Checker } from "./Checker";
 
 export class Deleter extends Checker {
@@ -22,13 +22,14 @@ export class Deleter extends Checker {
     returnRawResponse?: U,
   ): Promise<U extends true ? DeleteItemOutput : T | undefined | null> => {
     return retry(async (bail, attempt) => {
+      const qf = new QuickFail(
+        attempt * SHORT_MAX_LATENCY,
+        new Error(TAKING_TOO_LONG_EXCEPTION),
+      );
       try {
         const response = await Promise.race([
           this.DB.delete(this[BUILD_PARAMS]() as DeleteItemInput).promise(),
-          quickFail(
-            attempt * SHORT_MAX_LATENCY,
-            new Error(TAKING_TOO_LONG_EXCEPTION),
-          ),
+          qf.wait(),
         ]);
         return (returnRawResponse ? response : response.Attributes) as any;
       } catch (ex) {
@@ -37,6 +38,8 @@ export class Deleter extends Checker {
           return;
         }
         throw ex;
+      } finally {
+        qf.cancel();
       }
     }, RETRY_OPTIONS);
   };

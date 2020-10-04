@@ -17,7 +17,7 @@ import {
   TAKING_TOO_LONG_EXCEPTION,
 } from "../utils/constants";
 import { optimizeRequestParams } from "../utils/expression-optimization-utils";
-import { isRetryableDBError, quickFail } from "../utils/misc-utils";
+import { isRetryableDBError, QuickFail } from "../utils/misc-utils";
 import { Mutator } from "./_Mutator";
 
 export class Putter extends Mutator {
@@ -80,13 +80,14 @@ export class Putter extends Mutator {
   ): Promise<U extends true ? PutItemOutput : T | undefined | null> => {
     const requestParams = this[BUILD_PARAMS]() as PutItemInput;
     return retry(async (bail, attempt) => {
+      const qf = new QuickFail(
+        attempt * SHORT_MAX_LATENCY,
+        new Error(TAKING_TOO_LONG_EXCEPTION),
+      );
       try {
         const response = await Promise.race([
           this.DB.put(requestParams).promise(),
-          quickFail(
-            attempt * SHORT_MAX_LATENCY,
-            new Error(TAKING_TOO_LONG_EXCEPTION),
-          ),
+          qf.wait(),
         ]);
         return (returnRawResponse ? response : requestParams.Item) as any;
       } catch (ex) {
@@ -95,6 +96,8 @@ export class Putter extends Mutator {
           return;
         }
         throw ex;
+      } finally {
+        qf.cancel();
       }
     }, RETRY_OPTIONS);
   };

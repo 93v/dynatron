@@ -17,7 +17,7 @@ import {
 import { optimizeRequestParams } from "../utils/expression-optimization-utils";
 import {
   isRetryableDBError,
-  quickFail,
+  QuickFail,
   validateKey,
 } from "../utils/misc-utils";
 import { Requester } from "./_Requester";
@@ -86,13 +86,14 @@ export class Getter extends Requester {
     returnRawResponse?: U,
   ): Promise<U extends true ? GetItemOutput : T | undefined | null> => {
     return retry(async (bail, attempt) => {
+      const qf = new QuickFail(
+        attempt * SHORT_MAX_LATENCY,
+        new Error(TAKING_TOO_LONG_EXCEPTION),
+      );
       try {
         const response = await Promise.race([
           this.DB.get(this[BUILD_PARAMS]() as GetItemInput).promise(),
-          quickFail(
-            attempt * SHORT_MAX_LATENCY,
-            new Error(TAKING_TOO_LONG_EXCEPTION),
-          ),
+          qf.wait(),
         ]);
         return (returnRawResponse ? response : response.Item) as any;
       } catch (ex) {
@@ -101,6 +102,8 @@ export class Getter extends Requester {
           return;
         }
         throw ex;
+      } finally {
+        qf.cancel();
       }
     }, RETRY_OPTIONS);
   };
