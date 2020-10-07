@@ -191,7 +191,7 @@ export class BatchGetter extends Requester {
       p.Responses = p.Responses || {};
       p.Responses[table] = [
         ...(p.Responses[table] || []),
-        ...(p.Responses[table] || []),
+        ...(c?.Responses?.[table] || []),
       ];
       if (c?.ConsumedCapacity) {
         if (!p.ConsumedCapacity) {
