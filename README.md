@@ -618,8 +618,11 @@ const users = await db("users-table")
   // The seconds argument allows to provide the start key
   .limit(20, { id: "502132ec-04db-450b-b654-108231637ca5" }) // optional
   // Set the number of segments to use while scanning the table
-  // The default number of segments is 100
+  // Should be a positive integer, the default number of segments is 100
   .totalSegments(50) // optional
+  // Set the segment to get
+  // Should be a positive integer up to the total number of segments provided
+  .segment(1) // optional
   // Disables segments and forces to scan the table with one segment
   // For smaller tables this can be more beneficial than scanning with segments
   .disableSegments() // optional

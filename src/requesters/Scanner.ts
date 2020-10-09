@@ -3,6 +3,7 @@ import {
   ItemList,
   ScanInput,
   ScanOutput,
+  ScanSegment,
   ScanTotalSegments,
 } from "aws-sdk/clients/dynamodb";
 
@@ -23,11 +24,17 @@ const MAX_TOTAL_SEGMENTS = 1_000_000;
 export class Scanner extends MultiGetter {
   readonly #INITIAL_MAX_TOTAL_SEGMENTS = 10;
   #TotalSegments?: ScanTotalSegments = this.#INITIAL_MAX_TOTAL_SEGMENTS;
+  #Segment?: ScanSegment;
 
   totalSegments = (
     totalSegments: ScanTotalSegments = this.#INITIAL_MAX_TOTAL_SEGMENTS,
   ) => {
     this.#TotalSegments = totalSegments;
+    return this;
+  };
+
+  segment = (segment: ScanSegment) => {
+    this.#Segment = segment;
     return this;
   };
 
@@ -40,6 +47,7 @@ export class Scanner extends MultiGetter {
     return {
       ...super[BUILD](),
       ...(this.#TotalSegments ? { TotalSegments: this.#TotalSegments } : {}),
+      ...(this.#Segment ? { Segment: this.#Segment } : {}),
     };
   }
 
@@ -142,15 +150,24 @@ export class Scanner extends MultiGetter {
         params.Limit = Math.ceil(params.Limit / params.TotalSegments);
       }
     }
-    const responses = await Promise.all(
-      [...Array(params.TotalSegments || 1).keys()].map(async (segment) => {
-        const segmentParams = { ...params };
-        if (segmentParams.TotalSegments) {
-          segmentParams.Segment = segment;
-        }
-        return this.scanSegment(segmentParams);
-      }),
-    );
+    let responses: (ScanOutput | undefined)[] = [];
+    if (params.Segment != null) {
+      const segmentParams = { ...params };
+      if (!segmentParams.TotalSegments) {
+        segmentParams.TotalSegments = 1;
+      }
+      responses = [await this.scanSegment(params)];
+    } else {
+      responses = await Promise.all(
+        [...Array(params.TotalSegments || 1).keys()].map(async (segment) => {
+          const segmentParams = { ...params };
+          if (segmentParams.TotalSegments) {
+            segmentParams.Segment = segment;
+          }
+          return this.scanSegment(segmentParams);
+        }),
+      );
+    }
     const consolidatedResponse = responses.reduce((p: ScanOutput, c) => {
       const o: ScanOutput = {
         Items: [...(p.Items || []), ...(c?.Items || [])],
