@@ -3,7 +3,7 @@ export {
   DynatronDocumentClientParams,
 } from "../types/request";
 export { Dynatron } from "./Dynatron";
-export { setOfValues } from "./utils/misc-utils";
+export { setOfValues, preStringify } from "./utils/misc-utils";
 
 export {
   and,
