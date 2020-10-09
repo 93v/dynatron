@@ -435,9 +435,11 @@ const user = await db("users-table")
   // be stored.
   // The add function can only be used on top-level attributes
   .add("age", 2) // optional
-  // If an array is provided the attribute will be updated as set to the array
+  // If an array is provided the attribute will be updated as a set of the array
+  // All values in the array should be of the same type without duplicates
   // The add function can only be used on top-level attributes
-  .add("hobbies", ["h", 1, null]) // optional
+  .add("hobbies", ["h", "i", "j"]) // optional - either a string array
+  .add("hobbies", [0, 1, 6]) // optional - or a numeric array
   // If a set of strings is provided it will be added to the property on the
   // item or if missing a new property will be created
   // The add function can only be used on top-level attributes

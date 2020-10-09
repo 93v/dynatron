@@ -1,5 +1,9 @@
 import { AWSError, Credentials, SharedIniFileCredentials } from "aws-sdk";
-import DynamoDB, { DocumentClient } from "aws-sdk/clients/dynamodb";
+import DynamoDB, {
+  AttributeMap,
+  AttributeValue,
+  DocumentClient,
+} from "aws-sdk/clients/dynamodb";
 import { ServiceConfigurationOptions } from "aws-sdk/lib/service";
 import https from "https";
 import { v4 } from "uuid";
@@ -57,7 +61,26 @@ export const setOfValues = (
     | number
     | DocumentClient.binaryType
     | (string | number | DocumentClient.binaryType)[],
-) => new DocumentClient().createSet(Array.isArray(values) ? values : [values]);
+) =>
+  new DocumentClient().createSet(Array.isArray(values) ? values : [values], {
+    validate: true,
+  });
+
+export const preStringify = (attributeMap: AttributeMap) => {
+  Object.entries(attributeMap).forEach(([key, value]) => {
+    if (value == null || value.constructor.name !== "Set") {
+      return;
+    }
+
+    attributeMap[key] = {
+      wrapperName: "Set",
+      values: (value as DocumentClient.DynamoDbSet).values,
+      type: (value as DocumentClient.DynamoDbSet).type,
+    } as AttributeValue;
+  });
+
+  return attributeMap;
+};
 
 const bootstrapDynamoDBOptions = (params?: DynatronDocumentClientParams) => {
   const options: DocumentClient.DocumentClientOptions &
@@ -130,9 +153,9 @@ export class QuickFail {
   constructor(private duration: number, private error: Error) {}
 
   wait = async (): Promise<never> => {
-    return new Promise(() => {
+    return new Promise((_, reject) => {
       this.#timeoutReference = setTimeout(() => {
-        throw this.error;
+        reject(this.error);
       }, this.duration);
     });
   };

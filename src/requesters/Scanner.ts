@@ -44,7 +44,7 @@ export class Scanner extends MultiGetter {
   }
 
   private scanSegment = async (params: ScanInput) => {
-    let scanCompleted = false;
+    let operationCompleted = false;
     if (params.Segment != null && params.TotalSegments) {
       params.Segment = Math.min(
         Math.max(params.Segment, MIN_TOTAL_SEGMENTS - 1),
@@ -53,7 +53,7 @@ export class Scanner extends MultiGetter {
     }
     const response: ScanOutput = {};
     return retry(async (bail, attempt) => {
-      while (!scanCompleted) {
+      while (!operationCompleted) {
         const qf = new QuickFail(
           attempt * LONG_MAX_LATENCY,
           new Error(TAKING_TOO_LONG_EXCEPTION),
@@ -64,7 +64,7 @@ export class Scanner extends MultiGetter {
             qf.wait(),
           ]);
           if (result.LastEvaluatedKey == null) {
-            scanCompleted = true;
+            operationCompleted = true;
           } else {
             params.ExclusiveStartKey = result.LastEvaluatedKey;
           }
@@ -90,7 +90,7 @@ export class Scanner extends MultiGetter {
           if (params.Limit && (response.Items?.length || 0) >= params.Limit) {
             response.Items = response.Items?.slice(0, params.Limit);
             response.Count = response.Items?.length || 0;
-            scanCompleted = true;
+            operationCompleted = true;
           }
         } catch (ex) {
           if (!isRetryableDBError(ex)) {

@@ -44,12 +44,12 @@ export class TablesLister {
   $execute = async () => {
     const params = { ...(this[BUILD_PARAMS]() as ListTablesInput) };
 
-    let scanCompleted = false;
+    let operationCompleted = false;
 
     const response: ListTablesOutput = {};
 
     return retry(async (bail, attempt) => {
-      while (!scanCompleted) {
+      while (!operationCompleted) {
         const qf = new QuickFail(
           attempt * LONG_MAX_LATENCY,
           new Error(TAKING_TOO_LONG_EXCEPTION),
@@ -60,7 +60,7 @@ export class TablesLister {
             qf.wait(),
           ]);
           if (result.LastEvaluatedTableName == null) {
-            scanCompleted = true;
+            operationCompleted = true;
           } else {
             params.ExclusiveStartTableName = result.LastEvaluatedTableName;
           }
@@ -76,7 +76,7 @@ export class TablesLister {
             (response.TableNames?.length || 0) >= params.Limit
           ) {
             response.TableNames = response.TableNames?.slice(0, params.Limit);
-            scanCompleted = true;
+            operationCompleted = true;
           }
         } catch (ex) {
           if (!isRetryableDBError(ex)) {

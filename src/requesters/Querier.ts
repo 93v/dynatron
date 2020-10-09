@@ -79,10 +79,10 @@ export class Querier extends MultiGetter {
     if (params.IndexName) {
       delete params.ConsistentRead;
     }
-    let scanCompleted = false;
+    let operationCompleted = false;
     const response: QueryOutput = {};
     return retry(async (bail, attempt) => {
-      while (!scanCompleted) {
+      while (!operationCompleted) {
         const qf = new QuickFail(
           attempt * LONG_MAX_LATENCY,
           new Error(TAKING_TOO_LONG_EXCEPTION),
@@ -93,7 +93,7 @@ export class Querier extends MultiGetter {
             qf.wait(),
           ]);
           if (result.LastEvaluatedKey == null) {
-            scanCompleted = true;
+            operationCompleted = true;
           } else {
             params.ExclusiveStartKey = result.LastEvaluatedKey;
           }
@@ -119,7 +119,7 @@ export class Querier extends MultiGetter {
           if (params.Limit && (response.Items?.length || 0) >= params.Limit) {
             response.Items = response.Items?.slice(0, params.Limit);
             response.Count = response.Items?.length || 0;
-            scanCompleted = true;
+            operationCompleted = true;
           }
         } catch (ex) {
           if (!isRetryableDBError(ex)) {

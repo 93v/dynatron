@@ -107,7 +107,10 @@ export class Updater extends Checker {
 
     const setValue: DocumentClient.DynamoDbSet =
       value && value.constructor.name !== "Set" && typeof value !== "number"
-        ? new DocumentClient().createSet(Array.isArray(value) ? value : [value])
+        ? new DocumentClient().createSet(
+            Array.isArray(value) ? value : [value],
+            { validate: true },
+          )
         : (value as DocumentClient.DynamoDbSet);
 
     const expression: UpdateAdd = {
@@ -193,7 +196,10 @@ export class Updater extends Checker {
   ) {
     const setValue: DocumentClient.DynamoDbSet | undefined =
       value && value.constructor.name !== "Set"
-        ? new DocumentClient().createSet(Array.isArray(value) ? value : [value])
+        ? new DocumentClient().createSet(
+            Array.isArray(value) ? value : [value],
+            { validate: true },
+          )
         : (value as DocumentClient.DynamoDbSet);
     return setValue == null ? this.remove(path) : this.delete(path, setValue);
   }

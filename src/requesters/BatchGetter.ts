@@ -115,10 +115,10 @@ export class BatchGetter extends Requester {
 
     const table = Object.keys(params.RequestItems)[0];
 
-    let scanCompleted = false;
+    let operationCompleted = false;
 
     return retry(async (bail, attempt) => {
-      while (!scanCompleted) {
+      while (!operationCompleted) {
         const qf = new QuickFail(
           attempt * LONG_MAX_LATENCY,
           new Error(TAKING_TOO_LONG_EXCEPTION),
@@ -131,7 +131,7 @@ export class BatchGetter extends Requester {
           if (result.UnprocessedKeys?.[table]) {
             params.RequestItems = result.UnprocessedKeys;
           } else {
-            scanCompleted = true;
+            operationCompleted = true;
           }
           if (result.Responses?.[table]) {
             response.Responses = response.Responses || {};
@@ -172,14 +172,14 @@ export class BatchGetter extends Requester {
     const table = Object.keys(params.RequestItems)[0];
     const keys = [...params.RequestItems[table].Keys];
     const paramsGroups: BatchGetItemInput[] = [];
-    while (keys.length > 0) {
-      const lighterParams: BatchGetItemInput = JSON.parse(
-        JSON.stringify(params),
-      );
-      lighterParams.RequestItems[table].Keys = [
-        ...keys.splice(0, BATCH_OPTIONS.GET_LIMIT),
-      ];
-      paramsGroups.push(lighterParams);
+    const lighterParams: BatchGetItemInput = JSON.parse(JSON.stringify(params));
+    for (let i = 0; i < keys.length; i += BATCH_OPTIONS.GET_LIMIT) {
+      paramsGroups.push({
+        ...lighterParams,
+        RequestItems: {
+          [table]: { Keys: keys.slice(i, i + BATCH_OPTIONS.GET_LIMIT) },
+        },
+      });
     }
     const allResults = await Promise.all(
       paramsGroups.map((paramsGroup) => this.batchGetSegment(paramsGroup)),

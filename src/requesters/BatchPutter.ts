@@ -93,10 +93,10 @@ export class BatchPutter extends Requester {
 
     const table = Object.keys(params.RequestItems)[0];
 
-    let scanCompleted = false;
+    let operationCompleted = false;
 
     return retry(async (bail, attempt) => {
-      while (!scanCompleted) {
+      while (!operationCompleted) {
         const qf = new QuickFail(
           attempt * LONG_MAX_LATENCY,
           new Error(TAKING_TOO_LONG_EXCEPTION),
@@ -109,7 +109,7 @@ export class BatchPutter extends Requester {
           if (result.UnprocessedItems?.[table]) {
             params.RequestItems = result.UnprocessedItems;
           } else {
-            scanCompleted = true;
+            operationCompleted = true;
           }
 
           if (result.ConsumedCapacity) {
@@ -153,14 +153,16 @@ export class BatchPutter extends Requester {
     const table = Object.keys(params.RequestItems)[0];
     const items = [...params.RequestItems[table]];
     const paramsGroups: BatchWriteItemInput[] = [];
-    while (items.length > 0) {
-      const lighterParams: BatchWriteItemInput = JSON.parse(
-        JSON.stringify(params),
-      );
-      lighterParams.RequestItems[table] = [
-        ...items.splice(0, BATCH_OPTIONS.WRITE_LIMIT),
-      ];
-      paramsGroups.push(lighterParams);
+    const lighterParams: BatchWriteItemInput = JSON.parse(
+      JSON.stringify(params),
+    );
+    for (let i = 0; i < items.length; i += BATCH_OPTIONS.WRITE_LIMIT) {
+      paramsGroups.push({
+        ...lighterParams,
+        RequestItems: {
+          [table]: items.slice(i, i + BATCH_OPTIONS.WRITE_LIMIT),
+        },
+      });
     }
     const allResults = await Promise.all(
       paramsGroups.map((paramsGroup) => this.batchWriteSegment(paramsGroup)),
