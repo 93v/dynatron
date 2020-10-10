@@ -240,7 +240,7 @@ export class Updater extends Checker {
   ): Promise<U extends true ? UpdateItemOutput : T | undefined | null> => {
     return retry(async (bail, attempt) => {
       const qf = new QuickFail(
-        attempt * SHORT_MAX_LATENCY,
+        attempt * SHORT_MAX_LATENCY * (this.patienceRatio || 1),
         new Error(TAKING_TOO_LONG_EXCEPTION),
       );
       try {

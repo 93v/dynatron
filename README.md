@@ -333,6 +333,8 @@ const user = await db("users-table")
   // Possible options are "INDEXES" | "TOTAL" | "NONE"
   // Defaults to "TOTAL"
   .returnConsumedCapacity() // optional
+  // Multiplies the default max latency values for the requests timeout logic
+  .relaxLatencies(1) // optional
   // Returns the collection metrics in the raw response
   // Possible options are "SIZE" | "NONE"
   // Defaults to "SIZE"
@@ -393,6 +395,8 @@ const user = await db("users-table")
   // Possible options are "INDEXES" | "TOTAL" | "NONE"
   // Defaults to "TOTAL"
   .returnConsumedCapacity() // optional
+  // Multiplies the default max latency values for the requests timeout logic
+  .relaxLatencies(1) // optional
   // Can receive a type as an input and will return the data with that type
   // Can receive a boolean which if set to true returns the raw response instead
   // of the data item only
@@ -482,6 +486,8 @@ const user = await db("users-table")
   // Possible options are "INDEXES" | "TOTAL" | "NONE"
   // Defaults to "TOTAL"
   .returnConsumedCapacity() // optional
+  // Multiplies the default max latency values for the requests timeout logic
+  .relaxLatencies(1) // optional
   // Returns the collection metrics in the raw response
   // Possible options are "SIZE" | "NONE"
   // Defaults to "SIZE"
@@ -524,6 +530,8 @@ await db("users-table")
   // Possible options are "INDEXES" | "TOTAL" | "NONE"
   // Defaults to "TOTAL"
   .returnConsumedCapacity() // optional
+  // Multiplies the default max latency values for the requests timeout logic
+  .relaxLatencies(1) // optional
   // Returns the collection metrics in the raw response
   // Possible options are "SIZE" | "NONE"
   // Defaults to "SIZE"
@@ -588,6 +596,8 @@ const users = await db("users-table")
   // Possible options are "INDEXES" | "TOTAL" | "NONE"
   // Defaults to "TOTAL"
   .returnConsumedCapacity() // optional
+  // Multiplies the default max latency values for the requests timeout logic
+  .relaxLatencies(1) // optional
   // Can receive a type as an input and will return the data with that type
   // Can receive a boolean which if set to true returns the raw response instead
   // of the data item only
@@ -648,6 +658,8 @@ const users = await db("users-table")
   // Possible options are "INDEXES" | "TOTAL" | "NONE"
   // Defaults to "TOTAL"
   .returnConsumedCapacity() // optional
+  // Multiplies the default max latency values for the requests timeout logic
+  .relaxLatencies(1) // optional
   // Can receive a type as an input and will return the data with that type
   // Can receive a boolean which if set to true returns the raw response instead
   // of the data item only
@@ -709,6 +721,8 @@ const users = await db("users-table")
   // Possible options are "INDEXES" | "TOTAL" | "NONE"
   // Defaults to "TOTAL"
   .returnConsumedCapacity() // optional
+  // Multiplies the default max latency values for the requests timeout logic
+  .relaxLatencies(1) // optional
   // Returns the collection metrics in the raw response
   // Possible options are "SIZE" | "NONE"
   // Defaults to "SIZE"
@@ -783,6 +797,8 @@ const users = await db("users-table")
   // Possible options are "INDEXES" | "TOTAL" | "NONE"
   // Defaults to "TOTAL"
   .returnConsumedCapacity() // optional
+  // Multiplies the default max latency values for the requests timeout logic
+  .relaxLatencies(1) // optional
   // Can receive a type as an input and will return the data with that type
   // Can receive a boolean which if set to true returns the raw response instead
   // of the data item only
@@ -818,6 +834,8 @@ await db("users-table")
   // Possible options are "INDEXES" | "TOTAL" | "NONE"
   // Defaults to "TOTAL"
   .returnConsumedCapacity() // optional
+  // Multiplies the default max latency values for the requests timeout logic
+  .relaxLatencies(1) // optional
   // Returns the collection metrics in the raw response
   // Possible options are "SIZE" | "NONE"
   // Defaults to "SIZE"

@@ -81,7 +81,7 @@ export class Putter extends Mutator {
     const requestParams = this[BUILD_PARAMS]() as PutItemInput;
     return retry(async (bail, attempt) => {
       const qf = new QuickFail(
-        attempt * SHORT_MAX_LATENCY,
+        attempt * SHORT_MAX_LATENCY * (this.patienceRatio || 1),
         new Error(TAKING_TOO_LONG_EXCEPTION),
       );
       try {

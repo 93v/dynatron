@@ -11,6 +11,7 @@ import {
 
 export class Requester {
   #ReturnConsumedCapacity?: ReturnConsumedCapacity;
+  protected patienceRatio = 1;
 
   constructor(protected readonly DB: DocumentClient, protected table: string) {}
 
@@ -18,6 +19,14 @@ export class Requester {
     returnConsumedCapacity: ReturnConsumedCapacity = "TOTAL",
   ) => {
     this.#ReturnConsumedCapacity = returnConsumedCapacity;
+    return this;
+  };
+
+  relaxLatencies = (patienceRatio = 1) => {
+    if (patienceRatio <= 0) {
+      throw "The ratio must be positive";
+    }
+    this.patienceRatio = Math.abs(patienceRatio);
     return this;
   };
 

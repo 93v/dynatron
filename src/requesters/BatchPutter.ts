@@ -98,7 +98,7 @@ export class BatchPutter extends Requester {
     return retry(async (bail, attempt) => {
       while (!operationCompleted) {
         const qf = new QuickFail(
-          attempt * LONG_MAX_LATENCY,
+          attempt * LONG_MAX_LATENCY * (this.patienceRatio || 1),
           new Error(TAKING_TOO_LONG_EXCEPTION),
         );
         try {

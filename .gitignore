@@ -68,3 +68,5 @@ typings/
 .sonarlint/
 
 .idea/
+
+src/usage.ts

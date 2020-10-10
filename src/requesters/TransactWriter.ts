@@ -119,7 +119,7 @@ export class TransactWriter extends Mutator {
   $execute = async () => {
     return retry(async (bail, attempt) => {
       const qf = new QuickFail(
-        attempt * LONG_MAX_LATENCY,
+        attempt * LONG_MAX_LATENCY * (this.patienceRatio || 1),
         new Error(TAKING_TOO_LONG_EXCEPTION),
       );
       try {
