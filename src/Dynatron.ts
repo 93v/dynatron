@@ -94,11 +94,11 @@ export class Dynatron {
       item,
     );
 
-  query = (key: DocumentClient.Key) =>
+  query = (...args: [DocumentClient.Key] | [string, any]) =>
     new Querier(
       Dynatron.DocumentClients[this.instanceId],
       this.params.table,
-      key,
+      typeof args[0] === "string" ? { [args[0]]: args[1] } : args[0],
     );
 
   scan = () =>

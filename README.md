@@ -561,7 +561,9 @@ await db("users-table")
 
 ```typescript
 const users = await db("users-table")
-  // Pass in the partition key
+  // Pass in the partition key property name and the value
+  .query("id", "613243ec-04db-450b-b654-108231637ca5")
+  // or Alternatively pass in the partition key (this method may be deprecated)
   .query({ id: "613243ec-04db-450b-b654-108231637ca5" })
   // Receives a Condition Expression built with functions provided by the library
   // This is applied to the sort key for
@@ -609,7 +611,7 @@ const users = await db("users-table")
 
 ```typescript
 const users = await db("users-table")
-  .query({ id: "613243ec-04db-450b-b654-108231637ca5" })
+  .query("id", "613243ec-04db-450b-b654-108231637ca5")
   // You cannot pass in true and set the type at the same time. The typescript will complain about the parameter type.
   // Pay attention to the fact that your type must state that it is an array
   .$<User[]>(); // If you don't pass true and don't set the type the function will set the return type to DynamoDB.ItemList
@@ -1044,7 +1046,7 @@ Getting the full history of all the changes is also very simple as shown below
 
 ```typescript
 const userProfileHistory = await db("users-table")
-  .query({ pk: "USER#de91c1fd-3d32-4d85-b4f3-2d78fa4940c0" })
+  .query("pk", "USER#de91c1fd-3d32-4d85-b4f3-2d78fa4940c0")
   .having(beginsWith("sk", "PROFILE#v"))
   .where(ne("sk", "PROFILE#v0")) // Here we are filtering out the v0 as it is a special case and not a part of the history
   .$<(User & VersionControlled & TableEntry)[]>();
