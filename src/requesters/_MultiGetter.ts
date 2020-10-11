@@ -65,8 +65,10 @@ export class MultiGetter extends Requester {
     return this;
   };
 
-  start = (exclusiveStartKey: DocumentClient.Key) => {
-    this.#ExclusiveStartKey = exclusiveStartKey;
+  start = (exclusiveStartKey: DocumentClient.Key | null) => {
+    if (exclusiveStartKey != null) {
+      this.#ExclusiveStartKey = exclusiveStartKey;
+    }
     return this;
   };
 
