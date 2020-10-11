@@ -73,6 +73,7 @@ export class Querier extends MultiGetter {
 
   $execute = async <T = ItemList | undefined | null, U extends boolean = false>(
     returnRawResponse?: U,
+    disableRecursion = false,
   ): Promise<U extends true ? QueryOutput : T | undefined | null> => {
     const params = { ...(this[BUILD_PARAMS]() as QueryInput) };
 
@@ -92,7 +93,7 @@ export class Querier extends MultiGetter {
             this.DB.query(params).promise(),
             qf.wait(),
           ]);
-          if (result.LastEvaluatedKey == null) {
+          if (result.LastEvaluatedKey == null || disableRecursion) {
             operationCompleted = true;
           } else {
             params.ExclusiveStartKey = result.LastEvaluatedKey;
@@ -120,6 +121,9 @@ export class Querier extends MultiGetter {
             response.Items = response.Items?.slice(0, params.Limit);
             response.Count = response.Items?.length || 0;
             operationCompleted = true;
+          }
+          if (disableRecursion && result.LastEvaluatedKey != null) {
+            response.LastEvaluatedKey = result.LastEvaluatedKey;
           }
         } catch (ex) {
           if (!isRetryableDBError(ex)) {

@@ -60,11 +60,12 @@ export class MultiGetter extends Requester {
     return this;
   };
 
-  limit = (
-    limit: PositiveIntegerObject,
-    exclusiveStartKey?: DocumentClient.Key,
-  ) => {
+  limit = (limit: PositiveIntegerObject) => {
     this.#Limit = limit;
+    return this;
+  };
+
+  start = (exclusiveStartKey: DocumentClient.Key) => {
     this.#ExclusiveStartKey = exclusiveStartKey;
     return this;
   };

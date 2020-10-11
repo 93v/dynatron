@@ -61,6 +61,18 @@ DB entry property.
 setOfValues(["A", "B", "C"]);
 ```
 
+#### Pre-process before JSON.stringify
+
+The Sets returned from the DB when stringified are converted to arrays. This is
+fine in most of the cases, but that loses the info that the property used to be
+a set. To not loose that info `preStringify` function can be used, that converts
+the Set to an object which passed into `put` or similar functions gets written
+into the db correctly as a Set.
+
+```typescript
+preStringify(attributeMap);
+```
+
 ### Condition Expression Builders
 
 Dynatron provides quite a few utility functions to help build Condition
@@ -571,8 +583,9 @@ const users = await db("users-table")
   // The index name which should be scanned
   .indexName("names-index") // optional
   // Limit the count of the items returned by the request
-  // The seconds argument allows to provide the start key
-  .limit(20, { id: "502132ec-04db-450b-b654-108231637ca5" }) // optional
+  .limit(20) // optional
+  // Provide the start key
+  .start({ id: "502132ec-04db-450b-b654-108231637ca5" }) // optional
   // Set the sorting direction for the sort key
   // The default value is "ASC" (ascending)
   .sort("DSC") // optional
@@ -601,10 +614,10 @@ const users = await db("users-table")
   // Multiplies the default max latency values for the requests timeout logic
   .relaxLatencies(1) // optional
   // Can receive a type as an input and will return the data with that type
-  // Can receive a boolean which if set to true returns the raw response instead
-  // of the data item only
-  // You cannot pass in true and set the type at the same time. The typescript will complain about the parameter type.
-  .$execute(true); // If you pass true to this function it will set the return type to QueryOutput
+  // Can receive a boolean for the first property which if set to true returns the raw response instead of the data item only
+  // Can receive a boolean for the second property which if set to true disables recursion and returns the last evaluated key
+  // You cannot pass in true to the first param and set the type at the same time. The typescript will complain about the parameter type.
+  .$execute(true, true); // If you pass true to the first param to this function it will set the return type to QueryOutput
 ```
 
 #### Usual usage of `query`
@@ -627,8 +640,9 @@ const users = await db("users-table")
   // The index name which should be scanned
   .indexName("names-index") // optional
   // Limit the count of the items returned by the request
-  // The seconds argument allows to provide the start key
-  .limit(20, { id: "502132ec-04db-450b-b654-108231637ca5" }) // optional
+  .limit(20) // optional
+  // Provide the start key
+  .start({ id: "502132ec-04db-450b-b654-108231637ca5" }) // optional
   // Set the number of segments to use while scanning the table
   // Should be a positive integer, the default number of segments is 100
   .totalSegments(50) // optional
@@ -663,10 +677,10 @@ const users = await db("users-table")
   // Multiplies the default max latency values for the requests timeout logic
   .relaxLatencies(1) // optional
   // Can receive a type as an input and will return the data with that type
-  // Can receive a boolean which if set to true returns the raw response instead
-  // of the data item only
-  // You cannot pass in true and set the type at the same time. The typescript will complain about the parameter type.
-  .$execute(true); // If you pass true to this function it will set the return type to ScanOutput
+  // Can receive a boolean for the first property which if set to true returns the raw response instead of the data item only
+  // Can receive a boolean for the second property which if set to true disables recursion and returns the last evaluated key
+  // You cannot pass in true to the first param and set the type at the same time. The typescript will complain about the parameter type.
+  .$execute(true, true); // If you pass true to this function it will set the return type to ScanOutput
 ```
 
 #### Usual usage of `scan`

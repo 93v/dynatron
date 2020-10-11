@@ -51,7 +51,7 @@ export class Scanner extends MultiGetter {
     };
   }
 
-  private scanSegment = async (params: ScanInput) => {
+  private scanSegment = async (params: ScanInput, disableRecursion = false) => {
     let operationCompleted = false;
     if (params.Segment != null && params.TotalSegments) {
       params.Segment = Math.min(
@@ -71,7 +71,7 @@ export class Scanner extends MultiGetter {
             this.DB.scan(params).promise(),
             qf.wait(),
           ]);
-          if (result.LastEvaluatedKey == null) {
+          if (result.LastEvaluatedKey == null || disableRecursion) {
             operationCompleted = true;
           } else {
             params.ExclusiveStartKey = result.LastEvaluatedKey;
@@ -100,6 +100,9 @@ export class Scanner extends MultiGetter {
             response.Count = response.Items?.length || 0;
             operationCompleted = true;
           }
+          if (disableRecursion && result.LastEvaluatedKey != null) {
+            response.LastEvaluatedKey = result.LastEvaluatedKey;
+          }
         } catch (ex) {
           if (!isRetryableDBError(ex)) {
             bail(ex);
@@ -125,6 +128,7 @@ export class Scanner extends MultiGetter {
 
   $execute = async <T = ItemList | undefined | null, U extends boolean = false>(
     returnRawResponse?: U,
+    disableRecursion = false,
   ): Promise<U extends true ? ScanOutput : T | undefined | null> => {
     const params = { ...(this[BUILD_PARAMS]() as ScanInput) };
     if (params.IndexName) {
@@ -156,7 +160,7 @@ export class Scanner extends MultiGetter {
       if (!segmentParams.TotalSegments) {
         segmentParams.TotalSegments = 1;
       }
-      responses = [await this.scanSegment(params)];
+      responses = [await this.scanSegment(params, disableRecursion)];
     } else {
       responses = await Promise.all(
         [...Array(params.TotalSegments || 1).keys()].map(async (segment) => {
@@ -164,7 +168,7 @@ export class Scanner extends MultiGetter {
           if (segmentParams.TotalSegments) {
             segmentParams.Segment = segment;
           }
-          return this.scanSegment(segmentParams);
+          return this.scanSegment(segmentParams, disableRecursion);
         }),
       );
     }
@@ -173,6 +177,9 @@ export class Scanner extends MultiGetter {
         Items: [...(p.Items || []), ...(c?.Items || [])],
         Count: (p.Count || 0) + (c?.Count || 0),
         ScannedCount: (p.ScannedCount || 0) + (c?.ScannedCount || 0),
+        ...(disableRecursion
+          ? { LastEvaluatedKey: p.LastEvaluatedKey || c?.LastEvaluatedKey }
+          : {}),
       };
       if (c?.ConsumedCapacity) {
         if (!p.ConsumedCapacity) {
