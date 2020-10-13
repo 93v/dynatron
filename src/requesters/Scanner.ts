@@ -135,7 +135,7 @@ export class Scanner extends MultiGetter {
       delete params.ConsistentRead;
     }
     let initialLimit: number | undefined;
-    if (params.ExclusiveStartKey) {
+    if (params.ExclusiveStartKey && !disableRecursion) {
       delete params.TotalSegments;
       delete params.Segment;
     }
