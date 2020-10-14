@@ -72,12 +72,12 @@ export class BatchPutter extends Requester {
     };
     requestParams = {
       ...batchParams,
-      ...(requestParams.ReturnConsumedCapacity != null
+      ...(requestParams.ReturnConsumedCapacity
         ? {
             ReturnConsumedCapacity: requestParams.ReturnConsumedCapacity,
           }
         : {}),
-      ...(requestParams.ReturnItemCollectionMetrics != null
+      ...(requestParams.ReturnItemCollectionMetrics
         ? {
             ReturnItemCollectionMetrics:
               requestParams.ReturnItemCollectionMetrics,

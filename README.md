@@ -648,7 +648,7 @@ const users = await db("users-table")
   .totalSegments(50) // optional
   // Set the segment to get
   // Should be a positive integer up to the total number of segments provided
-  .segment(1) // optional
+  .segment(0) // optional
   // Disables segments and forces to scan the table with one segment
   // For smaller tables this can be more beneficial than scanning with segments
   .disableSegments() // optional

@@ -84,7 +84,7 @@ export class BatchGetter extends Requester {
 
     const requestItems: IBatchGetItemRequestItem = {
       Keys: this.keys,
-      ...(requestParams.ConsistentRead != null
+      ...(requestParams.ConsistentRead
         ? { ConsistentRead: requestParams.ConsistentRead }
         : {}),
       ...(requestParams.ProjectionExpression != null &&
@@ -100,7 +100,7 @@ export class BatchGetter extends Requester {
     };
     requestParams = {
       ...batchParams,
-      ...(requestParams.ReturnConsumedCapacity != null
+      ...(requestParams.ReturnConsumedCapacity
         ? {
             ReturnConsumedCapacity: requestParams.ReturnConsumedCapacity,
           }

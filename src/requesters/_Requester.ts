@@ -48,7 +48,7 @@ export class Requester {
             Object.keys(requestParams).reduce(
               (p: RequestParams, c) => ({
                 ...p,
-                ...(requestParams[c] ? { [c]: requestParams[c] } : {}),
+                ...(requestParams[c] != null ? { [c]: requestParams[c] } : {}),
               }),
               {},
             ),

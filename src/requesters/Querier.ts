@@ -56,7 +56,7 @@ export class Querier extends MultiGetter {
       ...(this.#KeyConditionExpression
         ? { RawKeyConditionExpression: [this.#KeyConditionExpression] }
         : {}),
-      ...(this.#ScanIndexForward != null
+      ...(this.#ScanIndexForward
         ? { ScanIndexForward: this.#ScanIndexForward }
         : {}),
     };

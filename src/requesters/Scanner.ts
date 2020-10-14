@@ -47,7 +47,7 @@ export class Scanner extends MultiGetter {
     return {
       ...super[BUILD](),
       ...(this.#TotalSegments ? { TotalSegments: this.#TotalSegments } : {}),
-      ...(this.#Segment ? { Segment: this.#Segment } : {}),
+      ...(this.#Segment != null ? { Segment: this.#Segment } : {}),
     };
   }
 
