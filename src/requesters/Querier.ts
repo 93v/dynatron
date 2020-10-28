@@ -44,7 +44,7 @@ export class Querier extends MultiGetter {
   };
 
   sort = (sort: "ASC" | "DSC") => {
-    if (sort == "DSC") {
+    if (sort === "DSC") {
       this.#ScanIndexForward = false;
     }
     return this;
@@ -56,7 +56,7 @@ export class Querier extends MultiGetter {
       ...(this.#KeyConditionExpression
         ? { RawKeyConditionExpression: [this.#KeyConditionExpression] }
         : {}),
-      ...(this.#ScanIndexForward
+      ...(this.#ScanIndexForward != null
         ? { ScanIndexForward: this.#ScanIndexForward }
         : {}),
     };
