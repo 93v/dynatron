@@ -111,6 +111,7 @@ export class BatchGetter extends Requester {
   }
 
   private batchGetSegment = async (params: BatchGetItemInput) => {
+    console.log(params);
     const response: BatchGetItemOutput = {};
 
     const table = Object.keys(params.RequestItems)[0];
@@ -175,9 +176,11 @@ export class BatchGetter extends Requester {
     const lighterParams: BatchGetItemInput = JSON.parse(JSON.stringify(params));
     for (let i = 0; i < keys.length; i += BATCH_OPTIONS.GET_LIMIT) {
       paramsGroups.push({
-        ...lighterParams,
         RequestItems: {
-          [table]: { Keys: keys.slice(i, i + BATCH_OPTIONS.GET_LIMIT) },
+          [table]: {
+            ...lighterParams.RequestItems[table],
+            Keys: keys.slice(i, i + BATCH_OPTIONS.GET_LIMIT),
+          },
         },
       });
     }
