@@ -111,7 +111,6 @@ export class BatchGetter extends Requester {
   }
 
   private batchGetSegment = async (params: BatchGetItemInput) => {
-    console.log(params);
     const response: BatchGetItemOutput = {};
 
     const table = Object.keys(params.RequestItems)[0];
