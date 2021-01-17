@@ -1,7 +1,7 @@
 import { PathElement } from "../../types/request";
 import { assertNever } from "./misc-utils";
 
-export const parseAttributePath = (path: string): PathElement[] => {
+export const parseAttributePath = (attributePath: string): PathElement[] => {
   const enum ParserMode {
     AFTER_LIST_INDEX_MODE,
     LIST_INDEX_MODE,
@@ -20,7 +20,7 @@ export const parseAttributePath = (path: string): PathElement[] => {
   let mode: ParserMode = ParserMode.NORMAL_MODE;
   let buffer = "";
 
-  [...path].forEach((char, index, chars) => {
+  [...attributePath].forEach((char, index, chars) => {
     switch (mode) {
       case ParserMode.ESCAPED_MODE:
         buffer += char;
@@ -45,7 +45,7 @@ export const parseAttributePath = (path: string): PathElement[] => {
           case Character.LEFT_BRACKET:
             if (buffer === "") {
               throw new Error(
-                `Invalid control character encountered in path [${path}] at index [${index}]`,
+                `Invalid control character encountered in path [${attributePath}] at index [${index}]`,
               );
             }
             elements.push({
@@ -73,7 +73,7 @@ export const parseAttributePath = (path: string): PathElement[] => {
             break;
           default:
             throw new Error(
-              `Bare identifier encountered between list index accesses in path [${path}] at index [${index}]`,
+              `Bare identifier encountered between list index accesses in path [${attributePath}] at index [${index}]`,
             );
         }
         break;
@@ -82,7 +82,7 @@ export const parseAttributePath = (path: string): PathElement[] => {
           const listIndexValue = Number.parseInt(buffer);
           if (!Number.isFinite(listIndexValue)) {
             throw new TypeError(
-              `Invalid array index character [${buffer}] encountered in path [${path}] at index ${
+              `Invalid array index character [${buffer}] encountered in path [${attributePath}] at index ${
                 index - buffer.length
               } `,
             );
@@ -96,7 +96,7 @@ export const parseAttributePath = (path: string): PathElement[] => {
         } else {
           if (!/^\d$/.test(char)) {
             throw new Error(
-              `Invalid array index character [${char}] encountered in path [${path}] at index ${index} `,
+              `Invalid array index character [${char}] encountered in path [${attributePath}] at index ${index} `,
             );
           }
           buffer += char;

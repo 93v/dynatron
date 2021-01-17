@@ -1,5 +1,5 @@
 import { RequestParameters } from "../../types/request";
-import { serializeAttributePath } from "./attribute-path-utils";
+import { serializeAttributePath } from "./attribute-path-serializer";
 import { optimizeExpression } from "./expression-optimization-utils";
 
 const marshallProjectionExpression = (rawProjectionExpression: string[]) => {

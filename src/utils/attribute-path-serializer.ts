@@ -1,14 +1,14 @@
 import { parseAttributePath } from "./attribute-path-parser";
 import alpha from "./next-alpha-char-generator";
 
-export const serializeAttributePath = (string: string) => {
-  const parsedPath = parseAttributePath(string);
+export const serializeAttributePath = (attributePath: string) => {
+  const parsedAttributePath = parseAttributePath(attributePath);
 
   let expression = "";
 
   const attributeNamesMap = {};
 
-  for (const pathElement of parsedPath) {
+  for (const pathElement of parsedAttributePath) {
     if (pathElement.type === "ListIndex") {
       expression += `[${pathElement.index}]`;
       continue;
