@@ -1,7 +1,9 @@
 import { Options } from "async-retry";
 
 export const BUILD: unique symbol = Symbol("Build._build");
-export const BUILD_PARAMS: unique symbol = Symbol("BuildParams._buildParams");
+export const BUILD_REQUEST_INPUT: unique symbol = Symbol(
+  "BuildRequestInput._buildRequestInput",
+);
 
 export const MILLISECONDS_IN_SECOND = 1000;
 

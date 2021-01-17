@@ -1,145 +1,101 @@
-import DynamoDB, {
-  CreateTableInput,
-  DocumentClient,
-  UpdateTableInput,
-  UpdateTimeToLiveInput,
-} from "aws-sdk/clients/dynamodb";
+// import {
+//   CreateTableInput,
+//   DynamoDBClient,
+//   DynamoDBClientConfig,
+//   UpdateTableInput,
+//   UpdateTimeToLiveInput,
+// } from "@aws-sdk/client-dynamodb";
 
-import { DynatronConstructorParams } from "../types/request";
-import { BatchDeleter } from "./requesters/BatchDeleter";
-import { BatchGetter } from "./requesters/BatchGetter";
-import { BatchPutter } from "./requesters/BatchPutter";
-import { Checker } from "./requesters/Checker";
-import { Deleter } from "./requesters/Deleter";
-import { Getter } from "./requesters/Getter";
-import { Putter } from "./requesters/Putter";
-import { Querier } from "./requesters/Querier";
-import { Scanner } from "./requesters/Scanner";
-import { TableCreator } from "./requesters/tables/TableCreator";
-import { TableDeleter } from "./requesters/tables/TableDeleter";
-import { TableDescriber } from "./requesters/tables/TableDescriber";
-import { TablesLister } from "./requesters/tables/TablesLister";
-import { TableTTLDescriber } from "./requesters/tables/TableTTLDescriber";
-import { TableTTLUpdater } from "./requesters/tables/TableTTLUpdater";
-import { TableUpdater } from "./requesters/tables/TableUpdater";
-import { TransactGetter } from "./requesters/TransactGetter";
-import { TransactWriter } from "./requesters/TransactWriter";
-import { Updater } from "./requesters/Updater";
-import { initDB, initDocumentClient } from "./utils/misc-utils";
+// import { NativeKey } from "../types/key";
+// import { BatchDeleter } from "./requesters/items/batch-deleter";
+// import { BatchGetter } from "./requesters/items/batch-getter";
+// import { BatchPutter } from "./requesters/items/batch-putter";
+// import { Checker } from "./requesters/items/checker";
+// import { Deleter } from "./requesters/items/deleter";
+// import { Getter } from "./requesters/items/getter";
+// import { Putter } from "./requesters/items/putter";
+// import { Querier } from "./requesters/items/querier";
+// import { Scanner } from "./requesters/items/scanner";
+// import { TransactGetter } from "./requesters/items/transact-getter";
+// import { TransactWriter } from "./requesters/items/transact-writer";
+// import { Updater } from "./requesters/items/updater";
+// import { TableCreator } from "./requesters/tables/table-creator";
+// import { TableDeleter } from "./requesters/tables/table-deleter";
+// import { TableDescriber } from "./requesters/tables/table-describer";
+// import { TableLister } from "./requesters/tables/table-lister";
+// import { TableTTLDescriber } from "./requesters/tables/table-ttl-describer";
+// import { TableTTLUpdater } from "./requesters/tables/table-ttl-updater";
+// import { TableUpdater } from "./requesters/tables/table-updater";
+// import { initializeDatabaseClient } from "./utils/database-client";
 
-export class Dynatron {
-  protected static readonly DynamoDBs: Record<string, DynamoDB> = {};
-  protected static readonly DocumentClients: Record<
-    string,
-    DocumentClient
-  > = {};
+// export class Dynatron {
+//   protected static readonly DynamoDBClients = new Map<string, DynamoDBClient>();
+//   constructor(
+//     private readonly tableName: string,
+//     private readonly clientConfiguration?: DynamoDBClientConfig,
+//     private instanceId = "default",
+//   ) {
+//     Dynatron.DynamoDBClients.set(
+//       this.instanceId,
+//       Dynatron.DynamoDBClients.get(this.instanceId) ||
+//         initializeDatabaseClient(this.clientConfiguration),
+//     );
+//   }
 
-  constructor(
-    private readonly params: DynatronConstructorParams,
-    private instanceId = "default",
-  ) {
-    Dynatron.DynamoDBs[this.instanceId] =
-      Dynatron.DynamoDBs[this.instanceId] || initDB(params.clientConfigs);
-    Dynatron.DocumentClients[this.instanceId] =
-      Dynatron.DocumentClients[this.instanceId] ||
-      initDocumentClient(params.clientConfigs);
-  }
+//   batchDelete = (keys: NativeKey[]) => new BatchDeleter(this, keys);
+//   batchGet = () => new BatchGetter();
+//   batchPut = () => new BatchPutter();
+//   check = () => new Checker();
+//   delete = () => new Deleter();
+//   get = (key: Record<string, any>) =>
+//     new Getter(
+//       Dynatron.DynamoDBClients.get(this.instanceId) as DynamoDBClient,
+//       this.tableName,
+//       key,
+//     );
+//   put = () => new Putter();
+//   query = () => new Querier();
+//   scan = () => new Scanner();
+//   update = () => new Updater();
+//   transactGet = () => new TransactGetter();
+//   transactWrite = () => new TransactWriter();
 
-  batchDelete = (keys: DocumentClient.Key[]) =>
-    new BatchDeleter(
-      Dynatron.DocumentClients[this.instanceId],
-      this.params.table,
-      keys,
-    );
-
-  batchGet = (keys: DocumentClient.Key[]) =>
-    new BatchGetter(
-      Dynatron.DocumentClients[this.instanceId],
-      this.params.table,
-      keys,
-    );
-
-  batchPut = (items: DocumentClient.PutItemInputAttributeMap[]) =>
-    new BatchPutter(
-      Dynatron.DocumentClients[this.instanceId],
-      this.params.table,
-      items,
-    );
-
-  check = (key: DocumentClient.Key) =>
-    new Checker(
-      Dynatron.DocumentClients[this.instanceId],
-      this.params.table,
-      key,
-    );
-
-  delete = (key: DocumentClient.Key) =>
-    new Deleter(
-      Dynatron.DocumentClients[this.instanceId],
-      this.params.table,
-      key,
-    );
-
-  get = (key: DocumentClient.Key) =>
-    new Getter(
-      Dynatron.DocumentClients[this.instanceId],
-      this.params.table,
-      key,
-    );
-
-  put = (item: DocumentClient.PutItemInputAttributeMap) =>
-    new Putter(
-      Dynatron.DocumentClients[this.instanceId],
-      this.params.table,
-      item,
-    );
-
-  query = (...args: [DocumentClient.Key] | [string, any]) =>
-    new Querier(
-      Dynatron.DocumentClients[this.instanceId],
-      this.params.table,
-      typeof args[0] === "string" ? { [args[0]]: args[1] } : args[0],
-    );
-
-  scan = () =>
-    new Scanner(Dynatron.DocumentClients[this.instanceId], this.params.table);
-
-  update = (key: DocumentClient.Key) =>
-    new Updater(
-      Dynatron.DocumentClients[this.instanceId],
-      this.params.table,
-      key,
-    );
-
-  transactGet = (items: Getter[]) =>
-    new TransactGetter(
-      Dynatron.DocumentClients[this.instanceId],
-      this.params.table,
-      items,
-    );
-
-  transactWrite = (items: (Checker | Putter | Deleter | Updater)[]) =>
-    new TransactWriter(
-      Dynatron.DocumentClients[this.instanceId],
-      this.params.table,
-      items,
-    );
-
-  public get Tables() {
-    return {
-      create: (params: CreateTableInput) =>
-        new TableCreator(Dynatron.DynamoDBs[this.instanceId], params),
-      delete: (table: string) =>
-        new TableDeleter(Dynatron.DynamoDBs[this.instanceId], table),
-      describe: (table: string) =>
-        new TableDescriber(Dynatron.DynamoDBs[this.instanceId], table),
-      describeTTL: (table: string) =>
-        new TableTTLDescriber(Dynatron.DynamoDBs[this.instanceId], table),
-      list: () => new TablesLister(Dynatron.DynamoDBs[this.instanceId]),
-      update: (params: UpdateTableInput) =>
-        new TableUpdater(Dynatron.DynamoDBs[this.instanceId], params),
-      updateTTL: (params: UpdateTimeToLiveInput) =>
-        new TableTTLUpdater(Dynatron.DynamoDBs[this.instanceId], params),
-    };
-  }
-}
+//   public get Tables() {
+//     return {
+//       create: (input: CreateTableInput) =>
+//         new TableCreator(
+//           Dynatron.DynamoDBClients.get(this.instanceId) as DynamoDBClient,
+//           input,
+//         ),
+//       delete: () =>
+//         new TableDeleter(
+//           Dynatron.DynamoDBClients.get(this.instanceId) as DynamoDBClient,
+//           this.tableName,
+//         ),
+//       describe: () =>
+//         new TableDescriber(
+//           Dynatron.DynamoDBClients.get(this.instanceId) as DynamoDBClient,
+//           this.tableName,
+//         ),
+//       describeTTL: () =>
+//         new TableTTLDescriber(
+//           Dynatron.DynamoDBClients.get(this.instanceId) as DynamoDBClient,
+//           this.tableName,
+//         ),
+//       list: () =>
+//         new TableLister(
+//           Dynatron.DynamoDBClients.get(this.instanceId) as DynamoDBClient,
+//         ),
+//       update: (input: UpdateTableInput) =>
+//         new TableUpdater(
+//           Dynatron.DynamoDBClients.get(this.instanceId) as DynamoDBClient,
+//           input,
+//         ),
+//       updateTTL: (input: UpdateTimeToLiveInput) =>
+//         new TableTTLUpdater(
+//           Dynatron.DynamoDBClients.get(this.instanceId) as DynamoDBClient,
+//           input,
+//         ),
+//     };
+//   }
+// }
