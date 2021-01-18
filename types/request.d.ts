@@ -4,7 +4,7 @@ import {
   ReturnValue,
 } from "@aws-sdk/client-dynamodb";
 
-import { NativeKey } from "./key";
+import { NativeKey, NativeValue } from "./native-types";
 
 type AttributeName = {
   type: "AttributeName";
@@ -27,8 +27,8 @@ export type RequestParameters = {
   // ExpressionAttributeValues?: ExpressionAttributeValueMap;
   FilterExpression?: string;
   IndexName?: string;
-  // Item?: DocumentClient.PutItemInputAttributeMap;
-  Key?: NativeKey;
+  _Item?: NativeValue;
+  _Key?: NativeKey;
   KeyConditionExpression?: string;
   Limit?: number;
   ProjectionExpression?: string;
@@ -48,6 +48,7 @@ export type RequestParameters = {
   ReturnValues?: ReturnValue;
   ReturnValuesOnConditionCheckFailure?: ReturnValue;
   ScanIndexForward?: boolean;
+  TableName?: string;
   TotalSegments?: number;
   // TransactItems?: TransactGetItemList | TransactWriteItemList;
   UpdateExpression?: string;

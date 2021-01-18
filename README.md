@@ -890,7 +890,7 @@ the `$` functions) and can only used as an item in the input array for the
 ### TransactWrite
 
 The `transactWrite` function receives an array of non-executed instances of the
-`Checker`, `Deleter`, `Putter` and/or `Updater` classes.
+`Checker`, `Deleter`, `Put` and/or `Updater` classes.
 
 #### Full usage of `transactWrite`
 
@@ -946,7 +946,7 @@ const result = await db("") // The table name passed in here is not important an
 ### TransactGet
 
 The `transactGet` function receives an array of non-executed instances of the
-`Getter` class.
+`Get` class.
 
 #### Full usage of `transactGet`
 

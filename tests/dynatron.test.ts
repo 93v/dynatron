@@ -1,86 +1,84 @@
 import { Dynatron } from "../src/dynatron";
-import { Getter } from "../src/requesters/1.1-getter";
-import { BatchGetter } from "../src/requesters/1.2-batch-getter";
-import { Querier } from "../src/requesters/1.3.1-querier";
-import { Scanner } from "../src/requesters/1.3.2-scanner";
-import { ConditionChecker } from "../src/requesters/2.1-condition-checker";
-import { Deleter } from "../src/requesters/2.1.1-deleter";
-import { Putter } from "../src/requesters/2.1.2-putter";
-import { Updater } from "../src/requesters/2.1.3-updater";
-import { BatchDeleter } from "../src/requesters/2.2-batch-deleter";
-import { BatchPutter } from "../src/requesters/2.3-batch-putter";
-import { TransactWriter } from "../src/requesters/2.4-transact-writer";
-import { TransactGetter } from "../src/requesters/3-transact-getter";
-import { TableCreator } from "../src/requesters/tables/table-creator";
-import { TableDeleter } from "../src/requesters/tables/table-deleter";
-import { TableDescriber } from "../src/requesters/tables/table-describer";
-import { TableLister } from "../src/requesters/tables/table-lister";
-import { TableTTLDescriber } from "../src/requesters/tables/table-ttl-describer";
-import { TableTTLUpdater } from "../src/requesters/tables/table-ttl-updater";
-import { TableUpdater } from "../src/requesters/tables/table-updater";
+import { Get } from "../src/requesters/1.1-get";
+import { BatchGet } from "../src/requesters/1.2-batch-get";
+import { Query } from "../src/requesters/1.3.1-query";
+import { Scan } from "../src/requesters/1.3.2-scan";
+import { Check } from "../src/requesters/2.1-check";
+import { Delete } from "../src/requesters/2.1.1-delete";
+import { Put } from "../src/requesters/2.1.2-put";
+import { Update } from "../src/requesters/2.1.3-update";
+import { BatchDelete } from "../src/requesters/2.2-batch-delete";
+import { BatchPut } from "../src/requesters/2.3-batch-put";
+import { TransactWrite } from "../src/requesters/2.4-transact-write";
+import { TransactGet } from "../src/requesters/3-transact-get";
+import { TableCreate } from "../src/requesters/tables/table-create";
+import { TableDelete } from "../src/requesters/tables/table-delete";
+import { TableDescribe } from "../src/requesters/tables/table-describe";
+import { TableList } from "../src/requesters/tables/table-list";
+import { TableTTLDescribe } from "../src/requesters/tables/table-ttl-describe";
+import { TableTTLUpdate } from "../src/requesters/tables/table-ttl-update";
+import { TableUpdate } from "../src/requesters/tables/table-update";
 
 describe("Dynatron instance", () => {
   const dynatron = new Dynatron("");
   test("should be an instance of Dynatron", async () => {
     expect(dynatron).toBeInstanceOf(Dynatron);
   });
-  test("should be an instance of BatchDeleter", () => {
-    expect(dynatron.batchDelete()).toBeInstanceOf(BatchDeleter);
+  test("should be an instance of BatchDelete", () => {
+    expect(dynatron.batchDelete()).toBeInstanceOf(BatchDelete);
   });
-  test("should be an instance of BatchGetter", () => {
-    expect(dynatron.batchGet()).toBeInstanceOf(BatchGetter);
+  test("should be an instance of BatchGet", () => {
+    expect(dynatron.batchGet()).toBeInstanceOf(BatchGet);
   });
-  test("should be an instance of BatchPutter", () => {
-    expect(dynatron.batchPut()).toBeInstanceOf(BatchPutter);
+  test("should be an instance of BatchPut", () => {
+    expect(dynatron.batchPut()).toBeInstanceOf(BatchPut);
   });
   test("should be an instance of Checker", () => {
-    expect(dynatron.check()).toBeInstanceOf(ConditionChecker);
+    expect(dynatron.check()).toBeInstanceOf(Check);
   });
-  test("should be an instance of Deleter", () => {
-    expect(dynatron.delete()).toBeInstanceOf(Deleter);
+  test("should be an instance of Delete", () => {
+    expect(dynatron.delete()).toBeInstanceOf(Delete);
   });
-  test("should be an instance of Getter", () => {
-    expect(dynatron.get({ id: "1" })).toBeInstanceOf(Getter);
+  test("should be an instance of Get", () => {
+    expect(dynatron.get({ id: "1" })).toBeInstanceOf(Get);
   });
-  test("should be an instance of Putter", () => {
-    expect(dynatron.put()).toBeInstanceOf(Putter);
+  test("should be an instance of Put", () => {
+    expect(dynatron.put({})).toBeInstanceOf(Put);
   });
-  test("should be an instance of Querier", () => {
-    expect(dynatron.query()).toBeInstanceOf(Querier);
+  test("should be an instance of Query", () => {
+    expect(dynatron.query()).toBeInstanceOf(Query);
   });
-  test("should be an instance of Scanner", () => {
-    expect(dynatron.scan()).toBeInstanceOf(Scanner);
+  test("should be an instance of Scan", () => {
+    expect(dynatron.scan()).toBeInstanceOf(Scan);
   });
   test("should be an instance of Updater", () => {
-    expect(dynatron.update()).toBeInstanceOf(Updater);
+    expect(dynatron.update()).toBeInstanceOf(Update);
   });
-  test("should be an instance of TransactGetter", () => {
-    expect(dynatron.transactGet()).toBeInstanceOf(TransactGetter);
+  test("should be an instance of TransactGet", () => {
+    expect(dynatron.transactGet()).toBeInstanceOf(TransactGet);
   });
-  test("should be an instance of TransactWriter", () => {
-    expect(dynatron.transactWrite()).toBeInstanceOf(TransactWriter);
+  test("should be an instance of TransactWrite", () => {
+    expect(dynatron.transactWrite()).toBeInstanceOf(TransactWrite);
   });
   test("should be an instance of TableCreator", () => {
-    expect(dynatron.Tables.create({} as any)).toBeInstanceOf(TableCreator);
+    expect(dynatron.Tables.create({} as any)).toBeInstanceOf(TableCreate);
   });
   test("should be an instance of TableDeleter", () => {
-    expect(dynatron.Tables.delete()).toBeInstanceOf(TableDeleter);
+    expect(dynatron.Tables.delete()).toBeInstanceOf(TableDelete);
   });
   test("should be an instance of TableDescriber", () => {
-    expect(dynatron.Tables.describe()).toBeInstanceOf(TableDescriber);
+    expect(dynatron.Tables.describe()).toBeInstanceOf(TableDescribe);
   });
   test("should be an instance of TableLister", () => {
-    expect(dynatron.Tables.list()).toBeInstanceOf(TableLister);
+    expect(dynatron.Tables.list()).toBeInstanceOf(TableList);
   });
   test("should be an instance of TableTTLDescriber", () => {
-    expect(dynatron.Tables.describeTTL()).toBeInstanceOf(TableTTLDescriber);
+    expect(dynatron.Tables.describeTTL()).toBeInstanceOf(TableTTLDescribe);
   });
   test("should be an instance of TableTTLUpdater", () => {
-    expect(dynatron.Tables.updateTTL({} as any)).toBeInstanceOf(
-      TableTTLUpdater,
-    );
+    expect(dynatron.Tables.updateTTL({} as any)).toBeInstanceOf(TableTTLUpdate);
   });
   test("should be an instance of TableUpdater", () => {
-    expect(dynatron.Tables.update({} as any)).toBeInstanceOf(TableUpdater);
+    expect(dynatron.Tables.update({} as any)).toBeInstanceOf(TableUpdate);
   });
 });

@@ -1,4 +1,4 @@
-import { NativeKey } from "../../types/key";
+import { NativeKey } from "../../types/native-types";
 
 export const validateKey = (parameters: {
   key: NativeKey;

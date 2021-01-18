@@ -1,152 +1,154 @@
-// export type AttributeType =
-//   | "binary"
-//   | "binarySet"
-//   | "boolean"
-//   | "list"
-//   | "map"
-//   | "null"
-//   | "number"
-//   | "numberSet"
-//   | "string"
-//   | "stringSet";
+import { NativeAttributeValue } from "@aws-sdk/util-dynamodb";
 
-// export type ExpressionKind =
-//   | "AND"
-//   | "attribute_exists"
-//   | "attribute_not_exists"
-//   | "attribute_type"
-//   | "begins_with"
-//   | "BETWEEN"
-//   | "contains"
-//   | "="
-//   | ">"
-//   | ">="
-//   | "IN"
-//   | "<"
-//   | "<="
-//   | "NOT"
-//   | "<>"
-//   | "OR"
-//   | "size";
+export type AttributeType =
+  | "binary"
+  | "binarySet"
+  | "boolean"
+  | "list"
+  | "map"
+  | "null"
+  | "number"
+  | "numberSet"
+  | "string"
+  | "stringSet";
 
-// interface IConditionExpression {
-//   kind: ExpressionKind;
-// }
+export type ExpressionKind =
+  | "AND"
+  | "attribute_exists"
+  | "attribute_not_exists"
+  | "attribute_type"
+  | "begins_with"
+  | "BETWEEN"
+  | "contains"
+  | "="
+  | ">"
+  | ">="
+  | "IN"
+  | "<"
+  | "<="
+  | "NOT"
+  | "<>"
+  | "OR"
+  | "size";
 
-// export interface AndCondition extends IConditionExpression {
-//   kind: "AND";
-//   conditions: Condition[];
-// }
+interface IConditionExpression {
+  kind: ExpressionKind;
+}
 
-// export interface AttributeExistsCondition extends IConditionExpression {
-//   kind: "attribute_exists";
-//   path: string;
-// }
+export interface AndCondition extends IConditionExpression {
+  kind: "AND";
+  conditions: Condition[];
+}
 
-// export interface AttributeNotExistsCondition extends IConditionExpression {
-//   kind: "attribute_not_exists";
-//   path: string;
-// }
+export interface AttributeExistsCondition extends IConditionExpression {
+  kind: "attribute_exists";
+  path: string;
+}
 
-// export interface AttributeTypeCondition extends IConditionExpression {
-//   path: string;
-//   kind: "attribute_type";
-//   value: string;
-// }
+export interface AttributeNotExistsCondition extends IConditionExpression {
+  kind: "attribute_not_exists";
+  path: string;
+}
 
-// export interface BeginsWithCondition extends IConditionExpression {
-//   path: string;
-//   kind: "begins_with";
-//   value: string;
-// }
+export interface AttributeTypeCondition extends IConditionExpression {
+  path: string;
+  kind: "attribute_type";
+  value: string;
+}
 
-// export interface BetweenCondition extends IConditionExpression {
-//   path: string | SizeCondition;
-//   kind: "BETWEEN";
-//   values: [any, any];
-// }
+export interface BeginsWithCondition extends IConditionExpression {
+  path: string;
+  kind: "begins_with";
+  value: string;
+}
 
-// export interface ContainsCondition extends IConditionExpression {
-//   path: string;
-//   kind: "contains";
-//   value: string;
-// }
+export interface BetweenCondition extends IConditionExpression {
+  path: string | SizeCondition;
+  kind: "BETWEEN";
+  values: [NativeAttributeValue, NativeAttributeValue];
+}
 
-// export interface EqualsCondition extends IConditionExpression {
-//   path: string | SizeCondition;
-//   kind: "=";
-//   value: any;
-// }
+export interface ContainsCondition extends IConditionExpression {
+  path: string;
+  kind: "contains";
+  value: string;
+}
 
-// export interface GreaterThanCondition extends IConditionExpression {
-//   path: string | SizeCondition;
-//   kind: ">";
-//   value: any;
-// }
+export interface EqualsCondition extends IConditionExpression {
+  path: string | SizeCondition;
+  kind: "=";
+  value: NativeAttributeValue;
+}
 
-// export interface GreaterThanOrEqualsCondition extends IConditionExpression {
-//   path: string | SizeCondition;
-//   kind: ">=";
-//   value: any;
-// }
+export interface GreaterThanCondition extends IConditionExpression {
+  path: string | SizeCondition;
+  kind: ">";
+  value: NativeAttributeValue;
+}
 
-// export interface InCondition extends IConditionExpression {
-//   path: string | SizeCondition;
-//   kind: "IN";
-//   values: any[];
-// }
+export interface GreaterThanOrEqualsCondition extends IConditionExpression {
+  path: string | SizeCondition;
+  kind: ">=";
+  value: NativeAttributeValue;
+}
 
-// export interface LessThanCondition extends IConditionExpression {
-//   path: string | SizeCondition;
-//   kind: "<";
-//   value: any;
-// }
+export interface InCondition extends IConditionExpression {
+  path: string | SizeCondition;
+  kind: "IN";
+  values: NativeAttributeValue[];
+}
 
-// export interface LessThanOrEqualsCondition extends IConditionExpression {
-//   path: string | SizeCondition;
-//   kind: "<=";
-//   value: any;
-// }
+export interface LessThanCondition extends IConditionExpression {
+  path: string | SizeCondition;
+  kind: "<";
+  value: NativeAttributeValue;
+}
 
-// export interface NotCondition extends IConditionExpression {
-//   kind: "NOT";
-//   condition: Condition;
-// }
+export interface LessThanOrEqualsCondition extends IConditionExpression {
+  path: string | SizeCondition;
+  kind: "<=";
+  value: NativeAttributeValue;
+}
 
-// export interface NotEqualsCondition extends IConditionExpression {
-//   path: string | SizeCondition;
-//   kind: "<>";
-//   value: any;
-// }
+export interface NotCondition extends IConditionExpression {
+  kind: "NOT";
+  condition: Condition;
+}
 
-// export interface OrCondition extends IConditionExpression {
-//   kind: "OR";
-//   conditions: Condition[];
-// }
+export interface NotEqualsCondition extends IConditionExpression {
+  path: string | SizeCondition;
+  kind: "<>";
+  value: NativeAttributeValue;
+}
 
-// export interface SizeCondition extends IConditionExpression {
-//   path: string;
-//   kind: "size";
-// }
+export interface OrCondition extends IConditionExpression {
+  kind: "OR";
+  conditions: Condition[];
+}
 
-// type KeyCondition =
-//   | BeginsWithCondition
-//   | BetweenCondition
-//   | EqualsCondition
-//   | GreaterThanCondition
-//   | GreaterThanOrEqualsCondition
-//   | LessThanCondition
-//   | LessThanOrEqualsCondition;
+export interface SizeCondition extends IConditionExpression {
+  path: string;
+  kind: "size";
+}
 
-// type NonKeyCondition =
-//   | AndCondition
-//   | AttributeExistsCondition
-//   | AttributeNotExistsCondition
-//   | AttributeTypeCondition
-//   | ContainsCondition
-//   | InCondition
-//   | NotCondition
-//   | NotEqualsCondition
-//   | OrCondition;
+type KeyCondition =
+  | BeginsWithCondition
+  | BetweenCondition
+  | EqualsCondition
+  | GreaterThanCondition
+  | GreaterThanOrEqualsCondition
+  | LessThanCondition
+  | LessThanOrEqualsCondition;
 
-// export type Condition = KeyCondition | NonKeyCondition;
+type NonKeyCondition =
+  | AndCondition
+  | AttributeExistsCondition
+  | AttributeNotExistsCondition
+  | AttributeTypeCondition
+  | ContainsCondition
+  | InCondition
+  | NotCondition
+  | NotEqualsCondition
+  | OrCondition;
+
+export type Condition = KeyCondition | NonKeyCondition;

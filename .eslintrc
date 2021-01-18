@@ -33,6 +33,7 @@
     "unicorn/no-unused-properties": "error",
     "unicorn/numeric-separators-style": "error",
     "unicorn/prefer-array-flat-map": "error",
-    "unicorn/string-content": "error"
+    "unicorn/string-content": "error",
+    "unicorn/no-array-reduce": "off"
   }
 }

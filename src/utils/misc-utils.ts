@@ -1,10 +1,9 @@
-import { AttributeValue } from "@aws-sdk/client-dynamodb";
+import { NativeAttributeValue } from "@aws-sdk/util-dynamodb";
 
-// import { NativeKey } from "../../types/key";
 import { TAKING_TOO_LONG_EXCEPTION } from "./constants";
 import alpha from "./next-alpha-char-generator";
 
-export const serializeExpressionValue = (value: AttributeValue) => ({
+export const serializeExpressionValue = (value: NativeAttributeValue) => ({
   name: `:${alpha.getNext()}`,
   value,
 });

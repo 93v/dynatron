@@ -6,7 +6,7 @@ export const serializeAttributePath = (attributePath: string) => {
 
   let expression = "";
 
-  const attributeNamesMap = {};
+  const attributeNamesMap: Record<string, string> = {};
 
   for (const pathElement of parsedAttributePath) {
     if (pathElement.type === "ListIndex") {
