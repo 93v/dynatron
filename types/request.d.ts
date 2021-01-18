@@ -4,6 +4,7 @@ import {
   ReturnValue,
 } from "@aws-sdk/client-dynamodb";
 
+import { AndCondition, Condition } from "./conditions";
 import { NativeKey, NativeValue } from "./native-types";
 
 type AttributeName = {
@@ -22,20 +23,17 @@ export type RequestParameters = {
   ClientRequestToken?: string;
   ConditionExpression?: string;
   ConsistentRead?: boolean;
-  // ExclusiveStartKey?: NativeKey;
   ExpressionAttributeNames?: Record<string, string>;
-  // ExpressionAttributeValues?: ExpressionAttributeValueMap;
-  FilterExpression?: string;
+  ExpressionAttributeValues?: NativeValue;
+  _FilterExpressions?: Condition[];
   IndexName?: string;
   _Item?: NativeValue;
   _Key?: NativeKey;
-  KeyConditionExpression?: string;
+  _ExclusiveStartKey?: NativeKey;
   Limit?: number;
-  ProjectionExpression?: string;
+  _ProjectionExpressions?: string[];
   // RawConditionExpression?: Condition[];
-  // RawFilterExpression?: Condition[];
-  // RawKeyConditionExpression?: KeyCondition[];
-  RawProjectionExpression?: string[];
+  _KeyConditionExpression?: AndCondition;
   // RawUpdateExpression?: Update[];
   // RequestItems?: Record<
   //   string,
@@ -49,6 +47,7 @@ export type RequestParameters = {
   ReturnValuesOnConditionCheckFailure?: ReturnValue;
   ScanIndexForward?: boolean;
   TableName?: string;
+  Segment?: number;
   TotalSegments?: number;
   // TransactItems?: TransactGetItemList | TransactWriteItemList;
   UpdateExpression?: string;

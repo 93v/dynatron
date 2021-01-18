@@ -46,7 +46,7 @@ describe("Dynatron instance", () => {
     expect(dynatron.put({})).toBeInstanceOf(Put);
   });
   test("should be an instance of Query", () => {
-    expect(dynatron.query()).toBeInstanceOf(Query);
+    expect(dynatron.query("id", "")).toBeInstanceOf(Query);
   });
   test("should be an instance of Scan", () => {
     expect(dynatron.scan()).toBeInstanceOf(Scan);

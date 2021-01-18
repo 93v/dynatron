@@ -5,6 +5,7 @@ import {
   UpdateTableInput,
   UpdateTimeToLiveInput,
 } from "@aws-sdk/client-dynamodb";
+import { NativeAttributeValue } from "@aws-sdk/util-dynamodb";
 import { NativeKey, NativeValue } from "../types/native-types";
 
 import { Get } from "./requesters/1.1-get";
@@ -26,6 +27,7 @@ import { TableList } from "./requesters/tables/table-list";
 import { TableTTLDescribe } from "./requesters/tables/table-ttl-describe";
 import { TableTTLUpdate } from "./requesters/tables/table-ttl-update";
 import { TableUpdate } from "./requesters/tables/table-update";
+import { equals } from "./utils/condition-expression-utils";
 import { initializeDatabaseClient } from "./utils/database-client";
 
 export class Dynatron {
@@ -57,8 +59,12 @@ export class Dynatron {
     new Get(Dynatron.DynamoDBClients[this.instanceId], this.tableName, key);
   put = (item: NativeValue) =>
     new Put(Dynatron.DynamoDBClients[this.instanceId], this.tableName, item);
-  query = () =>
-    new Query(Dynatron.DynamoDBClients[this.instanceId], this.tableName);
+  query = (attributePath: string, value: NativeAttributeValue) =>
+    new Query(
+      Dynatron.DynamoDBClients[this.instanceId],
+      this.tableName,
+      equals(attributePath, value),
+    );
   scan = () =>
     new Scan(Dynatron.DynamoDBClients[this.instanceId], this.tableName);
   update = () =>

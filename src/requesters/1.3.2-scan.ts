@@ -11,11 +11,11 @@ import { NativeValue } from "../../types/native-types";
 import {
   BUILD,
   LONG_MAX_LATENCY,
-  MARSHALL_REQUEST,
   RETRY_OPTIONS,
   TAKING_TOO_LONG_EXCEPTION,
 } from "../utils/constants";
 import { isRetryableError } from "../utils/misc-utils";
+import { marshallRequestParameters } from "../utils/request-marshaller";
 import { createShortCircuit } from "../utils/short-circuit";
 import { ListFetch } from "./1.3-list-fetch";
 
@@ -67,7 +67,7 @@ export class Scan extends ListFetch {
     return retry(async (bail, attempt) => {
       while (!operationCompleted) {
         const shortCircuit = createShortCircuit({
-          duration: attempt * LONG_MAX_LATENCY,
+          duration: attempt * LONG_MAX_LATENCY * (this.patienceRatio || 1),
           error: new Error(TAKING_TOO_LONG_EXCEPTION),
         });
         try {
@@ -128,7 +128,7 @@ export class Scan extends ListFetch {
     returnRawResponse?: U,
     disableRecursion = false,
   ): Promise<U extends true ? ScanOutput : T | undefined> => {
-    const requestInput = super[MARSHALL_REQUEST]<ScanCommandInput>(
+    const requestInput = marshallRequestParameters<ScanCommandInput>(
       this[BUILD](),
     );
 

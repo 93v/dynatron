@@ -2,10 +2,8 @@ import {
   DynamoDBClient,
   ReturnConsumedCapacity,
 } from "@aws-sdk/client-dynamodb";
-import { marshall } from "@aws-sdk/util-dynamodb";
-import { RequestParameters } from "../../types/request";
 
-import { BUILD, MARSHALL_REQUEST } from "../utils/constants";
+import { BUILD } from "../utils/constants";
 
 export class Request {
   #ReturnConsumedCapacity?: ReturnConsumedCapacity;
@@ -38,25 +36,5 @@ export class Request {
       }),
       TableName: this.tableName,
     };
-  }
-
-  [MARSHALL_REQUEST]<T>(requestParameters: RequestParameters) {
-    // This will marshall and optimize the request
-    // TODO: stricter type maybe?
-    const marshalledParameters: Record<string, any> = {};
-
-    if (requestParameters.TableName) {
-      marshalledParameters.TableName = requestParameters.TableName;
-    }
-
-    if (requestParameters._Key) {
-      marshalledParameters.Key = marshall(requestParameters._Key);
-    }
-
-    if (requestParameters._Item) {
-      marshalledParameters.Item = marshall(requestParameters._Item);
-    }
-
-    return marshalledParameters as T;
   }
 }

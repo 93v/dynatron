@@ -1,7 +1,7 @@
 import { parseAttributePath } from "./attribute-path-parser";
 import alpha from "./next-alpha-char-generator";
 
-export const serializeAttributePath = (attributePath: string) => {
+export const serializeAttributePath = (attributePath: string, prefix = "") => {
   const parsedAttributePath = parseAttributePath(attributePath);
 
   let expression = "";
@@ -20,7 +20,7 @@ export const serializeAttributePath = (attributePath: string) => {
       `#${
         typeof attributeNamesMap[pathElementName] === "number"
           ? attributeNamesMap[pathElementName]
-          : alpha.getNext()
+          : `${prefix}${alpha.getNext()}`
       }`;
 
     if (expression !== "") {

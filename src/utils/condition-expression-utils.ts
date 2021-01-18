@@ -187,30 +187,31 @@ export const size = (path: string): SizeCondition => ({
 
 export const serializeConditionExpression = (
   condition: Condition,
+  prefix = "",
   level = 0,
 ): {
-  Expression: string;
-  ExpressionAttributeNames: Record<string, string>;
-  ExpressionAttributeValues?: NativeValue;
+  expressionString: string;
+  expressionAttributeNames: Record<string, string>;
+  expressionAttributeValues?: NativeValue;
 } => {
   switch (condition.kind) {
     case "attribute_exists":
     case "attribute_not_exists": {
-      const aPath = serializeAttributePath(condition.path);
+      const aPath = serializeAttributePath(condition.path, prefix);
       return {
-        Expression: `${condition.kind}(${aPath.expression})`,
-        ExpressionAttributeNames: aPath.expressionAttributeNames,
+        expressionString: `${condition.kind}(${aPath.expression})`,
+        expressionAttributeNames: aPath.expressionAttributeNames,
       };
     }
     case "attribute_type":
     case "begins_with":
     case "contains": {
-      const aPath = serializeAttributePath(condition.path);
-      const aValue = serializeExpressionValue(condition.value);
+      const aPath = serializeAttributePath(condition.path, prefix);
+      const aValue = serializeExpressionValue(condition.value, prefix);
       return {
-        Expression: `${condition.kind}(${aPath.expression},${aValue.name})`,
-        ExpressionAttributeNames: aPath.expressionAttributeNames,
-        ExpressionAttributeValues: { [aValue.name]: aValue.value },
+        expressionString: `${condition.kind}(${aPath.expression},${aValue.name})`,
+        expressionAttributeNames: aPath.expressionAttributeNames,
+        expressionAttributeValues: { [aValue.name]: aValue.value },
       };
     }
     case "BETWEEN": {
@@ -218,21 +219,21 @@ export const serializeConditionExpression = (
         typeof condition.path === "string"
           ? condition.path
           : condition.path.path;
-      const aPath = serializeAttributePath(path);
+      const aPath = serializeAttributePath(path, prefix);
       const aValues = condition.values.map((value) =>
-        serializeExpressionValue(value),
+        serializeExpressionValue(value, prefix),
       );
       return {
-        Expression: `${typeof condition.path !== "string" ? "size(" : ""}${
-          aPath.expression
-        }${typeof condition.path !== "string" ? ")" : ""} ${
+        expressionString: `${
+          typeof condition.path !== "string" ? "size(" : ""
+        }${aPath.expression}${typeof condition.path !== "string" ? ")" : ""} ${
           condition.kind
         } ${aValues
           .map((v) => v.name)
           .filter((t) => t.trim() !== "")
           .join(` AND `)}`,
-        ExpressionAttributeNames: aPath.expressionAttributeNames,
-        ExpressionAttributeValues: aValues.reduce(
+        expressionAttributeNames: aPath.expressionAttributeNames,
+        expressionAttributeValues: aValues.reduce(
           (p, c) => ({ ...p, [c.name]: c.value }),
           {},
         ),
@@ -248,16 +249,16 @@ export const serializeConditionExpression = (
         typeof condition.path === "string"
           ? condition.path
           : condition.path.path;
-      const aPath = serializeAttributePath(path);
-      const aValue = serializeExpressionValue(condition.value);
+      const aPath = serializeAttributePath(path, prefix);
+      const aValue = serializeExpressionValue(condition.value, prefix);
       return {
-        Expression: `${typeof condition.path !== "string" ? "size(" : ""}${
-          aPath.expression
-        }${typeof condition.path !== "string" ? ")" : ""}${condition.kind}${
-          aValue.name
-        }`,
-        ExpressionAttributeNames: aPath.expressionAttributeNames,
-        ExpressionAttributeValues: { [aValue.name]: aValue.value },
+        expressionString: `${
+          typeof condition.path !== "string" ? "size(" : ""
+        }${aPath.expression}${typeof condition.path !== "string" ? ")" : ""}${
+          condition.kind
+        }${aValue.name}`,
+        expressionAttributeNames: aPath.expressionAttributeNames,
+        expressionAttributeValues: { [aValue.name]: aValue.value },
       };
     }
     case "IN": {
@@ -265,21 +266,21 @@ export const serializeConditionExpression = (
         typeof condition.path === "string"
           ? condition.path
           : condition.path.path;
-      const aPath = serializeAttributePath(path);
+      const aPath = serializeAttributePath(path, prefix);
       const aValues = condition.values.map((value) =>
-        serializeExpressionValue(value),
+        serializeExpressionValue(value, prefix),
       );
       return {
-        Expression: `${typeof condition.path !== "string" ? "size(" : ""}${
-          aPath.expression
-        }${typeof condition.path !== "string" ? ")" : ""} ${
+        expressionString: `${
+          typeof condition.path !== "string" ? "size(" : ""
+        }${aPath.expression}${typeof condition.path !== "string" ? ")" : ""} ${
           condition.kind
         }(${aValues
           .map((v) => v.name)
           // .filter((t) => t.trim() !== "")
           .join(",")})`,
-        ExpressionAttributeNames: aPath.expressionAttributeNames,
-        ExpressionAttributeValues: aValues.reduce(
+        expressionAttributeNames: aPath.expressionAttributeNames,
+        expressionAttributeValues: aValues.reduce(
           (p, c) => ({ ...p, [c.name]: c.value }),
           {},
         ),
@@ -288,12 +289,13 @@ export const serializeConditionExpression = (
     case "NOT": {
       const serialized = serializeConditionExpression(
         condition.condition,
+        prefix,
         level + 1,
       );
       return {
-        Expression: `(${condition.kind} ${serialized.Expression})`,
-        ExpressionAttributeNames: serialized.ExpressionAttributeNames,
-        ExpressionAttributeValues: serialized.ExpressionAttributeValues,
+        expressionString: `(${condition.kind} ${serialized.expressionString})`,
+        expressionAttributeNames: serialized.expressionAttributeNames,
+        expressionAttributeValues: serialized.expressionAttributeValues,
       };
     }
     case "AND":
@@ -301,29 +303,30 @@ export const serializeConditionExpression = (
       const serializedConditions = condition.conditions.map((c) =>
         serializeConditionExpression(
           c,
+          prefix,
           level + condition.conditions.length - 1,
         ),
       );
       return {
-        Expression: `${
+        expressionString: `${
           condition.conditions.length > 1 && level > 0 ? "(" : ""
         }${serializedConditions
-          .map((c) => c.Expression)
+          .map((c) => c.expressionString)
           .filter((t) => t.trim() !== "")
           .join(` ${condition.kind} `)}${
           condition.conditions.length > 1 && level > 0 ? ")" : ""
         }`,
-        ExpressionAttributeNames: serializedConditions.reduce(
+        expressionAttributeNames: serializedConditions.reduce(
           (p, c) => ({
             ...p,
-            ...c.ExpressionAttributeNames,
+            ...c.expressionAttributeNames,
           }),
           {},
         ),
-        ExpressionAttributeValues: serializedConditions.reduce(
+        expressionAttributeValues: serializedConditions.reduce(
           (p, c) => ({
             ...p,
-            ...c.ExpressionAttributeValues,
+            ...c.expressionAttributeValues,
           }),
           {},
         ),

@@ -1,4 +1,5 @@
 import {
+  DynamoDBClient,
   QueryCommand,
   QueryCommandInput,
   QueryOutput,
@@ -6,26 +7,36 @@ import {
 import { unmarshall } from "@aws-sdk/util-dynamodb";
 import retry from "async-retry";
 
-import { KeyCondition } from "../../types/conditions";
+import { EqualsCondition, KeyCondition } from "../../types/conditions";
 import { NativeValue } from "../../types/native-types";
+import { and } from "../utils/condition-expression-utils";
 import {
   BUILD,
   LONG_MAX_LATENCY,
-  MARSHALL_REQUEST,
   RETRY_OPTIONS,
   TAKING_TOO_LONG_EXCEPTION,
 } from "../utils/constants";
 import { isRetryableError } from "../utils/misc-utils";
+import { marshallRequestParameters } from "../utils/request-marshaller";
 import { createShortCircuit } from "../utils/short-circuit";
 import { ListFetch } from "./1.3-list-fetch";
 
 export class Query extends ListFetch {
-  #KeyConditionExpression?: KeyCondition;
   #ScanIndexForward?: boolean;
+
+  private sortKeyCondition?: KeyCondition;
+
+  constructor(
+    databaseClient: DynamoDBClient,
+    tableName: string,
+    private partitionKeyCondition: EqualsCondition,
+  ) {
+    super(databaseClient, tableName);
+  }
 
   having = (keyCondition: KeyCondition | undefined) => {
     if (keyCondition != undefined) {
-      this.#KeyConditionExpression = keyCondition;
+      this.sortKeyCondition = keyCondition;
     }
     return this;
   };
@@ -40,9 +51,12 @@ export class Query extends ListFetch {
   [BUILD]() {
     return {
       ...super[BUILD](),
-      ...(this.#KeyConditionExpression && {
-        _KeyConditionExpression: [this.#KeyConditionExpression],
-      }),
+      ...{
+        _KeyConditionExpression:
+          this.sortKeyCondition == undefined
+            ? and(this.partitionKeyCondition)
+            : and(this.partitionKeyCondition, this.sortKeyCondition),
+      },
       ...(this.#ScanIndexForward != undefined && {
         ScanIndexForward: this.#ScanIndexForward,
       }),
@@ -53,7 +67,7 @@ export class Query extends ListFetch {
     returnRawResponse?: U,
     disableRecursion = false,
   ): Promise<U extends true ? QueryOutput : T | undefined> => {
-    const requestInput = super[MARSHALL_REQUEST]<QueryCommandInput>(
+    const requestInput = marshallRequestParameters<QueryCommandInput>(
       this[BUILD](),
     );
 
@@ -67,7 +81,7 @@ export class Query extends ListFetch {
     return retry(async (bail, attempt) => {
       while (!operationCompleted) {
         const shortCircuit = createShortCircuit({
-          duration: attempt * LONG_MAX_LATENCY,
+          duration: attempt * LONG_MAX_LATENCY * (this.patienceRatio || 1),
           error: new Error(TAKING_TOO_LONG_EXCEPTION),
         });
         try {
