@@ -8,7 +8,7 @@ beforeEach(() => {
 describe("Serialize Attribute Path", () => {
   test("should return an object of a specific stricture", () => {
     expect(serializeAttributePath("id")).toMatchObject({
-      expression: "#a",
+      expressionString: "#a",
       expressionAttributeNames: {
         "#a": "id",
       },
@@ -16,7 +16,7 @@ describe("Serialize Attribute Path", () => {
   });
   test("should return an object of a specific stricture", () => {
     expect(serializeAttributePath("id[1]")).toMatchObject({
-      expression: "#a[1]",
+      expressionString: "#a[1]",
       expressionAttributeNames: {
         "#a": "id",
       },
@@ -24,7 +24,7 @@ describe("Serialize Attribute Path", () => {
   });
   test("should return an object of a specific stricture", () => {
     expect(serializeAttributePath("id.tag")).toMatchObject({
-      expression: "#a.#b",
+      expressionString: "#a.#b",
       expressionAttributeNames: {
         "#a": "id",
         "#b": "tag",

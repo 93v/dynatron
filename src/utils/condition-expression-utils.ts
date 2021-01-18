@@ -38,14 +38,14 @@ export const attributeExists = (
   attributePath: string,
 ): AttributeExistsCondition => ({
   kind: "attribute_exists",
-  attributePath: attributePath,
+  attributePath,
 });
 
 export const attributeNotExists = (
   attributePath: string,
 ): AttributeNotExistsCondition => ({
   kind: "attribute_not_exists",
-  attributePath: attributePath,
+  attributePath,
 });
 
 export const attributeType = (
@@ -67,7 +67,7 @@ export const attributeType = (
 
   return {
     kind: "attribute_type",
-    attributePath: attributePath,
+    attributePath,
     value: shortAttributeTypes[type],
   };
 };
@@ -77,7 +77,7 @@ export const beginsWith = (
   substr: string,
 ): BeginsWithCondition => ({
   kind: "begins_with",
-  attributePath: attributePath,
+  attributePath,
   value: substr,
 });
 
@@ -86,7 +86,7 @@ export const between = (
   bounds: [NativeAttributeValue, NativeAttributeValue],
 ): BetweenCondition => ({
   kind: "BETWEEN",
-  attributePath: attributePath,
+  attributePath,
   values: bounds,
 });
 
@@ -95,7 +95,7 @@ export const contains = (
   substr: string,
 ): ContainsCondition => ({
   kind: "contains",
-  attributePath: attributePath,
+  attributePath,
   value: substr,
 });
 
@@ -104,7 +104,7 @@ export const equals = (
   value: NativeAttributeValue,
 ): EqualsCondition => ({
   kind: "=",
-  attributePath: attributePath,
+  attributePath,
   value,
 });
 export const eq = equals;
@@ -114,7 +114,7 @@ export const greaterThan = (
   value: NativeAttributeValue,
 ): GreaterThanCondition => ({
   kind: ">",
-  attributePath: attributePath,
+  attributePath,
   value,
 });
 export const gt = greaterThan;
@@ -124,7 +124,7 @@ export const greaterThanOrEquals = (
   value: NativeAttributeValue,
 ): GreaterThanOrEqualsCondition => ({
   kind: ">=",
-  attributePath: attributePath,
+  attributePath,
   value,
 });
 export const gte = greaterThanOrEquals;
@@ -136,7 +136,7 @@ export const isIn = (
   } & NativeAttributeValue[],
 ): InCondition => ({
   kind: "IN",
-  attributePath: attributePath,
+  attributePath,
   values,
 });
 
@@ -145,7 +145,7 @@ export const lessThan = (
   value: NativeAttributeValue,
 ): LessThanCondition => ({
   kind: "<",
-  attributePath: attributePath,
+  attributePath,
   value,
 });
 export const lt = lessThan;
@@ -155,7 +155,7 @@ export const lessThanOrEquals = (
   value: NativeAttributeValue,
 ): LessThanOrEqualsCondition => ({
   kind: "<=",
-  attributePath: attributePath,
+  attributePath,
   value,
 });
 export const lte = lessThanOrEquals;
@@ -170,7 +170,7 @@ export const notEquals = (
   value: NativeAttributeValue,
 ): NotEqualsCondition => ({
   kind: "<>",
-  attributePath: attributePath,
+  attributePath,
   value,
 });
 export const ne = notEquals;
@@ -187,7 +187,7 @@ export const or = (
 
 export const size = (attributePath: string): SizeCondition => ({
   kind: "size",
-  attributePath: attributePath,
+  attributePath,
 });
 
 export const serializeConditionExpression = (
@@ -204,7 +204,7 @@ export const serializeConditionExpression = (
     case "attribute_not_exists": {
       const aPath = serializeAttributePath(condition.attributePath, prefix);
       return {
-        expressionString: `${condition.kind}(${aPath.expression})`,
+        expressionString: `${condition.kind}(${aPath.expressionString})`,
         expressionAttributeNames: aPath.expressionAttributeNames,
       };
     }
@@ -214,7 +214,7 @@ export const serializeConditionExpression = (
       const aPath = serializeAttributePath(condition.attributePath, prefix);
       const aValue = serializeExpressionValue(condition.value, prefix);
       return {
-        expressionString: `${condition.kind}(${aPath.expression},${aValue.name})`,
+        expressionString: `${condition.kind}(${aPath.expressionString},${aValue.name})`,
         expressionAttributeNames: aPath.expressionAttributeNames,
         expressionAttributeValues: { [aValue.name]: aValue.value },
       };
@@ -231,7 +231,7 @@ export const serializeConditionExpression = (
       return {
         expressionString: `${
           typeof condition.attributePath !== "string" ? "size(" : ""
-        }${aPath.expression}${
+        }${aPath.expressionString}${
           typeof condition.attributePath !== "string" ? ")" : ""
         } ${condition.kind} ${aValues
           .map((v) => v.name)
@@ -259,7 +259,7 @@ export const serializeConditionExpression = (
       return {
         expressionString: `${
           typeof condition.attributePath !== "string" ? "size(" : ""
-        }${aPath.expression}${
+        }${aPath.expressionString}${
           typeof condition.attributePath !== "string" ? ")" : ""
         }${condition.kind}${aValue.name}`,
         expressionAttributeNames: aPath.expressionAttributeNames,
@@ -278,7 +278,7 @@ export const serializeConditionExpression = (
       return {
         expressionString: `${
           typeof condition.attributePath !== "string" ? "size(" : ""
-        }${aPath.expression}${
+        }${aPath.expressionString}${
           typeof condition.attributePath !== "string" ? ")" : ""
         } ${condition.kind}(${aValues
           .map((v) => v.name)

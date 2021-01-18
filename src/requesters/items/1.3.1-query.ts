@@ -85,6 +85,7 @@ export class Query extends ListFetch {
           error: new Error(TAKING_TOO_LONG_EXCEPTION),
         });
         try {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           const { $metadata, ...output } = await Promise.race([
             this.databaseClient.send(new QueryCommand(requestInput)),
             shortCircuit.launch(),

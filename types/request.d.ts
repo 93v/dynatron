@@ -6,6 +6,7 @@ import {
 
 import { AndCondition, Condition } from "./conditions";
 import { NativeKey, NativeValue } from "./native-types";
+import { UpdateType } from "./update";
 
 type AttributeName = {
   type: "AttributeName";
@@ -27,13 +28,7 @@ export type RequestParameters = {
   _ProjectionExpressions?: string[];
   _ConditionExpressions?: Condition[];
   _KeyConditionExpression?: AndCondition;
-  // RawUpdateExpression?: Update[];
-  // RequestItems?: Record<
-  //   string,
-  //   | IBatchGetItemRequestItem
-  //   | IBatchDeleteItemRequestItem[]
-  //   | IBatchPutItemRequestItem[]
-  // >;
+  _UpdateExpressions?: UpdateType[];
   ClientRequestToken?: string;
   ConditionExpression?: string;
   ConsistentRead?: boolean;
@@ -49,6 +44,11 @@ export type RequestParameters = {
   TableName?: string;
   Segment?: number;
   TotalSegments?: number;
+  // RequestItems?: Record<
+  //   string,
+  //   | IBatchGetItemRequestItem
+  //   | IBatchDeleteItemRequestItem[]
+  //   | IBatchPutItemRequestItem[]
+  // >;
   // TransactItems?: TransactGetItemList | TransactWriteItemList;
-  UpdateExpression?: string;
 };

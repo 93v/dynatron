@@ -4,13 +4,13 @@ import alpha from "./next-alpha-char-generator";
 export const serializeAttributePath = (attributePath: string, prefix = "") => {
   const parsedAttributePath = parseAttributePath(attributePath);
 
-  let expression = "";
+  let expressionString = "";
 
   const attributeNamesMap: Record<string, string> = {};
 
   for (const pathElement of parsedAttributePath) {
     if (pathElement.type === "ListIndex") {
-      expression += `[${pathElement.index}]`;
+      expressionString += `[${pathElement.index}]`;
       continue;
     }
 
@@ -23,11 +23,11 @@ export const serializeAttributePath = (attributePath: string, prefix = "") => {
           : `${prefix}${alpha.getNext()}`
       }`;
 
-    if (expression !== "") {
-      expression += ".";
+    if (expressionString !== "") {
+      expressionString += ".";
     }
 
-    expression += `${attributeNamesMap[pathElementName]}`;
+    expressionString += `${attributeNamesMap[pathElementName]}`;
   }
 
   const expressionAttributeNames: Record<string, string> = {};
@@ -36,5 +36,5 @@ export const serializeAttributePath = (attributePath: string, prefix = "") => {
     expressionAttributeNames[attributeNamesMap[key]] = key;
   }
 
-  return { expression, expressionAttributeNames };
+  return { expressionString, expressionAttributeNames };
 };

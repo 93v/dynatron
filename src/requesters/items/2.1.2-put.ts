@@ -4,6 +4,7 @@ import {
   PutItemCommandInput,
   PutItemOutput,
 } from "@aws-sdk/client-dynamodb";
+import { unmarshall } from "@aws-sdk/util-dynamodb";
 import AsyncRetry from "async-retry";
 
 import { NativeValue } from "../../../types/native-types";
@@ -46,12 +47,15 @@ export class Put extends Check {
         error: new Error(TAKING_TOO_LONG_EXCEPTION),
       });
       try {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { $metadata, ...output } = await Promise.race([
           this.databaseClient.send(new PutItemCommand(requestInput)),
           shortCircuit.launch(),
         ]);
 
-        return (returnRawResponse ? output : this.item) as any;
+        return (returnRawResponse
+          ? output
+          : requestInput.Item && unmarshall(requestInput.Item)) as any;
       } catch (error) {
         if (!isRetryableError(error)) {
           bail(error);

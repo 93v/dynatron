@@ -1,3 +1,4 @@
+import { marshallOptions } from "@aws-sdk/util-dynamodb";
 import { Options } from "async-retry";
 
 export const BUILD: unique symbol = Symbol("Build._build");
@@ -21,3 +22,7 @@ export const RETRY_OPTIONS: Options = {
 
 export const SHORT_MAX_LATENCY = MILLISECONDS_IN_SECOND;
 export const LONG_MAX_LATENCY = 10 * MILLISECONDS_IN_SECOND;
+
+export const MARSHALL_OPTIONS: marshallOptions = {
+  removeUndefinedValues: true,
+};

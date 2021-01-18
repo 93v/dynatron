@@ -1,7 +1,7 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 
 import { Check } from "../src/requesters/items/2.1-check";
-import { Update } from "../src/requesters/2.1.3-update";
+import { Update } from "../src/requesters/items/2.1.3-update";
 import { initializeDatabaseClient } from "../src/utils/database-client";
 
 let databaseClient: DynamoDBClient;

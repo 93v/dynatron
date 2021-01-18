@@ -15,7 +15,7 @@ import { Scan } from "./requesters/items/1.3.2-scan";
 import { Check } from "./requesters/items/2.1-check";
 import { Delete } from "./requesters/items/2.1.1-delete";
 import { Put } from "./requesters/items/2.1.2-put";
-import { Update } from "./requesters/2.1.3-update";
+import { Update } from "./requesters/items/2.1.3-update";
 import { BatchDelete } from "./requesters/2.2-batch-delete";
 import { BatchPut } from "./requesters/2.3-batch-put";
 import { TransactWrite } from "./requesters/2.4-transact-write";

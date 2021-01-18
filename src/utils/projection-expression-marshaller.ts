@@ -14,7 +14,10 @@ export const marshallProjectionExpression = (
 
   for (const projection of serializedProjections) {
     aggregatedProjections.expressions = [
-      ...new Set([...aggregatedProjections.expressions, projection.expression]),
+      ...new Set([
+        ...aggregatedProjections.expressions,
+        projection.expressionString,
+      ]),
     ];
     aggregatedProjections.expressionAttributeNames = {
       ...aggregatedProjections.expressionAttributeNames,

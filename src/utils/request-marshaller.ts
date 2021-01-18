@@ -2,7 +2,9 @@ import { marshall } from "@aws-sdk/util-dynamodb";
 
 import { RequestParameters } from "../../types/request";
 import { marshallConditionExpression } from "./condition-expression-marshaller";
+import { MARSHALL_OPTIONS } from "./constants";
 import { marshallProjectionExpression } from "./projection-expression-marshaller";
+import { marshallUpdateExpression } from "./update-expression-marshaller";
 
 const cleanupEmptyExpressions = (requestParameters: RequestParameters) => {
   const parameters = { ...requestParameters };
@@ -27,19 +29,24 @@ export const marshallRequestParameters = <T>(
   }
 
   if (requestParameters._Key) {
-    marshalledParameters.Key = marshall(requestParameters._Key);
+    marshalledParameters.Key = marshall(
+      requestParameters._Key,
+      MARSHALL_OPTIONS,
+    );
   }
 
   if (requestParameters._ExclusiveStartKey) {
     marshalledParameters.ExclusiveStartKey = marshall(
       requestParameters._ExclusiveStartKey,
+      MARSHALL_OPTIONS,
     );
   }
 
   if (requestParameters._Item) {
-    marshalledParameters.Item = marshall(requestParameters._Item, {
-      removeUndefinedValues: true,
-    });
+    marshalledParameters.Item = marshall(
+      requestParameters._Item,
+      MARSHALL_OPTIONS,
+    );
   }
 
   if (requestParameters.ReturnConsumedCapacity) {
@@ -154,25 +161,33 @@ export const marshallRequestParameters = <T>(
     };
   }
 
+  if (requestParameters._UpdateExpressions) {
+    const marshalledUpdateExpression = marshallUpdateExpression(
+      requestParameters._UpdateExpressions,
+      "update_",
+    );
+
+    marshalledParameters.UpdateExpression =
+      marshalledUpdateExpression.expressionString;
+
+    marshalledParameters.ExpressionAttributeNames = {
+      ...marshalledParameters.ExpressionAttributeNames,
+      ...marshalledUpdateExpression.expressionAttributeNames,
+    };
+
+    marshalledParameters.ExpressionAttributeValues = {
+      ...marshalledParameters.ExpressionAttributeValues,
+      ...marshalledUpdateExpression.expressionAttributeValues,
+    };
+  }
+
   // TODO: optimize before marshalling
   if (marshalledParameters.ExpressionAttributeValues) {
     marshalledParameters.ExpressionAttributeValues = marshall(
       marshalledParameters.ExpressionAttributeValues,
+      MARSHALL_OPTIONS,
     );
   }
 
   return cleanupEmptyExpressions(marshalledParameters) as T;
-
-  // convertRawUpdateExpression(
-  //   convertRawConditionExpressions(
-  //       Object.keys(requestParams).reduce(
-  //         (p: RequestParams, c) => ({
-  //           ...p,
-  //           ...(requestParams[c] != null ? { [c]: requestParams[c] } : {}),
-  //         }),
-  //         {},
-  //       ),
-  //     queryKey,
-  //   ),
-  // ),
 };
