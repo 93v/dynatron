@@ -14,15 +14,15 @@ import {
 } from "../../types/update";
 import { serializeAttributePath } from "../utils/attribute-path-serializer";
 import { BUILD } from "../utils/constants";
-import { Check } from "./2.1-check";
+import { Check } from "./items/2.1-check";
 
 export class Update extends Check {
   #UpdateExpressions: UpdateType[] = [];
 
-  private set(path: string, value: NativeValue, ifNotExist = false) {
+  private set(attributePath: string, value: NativeValue, ifNotExist = false) {
     const expression: UpdateSet = {
       kind: "set",
-      path,
+      attributePath: attributePath,
       value,
       ifNotExist,
     };
@@ -30,23 +30,23 @@ export class Update extends Check {
     return this;
   }
 
-  private remove(path: string | string[]) {
-    if (!Array.isArray(path)) {
-      path = [path];
+  private remove(attributePath: string | string[]) {
+    if (!Array.isArray(attributePath)) {
+      attributePath = [attributePath];
     }
 
-    path.forEach((p) => {
+    attributePath.forEach((p) => {
       const expression: UpdateRemove = {
         kind: "remove",
-        path: p,
+        attributePath: p,
       };
       this.#UpdateExpressions.push(expression);
     });
     return this;
   }
 
-  private delete(path: string, value: Set<string | number>) {
-    const serializedPath = serializeAttributePath(path);
+  private delete(attributePath: string, value: Set<string | number>) {
+    const serializedPath = serializeAttributePath(attributePath);
     if (
       serializedPath.expression.includes(".") ||
       (serializedPath.expression.includes("[") &&
@@ -56,7 +56,7 @@ export class Update extends Check {
     }
     const expression: UpdateDelete = {
       kind: "delete",
-      path,
+      attributePath: attributePath,
       value,
     };
     this.#UpdateExpressions.push(expression);
@@ -64,10 +64,10 @@ export class Update extends Check {
   }
 
   add(
-    path: string,
+    attributePath: string,
     value: Set<string | number> | (string | number) | (string | number)[],
   ) {
-    const serializedPath = serializeAttributePath(path);
+    const serializedPath = serializeAttributePath(attributePath);
     if (
       serializedPath.expression.includes(".") ||
       (serializedPath.expression.includes("[") &&
@@ -88,39 +88,39 @@ export class Update extends Check {
 
     const expression: UpdateAdd = {
       kind: "add",
-      path,
+      attributePath: attributePath,
       value: setValue,
     };
     this.#UpdateExpressions.push(expression);
     return this;
   }
 
-  increment(path: string, value: number, attributeExists = true) {
+  increment(attributePath: string, value: number, attributeExists = true) {
     const expression = attributeExists
       ? ({
           kind: "increment",
-          path,
+          attributePath: attributePath,
           value,
         } as UpdateIncrement)
       : ({
           kind: "add",
-          path,
+          attributePath: attributePath,
           value,
         } as UpdateAdd);
     this.#UpdateExpressions.push(expression);
     return this;
   }
 
-  decrement(path: string, value: number, attributeExists = true) {
+  decrement(attributePath: string, value: number, attributeExists = true) {
     const expression = attributeExists
       ? ({
           kind: "decrement",
-          path,
+          attributePath: attributePath,
           value,
         } as UpdateDecrement)
       : ({
           kind: "add",
-          path,
+          attributePath: attributePath,
           value: -1 * value,
         } as UpdateAdd);
     this.#UpdateExpressions.push(expression);
@@ -134,20 +134,26 @@ export class Update extends Check {
     return this;
   }
 
-  append(path: string, value: NativeAttributeValue | NativeAttributeValue[]) {
+  append(
+    attributePath: string,
+    value: NativeAttributeValue | NativeAttributeValue[],
+  ) {
     const expression: UpdateAppend = {
       kind: "append",
-      path,
+      attributePath: attributePath,
       value: Array.isArray(value) ? value : [value],
     };
     this.#UpdateExpressions.push(expression);
     return this;
   }
 
-  prepend(path: string, value: NativeAttributeValue | NativeAttributeValue[]) {
+  prepend(
+    attributePath: string,
+    value: NativeAttributeValue | NativeAttributeValue[],
+  ) {
     const expression: UpdatePrepend = {
       kind: "prepend",
-      path,
+      attributePath: attributePath,
       value: Array.isArray(value) ? value : [value],
     };
     this.#UpdateExpressions.push(expression);
@@ -155,7 +161,7 @@ export class Update extends Check {
   }
 
   drop(
-    path: string,
+    attributePath: string,
     value?: Set<string | number> | (string | number) | (string | number)[],
   ) {
     if (value == undefined) {
@@ -171,8 +177,8 @@ export class Update extends Check {
           new Set(Array.isArray(value) ? value : [value])
         : (value as Set<string | number>);
     return setValue == undefined
-      ? this.remove(path)
-      : this.delete(path, setValue);
+      ? this.remove(attributePath)
+      : this.delete(attributePath, setValue);
   }
 
   [BUILD]() {

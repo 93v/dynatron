@@ -1,11 +1,11 @@
 import { Dynatron } from "../src/dynatron";
-import { Get } from "../src/requesters/1.1-get";
+import { Get } from "../src/requesters/items/1.1-get";
 import { BatchGet } from "../src/requesters/1.2-batch-get";
-import { Query } from "../src/requesters/1.3.1-query";
-import { Scan } from "../src/requesters/1.3.2-scan";
-import { Check } from "../src/requesters/2.1-check";
-import { Delete } from "../src/requesters/2.1.1-delete";
-import { Put } from "../src/requesters/2.1.2-put";
+import { Query } from "../src/requesters/items/1.3.1-query";
+import { Scan } from "../src/requesters/items/1.3.2-scan";
+import { Check } from "../src/requesters/items/2.1-check";
+import { Delete } from "../src/requesters/items/2.1.1-delete";
+import { Put } from "../src/requesters/items/2.1.2-put";
 import { Update } from "../src/requesters/2.1.3-update";
 import { BatchDelete } from "../src/requesters/2.2-batch-delete";
 import { BatchPut } from "../src/requesters/2.3-batch-put";
@@ -25,19 +25,19 @@ describe("Dynatron instance", () => {
     expect(dynatron).toBeInstanceOf(Dynatron);
   });
   test("should be an instance of BatchDelete", () => {
-    expect(dynatron.batchDelete()).toBeInstanceOf(BatchDelete);
+    expect(dynatron.batchDelete([])).toBeInstanceOf(BatchDelete);
   });
   test("should be an instance of BatchGet", () => {
-    expect(dynatron.batchGet()).toBeInstanceOf(BatchGet);
+    expect(dynatron.batchGet([])).toBeInstanceOf(BatchGet);
   });
   test("should be an instance of BatchPut", () => {
-    expect(dynatron.batchPut()).toBeInstanceOf(BatchPut);
+    expect(dynatron.batchPut([])).toBeInstanceOf(BatchPut);
   });
   test("should be an instance of Checker", () => {
-    expect(dynatron.check()).toBeInstanceOf(Check);
+    expect(dynatron.check({})).toBeInstanceOf(Check);
   });
   test("should be an instance of Delete", () => {
-    expect(dynatron.delete()).toBeInstanceOf(Delete);
+    expect(dynatron.delete({})).toBeInstanceOf(Delete);
   });
   test("should be an instance of Get", () => {
     expect(dynatron.get({ id: "1" })).toBeInstanceOf(Get);
@@ -52,13 +52,13 @@ describe("Dynatron instance", () => {
     expect(dynatron.scan()).toBeInstanceOf(Scan);
   });
   test("should be an instance of Updater", () => {
-    expect(dynatron.update()).toBeInstanceOf(Update);
+    expect(dynatron.update({})).toBeInstanceOf(Update);
   });
   test("should be an instance of TransactGet", () => {
-    expect(dynatron.transactGet()).toBeInstanceOf(TransactGet);
+    expect(dynatron.transactGet([])).toBeInstanceOf(TransactGet);
   });
   test("should be an instance of TransactWrite", () => {
-    expect(dynatron.transactWrite()).toBeInstanceOf(TransactWrite);
+    expect(dynatron.transactWrite([])).toBeInstanceOf(TransactWrite);
   });
   test("should be an instance of TableCreator", () => {
     expect(dynatron.Tables.create({} as any)).toBeInstanceOf(TableCreate);

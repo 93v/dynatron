@@ -8,13 +8,13 @@ import {
 import { NativeAttributeValue } from "@aws-sdk/util-dynamodb";
 import { NativeKey, NativeValue } from "../types/native-types";
 
-import { Get } from "./requesters/1.1-get";
+import { Get } from "./requesters/items/1.1-get";
 import { BatchGet } from "./requesters/1.2-batch-get";
-import { Query } from "./requesters/1.3.1-query";
-import { Scan } from "./requesters/1.3.2-scan";
-import { Check } from "./requesters/2.1-check";
-import { Delete } from "./requesters/2.1.1-delete";
-import { Put } from "./requesters/2.1.2-put";
+import { Query } from "./requesters/items/1.3.1-query";
+import { Scan } from "./requesters/items/1.3.2-scan";
+import { Check } from "./requesters/items/2.1-check";
+import { Delete } from "./requesters/items/2.1.1-delete";
+import { Put } from "./requesters/items/2.1.2-put";
 import { Update } from "./requesters/2.1.3-update";
 import { BatchDelete } from "./requesters/2.2-batch-delete";
 import { BatchPut } from "./requesters/2.3-batch-put";
@@ -45,16 +45,28 @@ export class Dynatron {
       initializeDatabaseClient(this.clientConfiguration);
   }
 
-  batchDelete = () =>
-    new BatchDelete(Dynatron.DynamoDBClients[this.instanceId], this.tableName);
-  batchGet = () =>
-    new BatchGet(Dynatron.DynamoDBClients[this.instanceId], this.tableName);
-  batchPut = () =>
-    new BatchPut(Dynatron.DynamoDBClients[this.instanceId], this.tableName);
-  check = () =>
-    new Check(Dynatron.DynamoDBClients[this.instanceId], this.tableName);
-  delete = () =>
-    new Delete(Dynatron.DynamoDBClients[this.instanceId], this.tableName);
+  batchDelete = (keys: NativeKey[]) =>
+    new BatchDelete(
+      Dynatron.DynamoDBClients[this.instanceId],
+      this.tableName,
+      keys,
+    );
+  batchGet = (keys: NativeKey[]) =>
+    new BatchGet(
+      Dynatron.DynamoDBClients[this.instanceId],
+      this.tableName,
+      keys,
+    );
+  batchPut = (items: NativeValue[]) =>
+    new BatchPut(
+      Dynatron.DynamoDBClients[this.instanceId],
+      this.tableName,
+      items,
+    );
+  check = (key: NativeKey) =>
+    new Check(Dynatron.DynamoDBClients[this.instanceId], this.tableName, key);
+  delete = (key: NativeKey) =>
+    new Delete(Dynatron.DynamoDBClients[this.instanceId], this.tableName, key);
   get = (key: NativeKey) =>
     new Get(Dynatron.DynamoDBClients[this.instanceId], this.tableName, key);
   put = (item: NativeValue) =>
@@ -67,14 +79,19 @@ export class Dynatron {
     );
   scan = () =>
     new Scan(Dynatron.DynamoDBClients[this.instanceId], this.tableName);
-  update = () =>
-    new Update(Dynatron.DynamoDBClients[this.instanceId], this.tableName);
-  transactGet = () =>
-    new TransactGet(Dynatron.DynamoDBClients[this.instanceId], this.tableName);
-  transactWrite = () =>
+  update = (key: NativeKey) =>
+    new Update(Dynatron.DynamoDBClients[this.instanceId], this.tableName, key);
+  transactGet = (items: Get[]) =>
+    new TransactGet(
+      Dynatron.DynamoDBClients[this.instanceId],
+      this.tableName,
+      items,
+    );
+  transactWrite = (items: (Check | Put | Delete | Update)[]) =>
     new TransactWrite(
       Dynatron.DynamoDBClients[this.instanceId],
       this.tableName,
+      items,
     );
 
   public get Tables() {

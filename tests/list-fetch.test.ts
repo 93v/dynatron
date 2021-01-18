@@ -1,7 +1,7 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 
-import { Fetch } from "../src/requesters/1-fetch";
-import { ListFetch } from "../src/requesters/1.3-list-fetch";
+import { Fetch } from "../src/requesters/items/1-fetch";
+import { ListFetch } from "../src/requesters/items/1.3-list-fetch";
 import { initializeDatabaseClient } from "../src/utils/database-client";
 
 let databaseClient: DynamoDBClient;

@@ -34,20 +34,22 @@ export const and = (
   ),
 });
 
-export const attributeExists = (path: string): AttributeExistsCondition => ({
+export const attributeExists = (
+  attributePath: string,
+): AttributeExistsCondition => ({
   kind: "attribute_exists",
-  path,
+  attributePath: attributePath,
 });
 
 export const attributeNotExists = (
-  path: string,
+  attributePath: string,
 ): AttributeNotExistsCondition => ({
   kind: "attribute_not_exists",
-  path,
+  attributePath: attributePath,
 });
 
 export const attributeType = (
-  path: string,
+  attributePath: string,
   type: AttributeType,
 ): AttributeTypeCondition => {
   const shortAttributeTypes: Record<AttributeType, string> = {
@@ -65,92 +67,95 @@ export const attributeType = (
 
   return {
     kind: "attribute_type",
-    path,
+    attributePath: attributePath,
     value: shortAttributeTypes[type],
   };
 };
 
 export const beginsWith = (
-  path: string,
+  attributePath: string,
   substr: string,
 ): BeginsWithCondition => ({
   kind: "begins_with",
-  path,
+  attributePath: attributePath,
   value: substr,
 });
 
 export const between = (
-  path: string | SizeCondition,
+  attributePath: string | SizeCondition,
   bounds: [NativeAttributeValue, NativeAttributeValue],
 ): BetweenCondition => ({
   kind: "BETWEEN",
-  path,
+  attributePath: attributePath,
   values: bounds,
 });
 
-export const contains = (path: string, substr: string): ContainsCondition => ({
+export const contains = (
+  attributePath: string,
+  substr: string,
+): ContainsCondition => ({
   kind: "contains",
-  path,
+  attributePath: attributePath,
   value: substr,
 });
 
 export const equals = (
-  path: string | SizeCondition,
+  attributePath: string | SizeCondition,
   value: NativeAttributeValue,
 ): EqualsCondition => ({
   kind: "=",
-  path,
+  attributePath: attributePath,
   value,
 });
 export const eq = equals;
 
 export const greaterThan = (
-  path: string | SizeCondition,
+  attributePath: string | SizeCondition,
   value: NativeAttributeValue,
 ): GreaterThanCondition => ({
   kind: ">",
-  path,
+  attributePath: attributePath,
   value,
 });
 export const gt = greaterThan;
 
 export const greaterThanOrEquals = (
-  path: string | SizeCondition,
+  attributePath: string | SizeCondition,
   value: NativeAttributeValue,
 ): GreaterThanOrEqualsCondition => ({
   kind: ">=",
-  path,
+  attributePath: attributePath,
   value,
 });
 export const gte = greaterThanOrEquals;
 
 export const isIn = (
-  path: string | SizeCondition,
+  attributePath: string | SizeCondition,
   values: {
     0: NativeAttributeValue;
   } & NativeAttributeValue[],
 ): InCondition => ({
   kind: "IN",
-  path,
+  attributePath: attributePath,
   values,
 });
 
 export const lessThan = (
-  path: string | SizeCondition,
+  attributePath: string | SizeCondition,
   value: NativeAttributeValue,
 ): LessThanCondition => ({
   kind: "<",
-  path,
+  attributePath: attributePath,
   value,
 });
 export const lt = lessThan;
 
 export const lessThanOrEquals = (
-  path: string | SizeCondition,
+  attributePath: string | SizeCondition,
   value: NativeAttributeValue,
 ): LessThanOrEqualsCondition => ({
   kind: "<=",
-  path,
+  attributePath: attributePath,
   value,
 });
 export const lte = lessThanOrEquals;
@@ -161,11 +166,11 @@ export const not = (condition: Condition): NotCondition => ({
 });
 
 export const notEquals = (
-  path: string | SizeCondition,
+  attributePath: string | SizeCondition,
   value: NativeAttributeValue,
 ): NotEqualsCondition => ({
   kind: "<>",
-  path,
+  attributePath: attributePath,
   value,
 });
 export const ne = notEquals;
@@ -180,9 +185,9 @@ export const or = (
   ),
 });
 
-export const size = (path: string): SizeCondition => ({
+export const size = (attributePath: string): SizeCondition => ({
   kind: "size",
-  path,
+  attributePath: attributePath,
 });
 
 export const serializeConditionExpression = (
@@ -197,7 +202,7 @@ export const serializeConditionExpression = (
   switch (condition.kind) {
     case "attribute_exists":
     case "attribute_not_exists": {
-      const aPath = serializeAttributePath(condition.path, prefix);
+      const aPath = serializeAttributePath(condition.attributePath, prefix);
       return {
         expressionString: `${condition.kind}(${aPath.expression})`,
         expressionAttributeNames: aPath.expressionAttributeNames,
@@ -206,7 +211,7 @@ export const serializeConditionExpression = (
     case "attribute_type":
     case "begins_with":
     case "contains": {
-      const aPath = serializeAttributePath(condition.path, prefix);
+      const aPath = serializeAttributePath(condition.attributePath, prefix);
       const aValue = serializeExpressionValue(condition.value, prefix);
       return {
         expressionString: `${condition.kind}(${aPath.expression},${aValue.name})`,
@@ -216,19 +221,19 @@ export const serializeConditionExpression = (
     }
     case "BETWEEN": {
       const path =
-        typeof condition.path === "string"
-          ? condition.path
-          : condition.path.path;
+        typeof condition.attributePath === "string"
+          ? condition.attributePath
+          : condition.attributePath.attributePath;
       const aPath = serializeAttributePath(path, prefix);
       const aValues = condition.values.map((value) =>
         serializeExpressionValue(value, prefix),
       );
       return {
         expressionString: `${
-          typeof condition.path !== "string" ? "size(" : ""
-        }${aPath.expression}${typeof condition.path !== "string" ? ")" : ""} ${
-          condition.kind
-        } ${aValues
+          typeof condition.attributePath !== "string" ? "size(" : ""
+        }${aPath.expression}${
+          typeof condition.attributePath !== "string" ? ")" : ""
+        } ${condition.kind} ${aValues
           .map((v) => v.name)
           .filter((t) => t.trim() !== "")
           .join(` AND `)}`,
@@ -246,36 +251,36 @@ export const serializeConditionExpression = (
     case "<=":
     case "<>": {
       const path =
-        typeof condition.path === "string"
-          ? condition.path
-          : condition.path.path;
+        typeof condition.attributePath === "string"
+          ? condition.attributePath
+          : condition.attributePath.attributePath;
       const aPath = serializeAttributePath(path, prefix);
       const aValue = serializeExpressionValue(condition.value, prefix);
       return {
         expressionString: `${
-          typeof condition.path !== "string" ? "size(" : ""
-        }${aPath.expression}${typeof condition.path !== "string" ? ")" : ""}${
-          condition.kind
-        }${aValue.name}`,
+          typeof condition.attributePath !== "string" ? "size(" : ""
+        }${aPath.expression}${
+          typeof condition.attributePath !== "string" ? ")" : ""
+        }${condition.kind}${aValue.name}`,
         expressionAttributeNames: aPath.expressionAttributeNames,
         expressionAttributeValues: { [aValue.name]: aValue.value },
       };
     }
     case "IN": {
       const path =
-        typeof condition.path === "string"
-          ? condition.path
-          : condition.path.path;
+        typeof condition.attributePath === "string"
+          ? condition.attributePath
+          : condition.attributePath.attributePath;
       const aPath = serializeAttributePath(path, prefix);
       const aValues = condition.values.map((value) =>
         serializeExpressionValue(value, prefix),
       );
       return {
         expressionString: `${
-          typeof condition.path !== "string" ? "size(" : ""
-        }${aPath.expression}${typeof condition.path !== "string" ? ")" : ""} ${
-          condition.kind
-        }(${aValues
+          typeof condition.attributePath !== "string" ? "size(" : ""
+        }${aPath.expression}${
+          typeof condition.attributePath !== "string" ? ")" : ""
+        } ${condition.kind}(${aValues
           .map((v) => v.name)
           // .filter((t) => t.trim() !== "")
           .join(",")})`,

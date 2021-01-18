@@ -3,7 +3,7 @@ import {
   UpdateTimeToLiveCommand,
   UpdateTimeToLiveInput,
 } from "@aws-sdk/client-dynamodb";
-import retry from "async-retry";
+import AsyncRetry from "async-retry";
 
 import {
   MARSHALL_REQUEST,
@@ -24,9 +24,9 @@ export class TableTTLUpdate {
     return { ...this.parameters };
   }
 
-  $execute = async () => {
+  $ = async () => {
     const requestInput = this[MARSHALL_REQUEST]();
-    return retry(async (bail, attempt) => {
+    return AsyncRetry(async (bail, attempt) => {
       const shortCircuit = createShortCircuit({
         duration: attempt * SHORT_MAX_LATENCY,
         error: new Error(TAKING_TOO_LONG_EXCEPTION),
@@ -48,6 +48,4 @@ export class TableTTLUpdate {
       }
     }, RETRY_OPTIONS);
   };
-
-  $ = this.$execute;
 }

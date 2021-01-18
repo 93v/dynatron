@@ -4,7 +4,7 @@ import {
   ListTablesInput,
   ListTablesOutput,
 } from "@aws-sdk/client-dynamodb";
-import retry from "async-retry";
+import AsyncRetry from "async-retry";
 
 import {
   MARSHALL_REQUEST,
@@ -46,14 +46,14 @@ export class TableList {
     };
   }
 
-  $execute = async () => {
+  $ = async () => {
     const requestInput = this[MARSHALL_REQUEST]();
 
     let operationCompleted = false;
 
     const aggregatedResponse: ListTablesOutput = {};
 
-    return retry(async (bail, attempt) => {
+    return AsyncRetry(async (bail, attempt) => {
       while (!operationCompleted) {
         const shortCircuit = createShortCircuit({
           duration: attempt * LONG_MAX_LATENCY,
@@ -108,6 +108,4 @@ export class TableList {
       return aggregatedResponse.TableNames;
     }, RETRY_OPTIONS);
   };
-
-  $ = this.$execute;
 }

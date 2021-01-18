@@ -20,19 +20,12 @@ export type ListIndex = {
 export type PathElement = AttributeName | ListIndex;
 
 export type RequestParameters = {
-  ClientRequestToken?: string;
-  ConditionExpression?: string;
-  ConsistentRead?: boolean;
-  ExpressionAttributeNames?: Record<string, string>;
-  ExpressionAttributeValues?: NativeValue;
   _FilterExpressions?: Condition[];
-  IndexName?: string;
   _Item?: NativeValue;
   _Key?: NativeKey;
   _ExclusiveStartKey?: NativeKey;
-  Limit?: number;
   _ProjectionExpressions?: string[];
-  // RawConditionExpression?: Condition[];
+  _ConditionExpressions?: Condition[];
   _KeyConditionExpression?: AndCondition;
   // RawUpdateExpression?: Update[];
   // RequestItems?: Record<
@@ -41,6 +34,13 @@ export type RequestParameters = {
   //   | IBatchDeleteItemRequestItem[]
   //   | IBatchPutItemRequestItem[]
   // >;
+  ClientRequestToken?: string;
+  ConditionExpression?: string;
+  ConsistentRead?: boolean;
+  ExpressionAttributeNames?: Record<string, string>;
+  ExpressionAttributeValues?: NativeValue;
+  IndexName?: string;
+  Limit?: number;
   ReturnConsumedCapacity?: ReturnConsumedCapacity;
   ReturnItemCollectionMetrics?: ReturnItemCollectionMetrics;
   ReturnValues?: ReturnValue;

@@ -3,7 +3,7 @@ import {
   ReturnConsumedCapacity,
 } from "@aws-sdk/client-dynamodb";
 
-import { BUILD } from "../utils/constants";
+import { BUILD } from "../../utils/constants";
 
 export class Request {
   #ReturnConsumedCapacity?: ReturnConsumedCapacity;

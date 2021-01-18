@@ -42,70 +42,70 @@ export interface AndCondition extends IConditionExpression {
 
 export interface AttributeExistsCondition extends IConditionExpression {
   kind: "attribute_exists";
-  path: string;
+  attributePath: string;
 }
 
 export interface AttributeNotExistsCondition extends IConditionExpression {
   kind: "attribute_not_exists";
-  path: string;
+  attributePath: string;
 }
 
 export interface AttributeTypeCondition extends IConditionExpression {
-  path: string;
+  attributePath: string;
   kind: "attribute_type";
   value: string;
 }
 
 export interface BeginsWithCondition extends IConditionExpression {
-  path: string;
+  attributePath: string;
   kind: "begins_with";
   value: string;
 }
 
 export interface BetweenCondition extends IConditionExpression {
-  path: string | SizeCondition;
+  attributePath: string | SizeCondition;
   kind: "BETWEEN";
   values: [NativeAttributeValue, NativeAttributeValue];
 }
 
 export interface ContainsCondition extends IConditionExpression {
-  path: string;
+  attributePath: string;
   kind: "contains";
   value: string;
 }
 
 export interface EqualsCondition extends IConditionExpression {
-  path: string | SizeCondition;
+  attributePath: string | SizeCondition;
   kind: "=";
   value: NativeAttributeValue;
 }
 
 export interface GreaterThanCondition extends IConditionExpression {
-  path: string | SizeCondition;
+  attributePath: string | SizeCondition;
   kind: ">";
   value: NativeAttributeValue;
 }
 
 export interface GreaterThanOrEqualsCondition extends IConditionExpression {
-  path: string | SizeCondition;
+  attributePath: string | SizeCondition;
   kind: ">=";
   value: NativeAttributeValue;
 }
 
 export interface InCondition extends IConditionExpression {
-  path: string | SizeCondition;
+  attributePath: string | SizeCondition;
   kind: "IN";
   values: NativeAttributeValue[];
 }
 
 export interface LessThanCondition extends IConditionExpression {
-  path: string | SizeCondition;
+  attributePath: string | SizeCondition;
   kind: "<";
   value: NativeAttributeValue;
 }
 
 export interface LessThanOrEqualsCondition extends IConditionExpression {
-  path: string | SizeCondition;
+  attributePath: string | SizeCondition;
   kind: "<=";
   value: NativeAttributeValue;
 }
@@ -116,7 +116,7 @@ export interface NotCondition extends IConditionExpression {
 }
 
 export interface NotEqualsCondition extends IConditionExpression {
-  path: string | SizeCondition;
+  attributePath: string | SizeCondition;
   kind: "<>";
   value: NativeAttributeValue;
 }
@@ -127,7 +127,7 @@ export interface OrCondition extends IConditionExpression {
 }
 
 export interface SizeCondition extends IConditionExpression {
-  path: string;
+  attributePath: string;
   kind: "size";
 }
 

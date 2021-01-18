@@ -1,7 +1,7 @@
 import { marshall } from "@aws-sdk/util-dynamodb";
+
 import { RequestParameters } from "../../types/request";
 import { marshallConditionExpression } from "./condition-expression-marshaller";
-import { serializeConditionExpression } from "./condition-expression-utils";
 import { marshallProjectionExpression } from "./projection-expression-marshaller";
 
 const cleanupEmptyExpressions = (requestParameters: RequestParameters) => {
@@ -38,7 +38,6 @@ export const marshallRequestParameters = <T>(
 
   if (requestParameters._Item) {
     marshalledParameters.Item = marshall(requestParameters._Item, {
-      convertEmptyValues: true,
       removeUndefinedValues: true,
     });
   }
@@ -78,6 +77,15 @@ export const marshallRequestParameters = <T>(
     marshalledParameters.TotalSegments = requestParameters.TotalSegments;
   }
 
+  if (requestParameters.ReturnItemCollectionMetrics) {
+    marshalledParameters.ReturnItemCollectionMetrics =
+      requestParameters.ReturnItemCollectionMetrics;
+  }
+
+  if (requestParameters.ReturnValues) {
+    marshalledParameters.ReturnValues = requestParameters.ReturnValues;
+  }
+
   if (requestParameters.ScanIndexForward != undefined) {
     marshalledParameters.ScanIndexForward = requestParameters.ScanIndexForward;
   }
@@ -107,8 +115,8 @@ export const marshallRequestParameters = <T>(
   }
 
   if (requestParameters._KeyConditionExpression) {
-    const marshalledKeyConditionExpression = serializeConditionExpression(
-      requestParameters._KeyConditionExpression,
+    const marshalledKeyConditionExpression = marshallConditionExpression(
+      [requestParameters._KeyConditionExpression],
       "key_",
     );
 
@@ -126,10 +134,32 @@ export const marshallRequestParameters = <T>(
     };
   }
 
+  if (requestParameters._ConditionExpressions) {
+    const marshalledConditionExpression = marshallConditionExpression(
+      requestParameters._ConditionExpressions,
+      "condition_",
+    );
+
+    marshalledParameters.ConditionExpression =
+      marshalledConditionExpression.expressionString;
+
+    marshalledParameters.ExpressionAttributeNames = {
+      ...marshalledParameters.ExpressionAttributeNames,
+      ...marshalledConditionExpression.expressionAttributeNames,
+    };
+
+    marshalledParameters.ExpressionAttributeValues = {
+      ...marshalledParameters.ExpressionAttributeValues,
+      ...marshalledConditionExpression.expressionAttributeValues,
+    };
+  }
+
   // TODO: optimize before marshalling
-  marshalledParameters.ExpressionAttributeValues = marshall(
-    marshalledParameters.ExpressionAttributeValues,
-  );
+  if (marshalledParameters.ExpressionAttributeValues) {
+    marshalledParameters.ExpressionAttributeValues = marshall(
+      marshalledParameters.ExpressionAttributeValues,
+    );
+  }
 
   return cleanupEmptyExpressions(marshalledParameters) as T;
 

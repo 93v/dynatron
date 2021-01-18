@@ -5,18 +5,18 @@ import {
   ScanOutput,
 } from "@aws-sdk/client-dynamodb";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
-import retry from "async-retry";
+import AsyncRetry from "async-retry";
 
-import { NativeValue } from "../../types/native-types";
+import { NativeValue } from "../../../types/native-types";
 import {
   BUILD,
   LONG_MAX_LATENCY,
   RETRY_OPTIONS,
   TAKING_TOO_LONG_EXCEPTION,
-} from "../utils/constants";
-import { isRetryableError } from "../utils/misc-utils";
-import { marshallRequestParameters } from "../utils/request-marshaller";
-import { createShortCircuit } from "../utils/short-circuit";
+} from "../../utils/constants";
+import { isRetryableError } from "../../utils/misc-utils";
+import { marshallRequestParameters } from "../../utils/request-marshaller";
+import { createShortCircuit } from "../../utils/short-circuit";
 import { ListFetch } from "./1.3-list-fetch";
 
 const MIN_TOTAL_SEGMENTS = 1;
@@ -64,7 +64,7 @@ export class Scan extends ListFetch {
       );
     }
     const response: ScanOutput = {};
-    return retry(async (bail, attempt) => {
+    return AsyncRetry(async (bail, attempt) => {
       while (!operationCompleted) {
         const shortCircuit = createShortCircuit({
           duration: attempt * LONG_MAX_LATENCY * (this.patienceRatio || 1),
@@ -124,7 +124,7 @@ export class Scan extends ListFetch {
     }, RETRY_OPTIONS);
   };
 
-  $execute = async <T = NativeValue[] | undefined, U extends boolean = false>(
+  $ = async <T = NativeValue[] | undefined, U extends boolean = false>(
     returnRawResponse?: U,
     disableRecursion = false,
   ): Promise<U extends true ? ScanOutput : T | undefined> => {
@@ -219,6 +219,4 @@ export class Scan extends ListFetch {
       ? aggregatedOutput
       : aggregatedOutput.Items?.map((item) => unmarshall(item))) as any;
   };
-
-  $ = this.$execute;
 }

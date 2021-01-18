@@ -1,4 +1,4 @@
-import { BUILD } from "../utils/constants";
+import { BUILD } from "../../utils/constants";
 import { Request } from "./0-request";
 
 export class Fetch extends Request {

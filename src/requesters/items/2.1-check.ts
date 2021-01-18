@@ -1,13 +1,22 @@
-import { ReturnValue } from "@aws-sdk/client-dynamodb";
+import { DynamoDBClient, ReturnValue } from "@aws-sdk/client-dynamodb";
 
-import { Condition } from "../../types/conditions";
-import { isConditionEmptyDeep } from "../utils/condition-expression-utils";
-import { BUILD } from "../utils/constants";
+import { Condition } from "../../../types/conditions";
+import { NativeKey } from "../../../types/native-types";
+import { isConditionEmptyDeep } from "../../utils/condition-expression-utils";
+import { BUILD } from "../../utils/constants";
 import { Amend } from "./2-amend";
 
 export class Check extends Amend {
   #ConditionExpressions?: Condition[];
   #ReturnValues?: ReturnValue;
+
+  constructor(
+    databaseClient: DynamoDBClient,
+    tableName: string,
+    private key?: NativeKey,
+  ) {
+    super(databaseClient, tableName);
+  }
 
   returnValues = (returnValues: ReturnValue = "ALL_OLD") => {
     this.#ReturnValues = returnValues;
@@ -38,6 +47,7 @@ export class Check extends Amend {
   [BUILD]() {
     return {
       ...super[BUILD](),
+      ...(this.key && { _Key: this.key }),
       ...(this.#ConditionExpressions?.length && {
         _ConditionExpressions: this.#ConditionExpressions,
       }),

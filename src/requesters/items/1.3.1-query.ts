@@ -5,20 +5,20 @@ import {
   QueryOutput,
 } from "@aws-sdk/client-dynamodb";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
-import retry from "async-retry";
+import AsyncRetry from "async-retry";
 
-import { EqualsCondition, KeyCondition } from "../../types/conditions";
-import { NativeValue } from "../../types/native-types";
-import { and } from "../utils/condition-expression-utils";
+import { EqualsCondition, KeyCondition } from "../../../types/conditions";
+import { NativeValue } from "../../../types/native-types";
+import { and } from "../../utils/condition-expression-utils";
 import {
   BUILD,
   LONG_MAX_LATENCY,
   RETRY_OPTIONS,
   TAKING_TOO_LONG_EXCEPTION,
-} from "../utils/constants";
-import { isRetryableError } from "../utils/misc-utils";
-import { marshallRequestParameters } from "../utils/request-marshaller";
-import { createShortCircuit } from "../utils/short-circuit";
+} from "../../utils/constants";
+import { isRetryableError } from "../../utils/misc-utils";
+import { marshallRequestParameters } from "../../utils/request-marshaller";
+import { createShortCircuit } from "../../utils/short-circuit";
 import { ListFetch } from "./1.3-list-fetch";
 
 export class Query extends ListFetch {
@@ -63,7 +63,7 @@ export class Query extends ListFetch {
     };
   }
 
-  $execute = async <T = NativeValue[] | undefined, U extends boolean = false>(
+  $ = async <T = NativeValue[] | undefined, U extends boolean = false>(
     returnRawResponse?: U,
     disableRecursion = false,
   ): Promise<U extends true ? QueryOutput : T | undefined> => {
@@ -78,7 +78,7 @@ export class Query extends ListFetch {
     let operationCompleted = false;
     const aggregatedOutput: QueryOutput = {};
 
-    return retry(async (bail, attempt) => {
+    return AsyncRetry(async (bail, attempt) => {
       while (!operationCompleted) {
         const shortCircuit = createShortCircuit({
           duration: attempt * LONG_MAX_LATENCY * (this.patienceRatio || 1),
@@ -147,6 +147,4 @@ export class Query extends ListFetch {
         : aggregatedOutput.Items?.map((item) => unmarshall(item))) as any;
     }, RETRY_OPTIONS);
   };
-
-  $ = this.$execute;
 }

@@ -1,6 +1,6 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 
-import { Request } from "../src/requesters/0-request";
+import { Request } from "../src/requesters/items/0-request";
 import { TransactGet } from "../src/requesters/3-transact-get";
 import { initializeDatabaseClient } from "../src/utils/database-client";
 
@@ -12,12 +12,12 @@ beforeAll(() => {
 
 describe("TransactGet", () => {
   test("should be an instance of Request", () => {
-    const instance = new TransactGet(databaseClient, "");
+    const instance = new TransactGet(databaseClient, "", []);
     expect(instance).toBeInstanceOf(Request);
   });
 
   test("should be an instance of TransactGet", () => {
-    const instance = new TransactGet(databaseClient, "");
+    const instance = new TransactGet(databaseClient, "", []);
     expect(instance).toBeInstanceOf(TransactGet);
   });
 });

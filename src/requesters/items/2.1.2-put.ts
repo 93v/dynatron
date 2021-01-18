@@ -4,19 +4,18 @@ import {
   PutItemCommandInput,
   PutItemOutput,
 } from "@aws-sdk/client-dynamodb";
-import { marshall } from "@aws-sdk/util-dynamodb";
-import retry from "async-retry";
+import AsyncRetry from "async-retry";
 
-import { NativeValue } from "../../types/native-types";
+import { NativeValue } from "../../../types/native-types";
 import {
   BUILD,
   RETRY_OPTIONS,
   SHORT_MAX_LATENCY,
   TAKING_TOO_LONG_EXCEPTION,
-} from "../utils/constants";
-import { isRetryableError } from "../utils/misc-utils";
-import { marshallRequestParameters } from "../utils/request-marshaller";
-import { createShortCircuit } from "../utils/short-circuit";
+} from "../../utils/constants";
+import { isRetryableError } from "../../utils/misc-utils";
+import { marshallRequestParameters } from "../../utils/request-marshaller";
+import { createShortCircuit } from "../../utils/short-circuit";
 import { Check } from "./2.1-check";
 
 export class Put extends Check {
@@ -31,17 +30,17 @@ export class Put extends Check {
   [BUILD]() {
     return {
       ...super[BUILD](),
-      _Item: marshall(this.item),
+      _Item: this.item,
     };
   }
 
-  $execute = async <T = NativeValue | undefined, U extends boolean = false>(
+  $ = async <T = NativeValue | undefined, U extends boolean = false>(
     returnRawResponse?: U,
   ): Promise<U extends true ? PutItemOutput : T | undefined> => {
     const requestInput = marshallRequestParameters<PutItemCommandInput>(
       this[BUILD](),
     );
-    return retry(async (bail, attempt) => {
+    return AsyncRetry(async (bail, attempt) => {
       const shortCircuit = createShortCircuit({
         duration: attempt * SHORT_MAX_LATENCY * (this.patienceRatio || 1),
         error: new Error(TAKING_TOO_LONG_EXCEPTION),
@@ -64,6 +63,4 @@ export class Put extends Check {
       }
     }, RETRY_OPTIONS);
   };
-
-  $ = this.$execute;
 }

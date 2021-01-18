@@ -1,15 +1,13 @@
-import { marshall } from "@aws-sdk/util-dynamodb";
 import { TAKING_TOO_LONG_EXCEPTION } from "../../src/utils/constants";
 import {
   assertNever,
   isRetryableError,
   serializeExpressionValue,
-  //   validateKey,
 } from "../../src/utils/misc-utils";
 
 describe("Misc utils serialization", () => {
   test("should serialize expression value", () => {
-    const value = marshall({ key: "hello" });
+    const value = { key: "hello" };
     const serializedExpressionValue = serializeExpressionValue(value.key);
     expect(serializedExpressionValue.value).toEqual(value.key);
     expect(serializedExpressionValue.name).toHaveLength(2);
