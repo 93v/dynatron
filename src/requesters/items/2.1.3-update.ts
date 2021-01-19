@@ -17,16 +17,16 @@ import {
   UpdateSet,
   UpdateType,
 } from "../../../types/update";
-import { serializeAttributePath } from "../../utils/attribute-path-serializer";
+import { isTopLevelAttributePath } from "../../utils/expressions-utils";
 import {
   BUILD,
+  createShortCircuit,
+  isRetryableError,
   RETRY_OPTIONS,
   SHORT_MAX_LATENCY,
   TAKING_TOO_LONG_EXCEPTION,
-} from "../../utils/constants";
-import { isRetryableError } from "../../utils/misc-utils";
+} from "../../utils/misc-utils";
 import { marshallRequestParameters } from "../../utils/request-marshaller";
-import { createShortCircuit } from "../../utils/short-circuit";
 import { Check } from "./2.1-check";
 
 export class Update extends Check {
@@ -115,12 +115,7 @@ export class Update extends Check {
     attributePath: string,
     value: Set<string | number> | string | number | (string | number)[],
   ) {
-    const serializedPath = serializeAttributePath(attributePath);
-    if (
-      serializedPath.expressionString.includes(".") ||
-      (serializedPath.expressionString.includes("[") &&
-        serializedPath.expressionString.endsWith("]"))
-    ) {
+    if (!isTopLevelAttributePath(attributePath)) {
       throw new Error("ADD can only be used on top-level attributes");
     }
 
@@ -148,12 +143,7 @@ export class Update extends Check {
       return this;
     }
 
-    const serializedPath = serializeAttributePath(attributePath);
-    if (
-      serializedPath.expressionString.includes(".") ||
-      (serializedPath.expressionString.includes("[") &&
-        serializedPath.expressionString.endsWith("]"))
-    ) {
+    if (!isTopLevelAttributePath(attributePath)) {
       throw new Error("DELETE can only be used on top-level attributes");
     }
 

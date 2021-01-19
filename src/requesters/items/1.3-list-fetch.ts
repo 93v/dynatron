@@ -1,7 +1,7 @@
 import { Condition } from "../../../types/conditions";
 import { NativeKey } from "../../../types/native-types";
-import { isConditionEmptyDeep } from "../../utils/condition-expression-utils";
-import { BUILD } from "../../utils/constants";
+import { isConditionEmptyDeep } from "../../condition-expression-builders";
+import { BUILD } from "../../utils/misc-utils";
 import { Fetch } from "./1-fetch";
 
 export class ListFetch extends Fetch {

@@ -1,4 +1,4 @@
-import nextAlpha from "../../src/utils/next-alpha-char-generator";
+import { nextAlpha } from "../../src/utils/next-alpha-char-generator";
 
 describe("Next Alpha Char Generator", () => {
   test("should return the alphabet sequentially and then the double", () => {

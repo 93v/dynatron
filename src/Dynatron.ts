@@ -5,9 +5,12 @@ import {
   UpdateTableInput,
   UpdateTimeToLiveInput,
 } from "@aws-sdk/client-dynamodb";
+import { NodeHttpHandler } from "@aws-sdk/node-http-handler";
 import { NativeAttributeValue } from "@aws-sdk/util-dynamodb";
-import { NativeKey, NativeValue } from "../types/native-types";
+import { Agent } from "https";
 
+import { NativeKey, NativeValue } from "../types/native-types";
+import { equals } from "./condition-expression-builders";
 import { Get } from "./requesters/items/1.1-get";
 import { BatchGet } from "./requesters/items/1.2-batch-get";
 import { Query } from "./requesters/items/1.3.1-query";
@@ -17,7 +20,7 @@ import { Delete } from "./requesters/items/2.1.1-delete";
 import { Put } from "./requesters/items/2.1.2-put";
 import { Update } from "./requesters/items/2.1.3-update";
 import { BatchWrite } from "./requesters/items/2.2-batch-write";
-import { TransactWrite } from "./requesters/2.4-transact-write";
+import { TransactWrite } from "./requesters/items/2.4-transact-write";
 import { TransactGet } from "./requesters/items/3-transact-get";
 import { TableCreate } from "./requesters/tables/table-create";
 import { TableDelete } from "./requesters/tables/table-delete";
@@ -26,8 +29,7 @@ import { TableList } from "./requesters/tables/table-list";
 import { TableTTLDescribe } from "./requesters/tables/table-ttl-describe";
 import { TableTTLUpdate } from "./requesters/tables/table-ttl-update";
 import { TableUpdate } from "./requesters/tables/table-update";
-import { equals } from "./utils/condition-expression-utils";
-import { initializeDatabaseClient } from "./utils/database-client";
+import { LONG_MAX_LATENCY } from "./utils/misc-utils";
 
 export class Dynatron {
   protected static readonly DynamoDBClients: Record<
@@ -36,13 +38,47 @@ export class Dynatron {
   > = {};
   constructor(
     private readonly tableName: string,
-    private readonly clientConfiguration?: DynamoDBClientConfig,
+    private readonly clientConfiguration?: DynamoDBClientConfig & {
+      timeout?: number;
+    },
     private instanceId = "default",
   ) {
     Dynatron.DynamoDBClients[this.instanceId] =
       Dynatron.DynamoDBClients[this.instanceId] ||
-      initializeDatabaseClient(this.clientConfiguration);
+      this.initializeDatabaseClient(this.clientConfiguration);
   }
+
+  private initializeDatabaseClient = (
+    connectionParameters?: DynamoDBClientConfig & { timeout?: number },
+  ) => {
+    const configuration: DynamoDBClientConfig = {
+      ...connectionParameters,
+      maxAttempts: 3,
+    };
+
+    // TODO: smarter check
+    if (
+      configuration.region !== "local" &&
+      configuration.region !== "localhost"
+    ) {
+      // Experiments have shown that this is the optimal number for sockets
+      const MAX_SOCKETS = 256;
+
+      configuration.requestHandler = new NodeHttpHandler({
+        httpsAgent: new Agent({
+          keepAlive: true,
+          rejectUnauthorized: true,
+          maxSockets: MAX_SOCKETS,
+          maxFreeSockets: MAX_SOCKETS / 8,
+          secureProtocol: "TLSv1_method",
+          ciphers: "ALL",
+        }),
+        socketTimeout: connectionParameters?.timeout || LONG_MAX_LATENCY + 1000,
+      });
+    }
+
+    return new DynamoDBClient(configuration);
+  };
 
   batchDelete = (keys: NativeKey[]) =>
     new BatchWrite(

@@ -1,6 +1,4 @@
 import { Dynatron } from "../src/dynatron";
-import { TransactWrite } from "../src/requesters/2.4-transact-write";
-import { TransactGet } from "../src/requesters/items/3-transact-get";
 import { Get } from "../src/requesters/items/1.1-get";
 import { BatchGet } from "../src/requesters/items/1.2-batch-get";
 import { Query } from "../src/requesters/items/1.3.1-query";
@@ -10,6 +8,8 @@ import { Delete } from "../src/requesters/items/2.1.1-delete";
 import { Put } from "../src/requesters/items/2.1.2-put";
 import { Update } from "../src/requesters/items/2.1.3-update";
 import { BatchWrite } from "../src/requesters/items/2.2-batch-write";
+import { TransactWrite } from "../src/requesters/items/2.4-transact-write";
+import { TransactGet } from "../src/requesters/items/3-transact-get";
 import { TableCreate } from "../src/requesters/tables/table-create";
 import { TableDelete } from "../src/requesters/tables/table-delete";
 import { TableDescribe } from "../src/requesters/tables/table-describe";
@@ -17,6 +17,28 @@ import { TableList } from "../src/requesters/tables/table-list";
 import { TableTTLDescribe } from "../src/requesters/tables/table-ttl-describe";
 import { TableTTLUpdate } from "../src/requesters/tables/table-ttl-update";
 import { TableUpdate } from "../src/requesters/tables/table-update";
+
+describe("Database Client", () => {
+  test("should return an instance of Dynatron", () => {
+    const dynatron = new Dynatron("", {});
+    expect(dynatron).toBeInstanceOf(Dynatron);
+  });
+
+  test("should return an instance of Dynatron", () => {
+    const dynatron = new Dynatron("", { timeout: 100 });
+    expect(dynatron).toBeInstanceOf(Dynatron);
+  });
+
+  test("should return an instance of Dynatron", () => {
+    const dynatron = new Dynatron("", { region: "local" });
+    expect(dynatron).toBeInstanceOf(Dynatron);
+  });
+
+  test("should return an instance of Dynatron", () => {
+    const dynatron = new Dynatron("", { region: "localhost" });
+    expect(dynatron).toBeInstanceOf(Dynatron);
+  });
+});
 
 describe("Dynatron instance", () => {
   const dynatron = new Dynatron("");

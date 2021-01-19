@@ -1,15 +1,17 @@
-import { NativeAttributeValue } from "@aws-sdk/util-dynamodb";
+import { loadSharedConfigFiles } from "@aws-sdk/shared-ini-file-loader";
+import { Options } from "async-retry";
 
-import { TAKING_TOO_LONG_EXCEPTION } from "./constants";
-import alpha from "./next-alpha-char-generator";
+import { NativeKey } from "../../types/native-types";
 
-export const serializeExpressionValue = (
-  value: NativeAttributeValue,
-  prefix = "",
-) => ({
-  name: `:${prefix}${alpha.getNext()}`,
-  value,
-});
+export const BUILD: unique symbol = Symbol("Build._build");
+
+export const TAKING_TOO_LONG_EXCEPTION = "TakingTooLongException";
+
+export const RETRY_OPTIONS: Options = { minTimeout: 50, retries: 5 };
+
+const MILLISECONDS_IN_SECOND = 1000;
+export const SHORT_MAX_LATENCY = MILLISECONDS_IN_SECOND;
+export const LONG_MAX_LATENCY = 10 * SHORT_MAX_LATENCY;
 
 export const assertNever = (object: never): never => {
   throw new Error(`Unexpected value: ${JSON.stringify(object)}`);
@@ -26,3 +28,58 @@ export const isRetryableError = (error: Error) =>
     ["ProvisionedThroughputExceededException", "ThrottlingException"].includes(
       (error as any).code,
     ));
+
+export const validateKey = (parameters: {
+  key: NativeKey;
+  singlePropertyKey?: boolean;
+}) => {
+  const keysLength = Object.keys(parameters.key).length;
+  const maxKeys = parameters.singlePropertyKey ? 1 : 2;
+  if (keysLength === 0) {
+    throw new Error("At least 1 property must be present in the key");
+  }
+  if (keysLength > maxKeys) {
+    throw new Error(
+      `At most ${maxKeys} ${
+        maxKeys === 1 ? "property" : "properties"
+      } must be present in the key`,
+    );
+  }
+};
+
+export const loadProfileCredentials = async (profile: string) => {
+  return ((await loadSharedConfigFiles()).credentialsFile[
+    profile
+  ] as unknown) as any;
+};
+
+export const createShortCircuit = (parameters: {
+  duration: number;
+  error: Error;
+}) => {
+  let timeoutReference: NodeJS.Timeout;
+  let launched = false;
+
+  if (parameters.duration < 0) {
+    throw new Error("Duration cannot be negative");
+  }
+
+  const launch = async (): Promise<never> => {
+    launched = true;
+    return new Promise((_, reject) => {
+      timeoutReference = setTimeout(() => {
+        reject(parameters.error);
+      }, parameters.duration);
+    });
+  };
+
+  const halt = () => {
+    if (!launched || timeoutReference == undefined) {
+      throw new Error("Cannot halt before launching");
+    }
+    clearTimeout(timeoutReference);
+    launched = false;
+  };
+
+  return { launch, halt };
+};

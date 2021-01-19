@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const path = require("path");
-const nodeExternals = require("webpack-node-externals");
+// const nodeExternals = require("webpack-node-externals");
 
 module.exports = {
   entry: "./src/index.ts",
   mode: "production",
-  devtool: "inline-source-map",
+  devtool: "source-map",
   module: {
     rules: [
       {
@@ -23,5 +23,5 @@ module.exports = {
     path: path.resolve(__dirname, "dist"),
   },
   target: "node",
-  externals: [nodeExternals()],
+  // externals: [nodeExternals()],
 };

@@ -24,4 +24,6 @@ export {
   notEquals,
   or,
   size,
-} from "./utils/condition-expression-utils";
+} from "./condition-expression-builders";
+
+export { loadProfileCredentials } from "./utils/misc-utils";

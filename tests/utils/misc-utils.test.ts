@@ -1,20 +1,63 @@
-import { TAKING_TOO_LONG_EXCEPTION } from "../../src/utils/constants";
 import {
   assertNever,
+  createShortCircuit,
   isRetryableError,
-  serializeExpressionValue,
+  loadProfileCredentials,
+  TAKING_TOO_LONG_EXCEPTION,
+  validateKey,
 } from "../../src/utils/misc-utils";
 
-describe("Misc utils serialization", () => {
-  test("should serialize expression value", () => {
-    const value = { key: "hello" };
-    const serializedExpressionValue = serializeExpressionValue(value.key);
-    expect(serializedExpressionValue.value).toEqual(value.key);
-    expect(serializedExpressionValue.name).toHaveLength(2);
+describe("Short Circuit", () => {
+  test("should fire an error with a specific text", async () => {
+    const shortCircuit = createShortCircuit({
+      duration: 0,
+      error: new Error("Time's up"),
+    });
+
+    expect(shortCircuit).toMatchObject({
+      launch: expect.any(Function),
+      halt: expect.any(Function),
+    });
+
+    await expect(shortCircuit.launch()).rejects.toThrow("Time's up");
+  });
+
+  test("should fail on negative duration", () => {
+    const parameters = {
+      duration: -1,
+      error: new Error("Time's up"),
+    };
+
+    expect(() => {
+      createShortCircuit(parameters);
+    }).toThrow(new Error("Duration cannot be negative"));
+  });
+
+  test("should fail to halt before starting duration", () => {
+    const shortCircuit = createShortCircuit({
+      duration: 0,
+      error: new Error("Time's up"),
+    });
+
+    expect(() => {
+      shortCircuit.halt();
+    }).toThrow(new Error("Cannot halt before launching"));
+  });
+
+  test("should halt normally", () => {
+    const shortCircuit = createShortCircuit({
+      duration: 0,
+      error: new Error("Time's up"),
+    });
+
+    expect(() => {
+      shortCircuit.launch();
+      shortCircuit.halt();
+    }).not.toThrow();
   });
 });
 
-describe("Misc utils assertion", () => {
+describe("Assert Never", () => {
   test("should always fail", () => {
     expect(() => assertNever("incorrect" as never)).toThrow(
       `Unexpected value: "incorrect"`,
@@ -26,7 +69,7 @@ describe("Misc utils assertion", () => {
   });
 });
 
-describe("Misc utils retryable errors type", () => {
+describe("Is Retryable Error", () => {
   const customError = new Error("Custom error") as any;
   customError.retryable = true;
 
@@ -47,5 +90,67 @@ describe("Misc utils retryable errors type", () => {
   ];
   test.each(errors)("given %1 returns true", (_, error) => {
     expect(isRetryableError(error)).toBe(true);
+  });
+});
+
+describe("Load Profile Credentials", () => {
+  test("should load", async () => {
+    const profile = await loadProfileCredentials("MISSING PROFILE");
+    expect(profile).toBeUndefined();
+  });
+});
+
+describe("Validate Key", () => {
+  test("should fail validation if key is an empty object", () => {
+    expect(() => {
+      validateKey({
+        key: {},
+      });
+    }).toThrowError("At least 1 property must be present in the key");
+  });
+
+  test("should fail validation with 2 keys if single", () => {
+    expect(() => {
+      validateKey({
+        key: {
+          id: 1,
+          name: "hello",
+        },
+        singlePropertyKey: true,
+      });
+    }).toThrowError("At most 1 property must be present in the key");
+  });
+
+  test("should fail validation with 3 keys", () => {
+    expect(() => {
+      validateKey({
+        key: {
+          id: 1,
+          name: "hello",
+          age: 30,
+        },
+      });
+    }).toThrowError("At most 2 properties must be present in the key");
+  });
+
+  test("should pass the validation with 1 key", () => {
+    expect(() => {
+      validateKey({
+        key: {
+          id: 1,
+        },
+      });
+    }).not.toThrow();
+  });
+
+  test("should pass the validation with 2 keys", () => {
+    expect(() => {
+      validateKey({
+        key: {
+          id: 1,
+          name: "hello",
+        },
+      });
+    }).not.toThrow();
   });
 });

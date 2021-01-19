@@ -1,12 +1,50 @@
-import { marshall } from "@aws-sdk/util-dynamodb";
+import {
+  ReturnConsumedCapacity,
+  ReturnItemCollectionMetrics,
+  ReturnValue,
+} from "@aws-sdk/client-dynamodb";
+import { marshall, marshallOptions } from "@aws-sdk/util-dynamodb";
 
-import { RequestParameters } from "../../types/request";
-import { marshallConditionExpression } from "./condition-expression-marshaller";
-import { MARSHALL_OPTIONS } from "./constants";
-import { marshallProjectionExpression } from "./projection-expression-marshaller";
-import { marshallUpdateExpression } from "./update-expression-marshaller";
+import { AndCondition, Condition } from "../../types/conditions";
+import { NativeKey, NativeValue } from "../../types/native-types";
+import { UpdateType } from "../../types/update";
+import {
+  marshallConditionExpression,
+  marshallProjectionExpression,
+  marshallUpdateExpression,
+} from "./expressions-utils";
 
-const cleanupEmptyExpressions = (requestParameters: RequestParameters) => {
+type NativeRequestParameters = {
+  _ConditionExpressions?: Condition[];
+  _ExclusiveStartKey?: NativeKey;
+  _FilterExpressions?: Condition[];
+  _Item?: NativeValue;
+  _Items?: NativeValue[];
+  _Key?: NativeKey;
+  _KeyConditionExpression?: AndCondition;
+  _Keys?: NativeKey[];
+  _ProjectionExpressions?: string[];
+  _UpdateExpressions?: UpdateType[];
+  ClientRequestToken?: string;
+  ConsistentRead?: boolean;
+  ExpressionAttributeNames?: Record<string, string>;
+  ExpressionAttributeValues?: NativeValue;
+  IndexName?: string;
+  Limit?: number;
+  ReturnConsumedCapacity?: ReturnConsumedCapacity;
+  ReturnItemCollectionMetrics?: ReturnItemCollectionMetrics;
+  ReturnValues?: ReturnValue;
+  ScanIndexForward?: boolean;
+  Segment?: number;
+  TableName?: string;
+  TotalSegments?: number;
+};
+
+const MARSHALL_OPTIONS: marshallOptions = { removeUndefinedValues: true };
+
+const cleanupEmptyExpressions = (
+  requestParameters: NativeRequestParameters,
+) => {
   const parameters = { ...requestParameters };
   if (Object.keys(parameters.ExpressionAttributeNames || {}).length === 0) {
     delete parameters.ExpressionAttributeNames;
@@ -18,7 +56,7 @@ const cleanupEmptyExpressions = (requestParameters: RequestParameters) => {
 };
 
 export const marshallRequestParameters = <T>(
-  requestParameters: RequestParameters,
+  requestParameters: NativeRequestParameters,
 ) => {
   // TODO: stricter type maybe?
   const marshalledParameters: Record<string, any> = {};
@@ -110,6 +148,11 @@ export const marshallRequestParameters = <T>(
 
   if (requestParameters.Segment != undefined) {
     marshalledParameters.Segment = requestParameters.Segment;
+  }
+
+  if (requestParameters.ClientRequestToken != undefined) {
+    marshalledParameters.ClientRequestToken =
+      requestParameters.ClientRequestToken;
   }
 
   if (requestParameters._FilterExpressions?.length) {

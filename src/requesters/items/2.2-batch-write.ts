@@ -10,16 +10,17 @@ import AsyncRetry from "async-retry";
 
 import { NativeKey, NativeValue } from "../../../types/native-types";
 import {
-  BATCH_OPTIONS,
   BUILD,
+  createShortCircuit,
+  isRetryableError,
   LONG_MAX_LATENCY,
   RETRY_OPTIONS,
   TAKING_TOO_LONG_EXCEPTION,
-} from "../../utils/constants";
-import { isRetryableError } from "../../utils/misc-utils";
+} from "../../utils/misc-utils";
 import { marshallRequestParameters } from "../../utils/request-marshaller";
-import { createShortCircuit } from "../../utils/short-circuit";
 import { Amend } from "./2-amend";
+
+const BATCH_WRITE_LIMIT = 25;
 
 export class BatchWrite extends Amend {
   constructor(
@@ -112,13 +113,13 @@ export class BatchWrite extends Amend {
       for (
         let index = 0;
         index < this.keys.length;
-        index += BATCH_OPTIONS.WRITE_LIMIT
+        index += BATCH_WRITE_LIMIT
       ) {
         const requestInput: BatchWriteItemCommandInput = {
           RequestItems: {
             [TableName]: marshalledParameters.Keys.slice(
               index,
-              index + BATCH_OPTIONS.WRITE_LIMIT,
+              index + BATCH_WRITE_LIMIT,
             ).map((key: Record<string, AttributeValue>) => ({
               DeleteRequest: { Key: key },
             })),
@@ -134,13 +135,13 @@ export class BatchWrite extends Amend {
       for (
         let index = 0;
         index < this.items.length;
-        index += BATCH_OPTIONS.WRITE_LIMIT
+        index += BATCH_WRITE_LIMIT
       ) {
         const requestInput: BatchWriteItemCommandInput = {
           RequestItems: {
             [TableName]: marshalledParameters.Items.slice(
               index,
-              index + BATCH_OPTIONS.WRITE_LIMIT,
+              index + BATCH_WRITE_LIMIT,
             ).map((item: Record<string, AttributeValue>) => ({
               PutRequest: { Item: item },
             })),

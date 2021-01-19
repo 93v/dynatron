@@ -6,13 +6,13 @@ import {
 import AsyncRetry from "async-retry";
 
 import {
-  MARSHALL_REQUEST,
+  BUILD,
+  createShortCircuit,
+  isRetryableError,
   RETRY_OPTIONS,
   SHORT_MAX_LATENCY,
   TAKING_TOO_LONG_EXCEPTION,
-} from "../../utils/constants";
-import { isRetryableError } from "../../utils/misc-utils";
-import { createShortCircuit } from "../../utils/short-circuit";
+} from "../../utils/misc-utils";
 
 export class TableTTLDescribe {
   constructor(
@@ -20,12 +20,12 @@ export class TableTTLDescribe {
     protected tableName: string,
   ) {}
 
-  [MARSHALL_REQUEST](): DescribeTimeToLiveInput {
+  [BUILD](): DescribeTimeToLiveInput {
     return { TableName: this.tableName };
   }
 
   $ = async () => {
-    const requestInput = this[MARSHALL_REQUEST]();
+    const requestInput = this[BUILD]();
     return AsyncRetry(async (bail, attempt) => {
       const shortCircuit = createShortCircuit({
         duration: attempt * SHORT_MAX_LATENCY,

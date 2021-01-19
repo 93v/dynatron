@@ -10,13 +10,13 @@ import AsyncRetry from "async-retry";
 import { NativeValue } from "../../../types/native-types";
 import {
   BUILD,
+  createShortCircuit,
+  isRetryableError,
   LONG_MAX_LATENCY,
   RETRY_OPTIONS,
   TAKING_TOO_LONG_EXCEPTION,
-} from "../../utils/constants";
-import { isRetryableError } from "../../utils/misc-utils";
+} from "../../utils/misc-utils";
 import { marshallRequestParameters } from "../../utils/request-marshaller";
-import { createShortCircuit } from "../../utils/short-circuit";
 import { ListFetch } from "./1.3-list-fetch";
 
 const MIN_TOTAL_SEGMENTS = 1;

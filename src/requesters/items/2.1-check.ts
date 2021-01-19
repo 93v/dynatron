@@ -2,8 +2,8 @@ import { DynamoDBClient, ReturnValue } from "@aws-sdk/client-dynamodb";
 
 import { Condition } from "../../../types/conditions";
 import { NativeKey } from "../../../types/native-types";
-import { isConditionEmptyDeep } from "../../utils/condition-expression-utils";
-import { BUILD } from "../../utils/constants";
+import { isConditionEmptyDeep } from "../../condition-expression-builders";
+import { BUILD } from "../../utils/misc-utils";
 import { Amend } from "./2-amend";
 
 export class Check extends Amend {

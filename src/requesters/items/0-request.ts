@@ -2,8 +2,7 @@ import {
   DynamoDBClient,
   ReturnConsumedCapacity,
 } from "@aws-sdk/client-dynamodb";
-
-import { BUILD } from "../../utils/constants";
+import { BUILD } from "../../utils/misc-utils";
 
 export class Request {
   #ReturnConsumedCapacity?: ReturnConsumedCapacity;

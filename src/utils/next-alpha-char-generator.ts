@@ -38,4 +38,4 @@ const nextAlpha = new NextAlphaCharGenerator();
 
 Object.freeze(nextAlpha);
 
-export default nextAlpha;
+export { nextAlpha };

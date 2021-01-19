@@ -6,13 +6,13 @@ import {
 import AsyncRetry from "async-retry";
 
 import {
-  MARSHALL_REQUEST,
+  BUILD,
+  createShortCircuit,
+  isRetryableError,
   LONG_MAX_LATENCY,
   RETRY_OPTIONS,
   TAKING_TOO_LONG_EXCEPTION,
-} from "../../utils/constants";
-import { isRetryableError } from "../../utils/misc-utils";
-import { createShortCircuit } from "../../utils/short-circuit";
+} from "../../utils/misc-utils";
 
 export class TableUpdate {
   constructor(
@@ -20,12 +20,12 @@ export class TableUpdate {
     protected parameters: UpdateTableInput,
   ) {}
 
-  [MARSHALL_REQUEST](): UpdateTableInput {
+  [BUILD](): UpdateTableInput {
     return { ...this.parameters };
   }
 
   $ = async () => {
-    const requestInput = this[MARSHALL_REQUEST]();
+    const requestInput = this[BUILD]();
     return AsyncRetry(async (bail, attempt) => {
       const shortCircuit = createShortCircuit({
         duration: attempt * LONG_MAX_LATENCY,

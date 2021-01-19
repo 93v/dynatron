@@ -11,13 +11,13 @@ import AsyncRetry from "async-retry";
 import { NativeValue } from "../../../types/native-types";
 import {
   BUILD,
+  createShortCircuit,
+  isRetryableError,
   LONG_MAX_LATENCY,
   RETRY_OPTIONS,
   TAKING_TOO_LONG_EXCEPTION,
-} from "../../utils/constants";
-import { isRetryableError } from "../../utils/misc-utils";
+} from "../../utils/misc-utils";
 import { marshallRequestParameters } from "../../utils/request-marshaller";
-import { createShortCircuit } from "../../utils/short-circuit";
 import { Request } from "./0-request";
 import { Get } from "./1.1-get";
 

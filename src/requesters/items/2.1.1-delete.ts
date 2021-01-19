@@ -9,13 +9,13 @@ import AsyncRetry from "async-retry";
 import { NativeValue } from "../../../types/native-types";
 import {
   BUILD,
+  createShortCircuit,
+  isRetryableError,
   RETRY_OPTIONS,
   SHORT_MAX_LATENCY,
   TAKING_TOO_LONG_EXCEPTION,
-} from "../../utils/constants";
-import { isRetryableError } from "../../utils/misc-utils";
+} from "../../utils/misc-utils";
 import { marshallRequestParameters } from "../../utils/request-marshaller";
-import { createShortCircuit } from "../../utils/short-circuit";
 import { Check } from "./2.1-check";
 
 export class Delete extends Check {
