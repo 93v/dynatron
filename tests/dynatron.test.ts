@@ -1,16 +1,15 @@
 import { Dynatron } from "../src/dynatron";
+import { TransactWrite } from "../src/requesters/2.4-transact-write";
+import { TransactGet } from "../src/requesters/3-transact-get";
 import { Get } from "../src/requesters/items/1.1-get";
-import { BatchGet } from "../src/requesters/1.2-batch-get";
+import { BatchGet } from "../src/requesters/items/1.2-batch-get";
 import { Query } from "../src/requesters/items/1.3.1-query";
 import { Scan } from "../src/requesters/items/1.3.2-scan";
 import { Check } from "../src/requesters/items/2.1-check";
 import { Delete } from "../src/requesters/items/2.1.1-delete";
 import { Put } from "../src/requesters/items/2.1.2-put";
 import { Update } from "../src/requesters/items/2.1.3-update";
-import { BatchDelete } from "../src/requesters/2.2-batch-delete";
-import { BatchPut } from "../src/requesters/2.3-batch-put";
-import { TransactWrite } from "../src/requesters/2.4-transact-write";
-import { TransactGet } from "../src/requesters/3-transact-get";
+import { BatchWrite } from "../src/requesters/items/2.2-batch-write";
 import { TableCreate } from "../src/requesters/tables/table-create";
 import { TableDelete } from "../src/requesters/tables/table-delete";
 import { TableDescribe } from "../src/requesters/tables/table-describe";
@@ -24,14 +23,14 @@ describe("Dynatron instance", () => {
   test("should be an instance of Dynatron", async () => {
     expect(dynatron).toBeInstanceOf(Dynatron);
   });
-  test("should be an instance of BatchDelete", () => {
-    expect(dynatron.batchDelete([])).toBeInstanceOf(BatchDelete);
+  test("should be an instance of BatchWrite", () => {
+    expect(dynatron.batchDelete([])).toBeInstanceOf(BatchWrite);
   });
   test("should be an instance of BatchGet", () => {
     expect(dynatron.batchGet([])).toBeInstanceOf(BatchGet);
   });
-  test("should be an instance of BatchPut", () => {
-    expect(dynatron.batchPut([])).toBeInstanceOf(BatchPut);
+  test("should be an instance of BatchWrite", () => {
+    expect(dynatron.batchPut([])).toBeInstanceOf(BatchWrite);
   });
   test("should be an instance of Checker", () => {
     expect(dynatron.check({})).toBeInstanceOf(Check);

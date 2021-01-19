@@ -9,15 +9,14 @@ import { NativeAttributeValue } from "@aws-sdk/util-dynamodb";
 import { NativeKey, NativeValue } from "../types/native-types";
 
 import { Get } from "./requesters/items/1.1-get";
-import { BatchGet } from "./requesters/1.2-batch-get";
+import { BatchGet } from "./requesters/items/1.2-batch-get";
 import { Query } from "./requesters/items/1.3.1-query";
 import { Scan } from "./requesters/items/1.3.2-scan";
 import { Check } from "./requesters/items/2.1-check";
 import { Delete } from "./requesters/items/2.1.1-delete";
 import { Put } from "./requesters/items/2.1.2-put";
 import { Update } from "./requesters/items/2.1.3-update";
-import { BatchDelete } from "./requesters/2.2-batch-delete";
-import { BatchPut } from "./requesters/2.3-batch-put";
+import { BatchWrite } from "./requesters/items/2.2-batch-write";
 import { TransactWrite } from "./requesters/2.4-transact-write";
 import { TransactGet } from "./requesters/3-transact-get";
 import { TableCreate } from "./requesters/tables/table-create";
@@ -46,7 +45,7 @@ export class Dynatron {
   }
 
   batchDelete = (keys: NativeKey[]) =>
-    new BatchDelete(
+    new BatchWrite(
       Dynatron.DynamoDBClients[this.instanceId],
       this.tableName,
       keys,
@@ -58,9 +57,10 @@ export class Dynatron {
       keys,
     );
   batchPut = (items: NativeValue[]) =>
-    new BatchPut(
+    new BatchWrite(
       Dynatron.DynamoDBClients[this.instanceId],
       this.tableName,
+      undefined,
       items,
     );
   check = (key: NativeKey) =>

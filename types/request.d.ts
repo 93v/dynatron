@@ -23,7 +23,9 @@ export type PathElement = AttributeName | ListIndex;
 export type RequestParameters = {
   _FilterExpressions?: Condition[];
   _Item?: NativeValue;
+  _Items?: NativeValue[];
   _Key?: NativeKey;
+  _Keys?: NativeKey[];
   _ExclusiveStartKey?: NativeKey;
   _ProjectionExpressions?: string[];
   _ConditionExpressions?: Condition[];

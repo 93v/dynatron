@@ -20,7 +20,6 @@ const cleanupEmptyExpressions = (requestParameters: RequestParameters) => {
 export const marshallRequestParameters = <T>(
   requestParameters: RequestParameters,
 ) => {
-  // This will marshall and optimize the request
   // TODO: stricter type maybe?
   const marshalledParameters: Record<string, any> = {};
 
@@ -35,6 +34,12 @@ export const marshallRequestParameters = <T>(
     );
   }
 
+  if (requestParameters._Keys) {
+    marshalledParameters.Keys = requestParameters._Keys.map((key) =>
+      marshall(key, MARSHALL_OPTIONS),
+    );
+  }
+
   if (requestParameters._ExclusiveStartKey) {
     marshalledParameters.ExclusiveStartKey = marshall(
       requestParameters._ExclusiveStartKey,
@@ -46,6 +51,12 @@ export const marshallRequestParameters = <T>(
     marshalledParameters.Item = marshall(
       requestParameters._Item,
       MARSHALL_OPTIONS,
+    );
+  }
+
+  if (requestParameters._Items) {
+    marshalledParameters.Items = requestParameters._Items.map((key) =>
+      marshall(key, MARSHALL_OPTIONS),
     );
   }
 
