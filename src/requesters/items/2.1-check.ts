@@ -1,9 +1,9 @@
 import { DynamoDBClient, ReturnValue } from "@aws-sdk/client-dynamodb";
 
 import { Condition } from "../../../types/conditions";
-import { NativeKey } from "../../../types/native-types";
 import { isConditionEmptyDeep } from "../../condition-expression-builders";
-import { BUILD } from "../../utils/misc-utils";
+import { NativeValue } from "../../dynatron";
+import { BUILD, validateKey } from "../../utils/misc-utils";
 import { Amend } from "./2-amend";
 
 export class Check extends Amend {
@@ -13,9 +13,10 @@ export class Check extends Amend {
   constructor(
     databaseClient: DynamoDBClient,
     tableName: string,
-    private key?: NativeKey,
+    private key?: NativeValue,
   ) {
     super(databaseClient, tableName);
+    key && validateKey(key);
   }
 
   returnValues = (returnValues: ReturnValue = "ALL_OLD") => {

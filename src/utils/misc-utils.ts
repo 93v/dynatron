@@ -1,7 +1,7 @@
 import { loadSharedConfigFiles } from "@aws-sdk/shared-ini-file-loader";
 import { Options } from "async-retry";
 
-import { NativeKey } from "../../types/native-types";
+import { NativeValue } from "../dynatron";
 
 export const BUILD: unique symbol = Symbol("Build._build");
 
@@ -29,21 +29,13 @@ export const isRetryableError = (error: Error) =>
       (error as any).code,
     ));
 
-export const validateKey = (parameters: {
-  key: NativeKey;
-  singlePropertyKey?: boolean;
-}) => {
-  const keysLength = Object.keys(parameters.key).length;
-  const maxKeys = parameters.singlePropertyKey ? 1 : 2;
+export const validateKey = (key: NativeValue) => {
+  const keysLength = Object.keys(key).length;
   if (keysLength === 0) {
     throw new Error("At least 1 property must be present in the key");
   }
-  if (keysLength > maxKeys) {
-    throw new Error(
-      `At most ${maxKeys} ${
-        maxKeys === 1 ? "property" : "properties"
-      } must be present in the key`,
-    );
+  if (keysLength > 2) {
+    throw new Error(`At most 2 properties must be present in the key`);
   }
 };
 

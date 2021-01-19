@@ -1,11 +1,11 @@
 import { Condition } from "../../../types/conditions";
-import { NativeKey } from "../../../types/native-types";
 import { isConditionEmptyDeep } from "../../condition-expression-builders";
+import { NativeValue } from "../../dynatron";
 import { BUILD } from "../../utils/misc-utils";
 import { Fetch } from "./1-fetch";
 
 export class ListFetch extends Fetch {
-  #ExclusiveStartKey?: NativeKey;
+  #ExclusiveStartKey?: NativeValue;
   #FilterExpressions?: Condition[];
   #IndexName?: string;
   #Limit?: number;
@@ -39,7 +39,7 @@ export class ListFetch extends Fetch {
     return this;
   };
 
-  start = (exclusiveStartKey?: NativeKey) => {
+  start = (exclusiveStartKey?: NativeValue) => {
     if (exclusiveStartKey != undefined) {
       this.#ExclusiveStartKey = exclusiveStartKey;
     }

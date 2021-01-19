@@ -6,17 +6,7 @@ import {
 import { NativeAttributeValue, unmarshall } from "@aws-sdk/util-dynamodb";
 import AsyncRetry from "async-retry";
 
-import { NativeValue } from "../../../types/native-types";
-import {
-  UpdateAdd,
-  UpdateAppend,
-  UpdateDecrement,
-  UpdateIncrement,
-  UpdatePrepend,
-  UpdateRemove,
-  UpdateSet,
-  UpdateType,
-} from "../../../types/update";
+import { NativeValue } from "../../dynatron";
 import { isTopLevelAttributePath } from "../../utils/expressions-utils";
 import {
   BUILD,
@@ -29,18 +19,75 @@ import {
 import { marshallRequestParameters } from "../../utils/request-marshaller";
 import { Check } from "./2.1-check";
 
+export type UpdateAdd = {
+  kind: "add";
+  attributePath: string;
+  value: Set<string | number> | number;
+};
+
+export type UpdateAppend = {
+  kind: "append";
+  attributePath: string;
+  value: NativeAttributeValue | NativeAttributeValue[];
+};
+
+export type UpdateDecrement = {
+  kind: "decrement";
+  attributePath: string;
+  value: number;
+};
+
+export type UpdateDelete = {
+  kind: "delete";
+  attributePath: string;
+  value: Set<string | number>;
+};
+
+export type UpdateIncrement = {
+  kind: "increment";
+  attributePath: string;
+  value: number;
+};
+
+export type UpdatePrepend = {
+  kind: "prepend";
+  attributePath: string;
+  value: NativeAttributeValue | NativeAttributeValue[];
+};
+
+export type UpdateRemove = {
+  kind: "remove";
+  attributePath: string;
+};
+
+export type UpdateSet = {
+  kind: "set";
+  attributePath: string;
+  value: NativeAttributeValue;
+  ifNotExist: boolean;
+};
+
+export type UpdateType =
+  | UpdateAdd
+  | UpdateAppend
+  | UpdateDecrement
+  | UpdateDelete
+  | UpdateIncrement
+  | UpdatePrepend
+  | UpdateRemove
+  | UpdateSet;
+
 export class Update extends Check {
   #UpdateExpressions: UpdateType[] = [];
 
   assign(item: NativeValue, ifNotExist = false) {
     Object.entries(item).forEach(([attributePath, value]) => {
-      const expression: UpdateSet = {
+      this.#UpdateExpressions.push({
         kind: "set",
         attributePath,
         value,
         ifNotExist,
-      };
-      this.#UpdateExpressions.push(expression);
+      } as UpdateSet);
     });
     return this;
   }
@@ -50,18 +97,19 @@ export class Update extends Check {
     value: number,
     createIfAttributePathDoesNotExist = true,
   ) {
-    const expression = createIfAttributePathDoesNotExist
-      ? ({
-          kind: "add",
-          attributePath,
-          value,
-        } as UpdateAdd)
-      : ({
-          kind: "increment",
-          attributePath,
-          value,
-        } as UpdateIncrement);
-    this.#UpdateExpressions.push(expression);
+    this.#UpdateExpressions.push(
+      createIfAttributePathDoesNotExist
+        ? ({
+            kind: "add",
+            attributePath,
+            value,
+          } as UpdateAdd)
+        : ({
+            kind: "increment",
+            attributePath,
+            value,
+          } as UpdateIncrement),
+    );
     return this;
   }
 
@@ -70,18 +118,19 @@ export class Update extends Check {
     value: number,
     createIfAttributePathDoesNotExist = true,
   ) {
-    const expression = createIfAttributePathDoesNotExist
-      ? ({
-          kind: "add",
-          attributePath,
-          value: -1 * value,
-        } as UpdateAdd)
-      : ({
-          kind: "decrement",
-          attributePath,
-          value,
-        } as UpdateDecrement);
-    this.#UpdateExpressions.push(expression);
+    this.#UpdateExpressions.push(
+      createIfAttributePathDoesNotExist
+        ? ({
+            kind: "add",
+            attributePath,
+            value: -1 * value,
+          } as UpdateAdd)
+        : ({
+            kind: "decrement",
+            attributePath,
+            value,
+          } as UpdateDecrement),
+    );
     return this;
   }
 
@@ -89,12 +138,11 @@ export class Update extends Check {
     attributePath: string,
     value: NativeAttributeValue | NativeAttributeValue[],
   ) {
-    const expression: UpdateAppend = {
+    this.#UpdateExpressions.push({
       kind: "append",
       attributePath,
       value: Array.isArray(value) ? value : [value],
-    };
-    this.#UpdateExpressions.push(expression);
+    } as UpdateAppend);
     return this;
   }
 
@@ -102,12 +150,11 @@ export class Update extends Check {
     attributePath: string,
     value: NativeAttributeValue | NativeAttributeValue[],
   ) {
-    const expression: UpdatePrepend = {
+    this.#UpdateExpressions.push({
       kind: "prepend",
       attributePath,
       value: Array.isArray(value) ? value : [value],
-    };
-    this.#UpdateExpressions.push(expression);
+    } as UpdatePrepend);
     return this;
   }
 
@@ -135,11 +182,10 @@ export class Update extends Check {
     value?: Set<string | number> | (string | number) | (string | number)[],
   ) {
     if (value == undefined) {
-      const removeExpression: UpdateRemove = {
+      this.#UpdateExpressions.push({
         kind: "remove",
         attributePath: attributePath,
-      };
-      this.#UpdateExpressions.push(removeExpression);
+      } as UpdateRemove);
       return this;
     }
 

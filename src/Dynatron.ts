@@ -9,7 +9,6 @@ import { NodeHttpHandler } from "@aws-sdk/node-http-handler";
 import { NativeAttributeValue } from "@aws-sdk/util-dynamodb";
 import { Agent } from "https";
 
-import { NativeKey, NativeValue } from "../types/native-types";
 import { equals } from "./condition-expression-builders";
 import { Get } from "./requesters/items/1.1-get";
 import { BatchGet } from "./requesters/items/1.2-batch-get";
@@ -30,6 +29,8 @@ import { TableTTLDescribe } from "./requesters/tables/table-ttl-describe";
 import { TableTTLUpdate } from "./requesters/tables/table-ttl-update";
 import { TableUpdate } from "./requesters/tables/table-update";
 import { LONG_MAX_LATENCY } from "./utils/misc-utils";
+
+export type NativeValue = Record<string, NativeAttributeValue>;
 
 export class Dynatron {
   protected static readonly DynamoDBClients: Record<
@@ -80,13 +81,13 @@ export class Dynatron {
     return new DynamoDBClient(configuration);
   };
 
-  batchDelete = (keys: NativeKey[]) =>
+  batchDelete = (keys: NativeValue[]) =>
     new BatchWrite(
       Dynatron.DynamoDBClients[this.instanceId],
       this.tableName,
       keys,
     );
-  batchGet = (keys: NativeKey[]) =>
+  batchGet = (keys: NativeValue[]) =>
     new BatchGet(
       Dynatron.DynamoDBClients[this.instanceId],
       this.tableName,
@@ -99,11 +100,11 @@ export class Dynatron {
       undefined,
       items,
     );
-  check = (key: NativeKey) =>
+  check = (key: NativeValue) =>
     new Check(Dynatron.DynamoDBClients[this.instanceId], this.tableName, key);
-  delete = (key: NativeKey) =>
+  delete = (key: NativeValue) =>
     new Delete(Dynatron.DynamoDBClients[this.instanceId], this.tableName, key);
-  get = (key: NativeKey) =>
+  get = (key: NativeValue) =>
     new Get(Dynatron.DynamoDBClients[this.instanceId], this.tableName, key);
   put = (item: NativeValue) =>
     new Put(Dynatron.DynamoDBClients[this.instanceId], this.tableName, item);
@@ -115,7 +116,7 @@ export class Dynatron {
     );
   scan = () =>
     new Scan(Dynatron.DynamoDBClients[this.instanceId], this.tableName);
-  update = (key: NativeKey) =>
+  update = (key: NativeValue) =>
     new Update(Dynatron.DynamoDBClients[this.instanceId], this.tableName, key);
   transactGet = (items: Get[]) =>
     new TransactGet(

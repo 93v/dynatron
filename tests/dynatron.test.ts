@@ -54,11 +54,11 @@ describe("Dynatron instance", () => {
   test("should be an instance of BatchWrite", () => {
     expect(dynatron.batchPut([])).toBeInstanceOf(BatchWrite);
   });
-  test("should be an instance of Checker", () => {
-    expect(dynatron.check({})).toBeInstanceOf(Check);
+  test("should be an instance of Check", () => {
+    expect(dynatron.check({ id: "" })).toBeInstanceOf(Check);
   });
   test("should be an instance of Delete", () => {
-    expect(dynatron.delete({})).toBeInstanceOf(Delete);
+    expect(dynatron.delete({ id: "" })).toBeInstanceOf(Delete);
   });
   test("should be an instance of Get", () => {
     expect(dynatron.get({ id: "1" })).toBeInstanceOf(Get);
@@ -72,8 +72,8 @@ describe("Dynatron instance", () => {
   test("should be an instance of Scan", () => {
     expect(dynatron.scan()).toBeInstanceOf(Scan);
   });
-  test("should be an instance of Updater", () => {
-    expect(dynatron.update({})).toBeInstanceOf(Update);
+  test("should be an instance of Update", () => {
+    expect(dynatron.update({ id: "" })).toBeInstanceOf(Update);
   });
   test("should be an instance of TransactGet", () => {
     expect(dynatron.transactGet([])).toBeInstanceOf(TransactGet);
@@ -84,22 +84,22 @@ describe("Dynatron instance", () => {
   test("should be an instance of TableCreator", () => {
     expect(dynatron.Tables.create({} as any)).toBeInstanceOf(TableCreate);
   });
-  test("should be an instance of TableDeleter", () => {
+  test("should be an instance of TableDelete", () => {
     expect(dynatron.Tables.delete()).toBeInstanceOf(TableDelete);
   });
-  test("should be an instance of TableDescriber", () => {
+  test("should be an instance of TableDescribe", () => {
     expect(dynatron.Tables.describe()).toBeInstanceOf(TableDescribe);
   });
-  test("should be an instance of TableLister", () => {
+  test("should be an instance of TableList", () => {
     expect(dynatron.Tables.list()).toBeInstanceOf(TableList);
   });
-  test("should be an instance of TableTTLDescriber", () => {
+  test("should be an instance of TableTTLDescribe", () => {
     expect(dynatron.Tables.describeTTL()).toBeInstanceOf(TableTTLDescribe);
   });
-  test("should be an instance of TableTTLUpdater", () => {
+  test("should be an instance of TableTTLUpdate", () => {
     expect(dynatron.Tables.updateTTL({} as any)).toBeInstanceOf(TableTTLUpdate);
   });
-  test("should be an instance of TableUpdater", () => {
+  test("should be an instance of TableUpdate", () => {
     expect(dynatron.Tables.update({} as any)).toBeInstanceOf(TableUpdate);
   });
 });

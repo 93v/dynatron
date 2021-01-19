@@ -7,7 +7,7 @@ import {
 import { unmarshall } from "@aws-sdk/util-dynamodb";
 import AsyncRetry from "async-retry";
 
-import { NativeKey, NativeValue } from "../../../types/native-types";
+import { NativeValue } from "../../dynatron";
 import {
   BUILD,
   createShortCircuit,
@@ -15,6 +15,7 @@ import {
   RETRY_OPTIONS,
   SHORT_MAX_LATENCY,
   TAKING_TOO_LONG_EXCEPTION,
+  validateKey,
 } from "../../utils/misc-utils";
 import { marshallRequestParameters } from "../../utils/request-marshaller";
 import { Fetch } from "./1-fetch";
@@ -23,9 +24,10 @@ export class Get extends Fetch {
   constructor(
     databaseClient: DynamoDBClient,
     tableName: string,
-    private key: NativeKey,
+    private key: NativeValue,
   ) {
     super(databaseClient, tableName);
+    validateKey(key);
   }
 
   [BUILD]() {

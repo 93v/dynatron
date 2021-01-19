@@ -8,8 +8,8 @@ import { unmarshall } from "@aws-sdk/util-dynamodb";
 import AsyncRetry from "async-retry";
 
 import { EqualsCondition, KeyCondition } from "../../../types/conditions";
-import { NativeValue } from "../../../types/native-types";
 import { and } from "../../condition-expression-builders";
+import { NativeValue } from "../../dynatron";
 import {
   BUILD,
   createShortCircuit,

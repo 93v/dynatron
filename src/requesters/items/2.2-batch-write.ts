@@ -8,7 +8,7 @@ import {
 import { unmarshall } from "@aws-sdk/util-dynamodb";
 import AsyncRetry from "async-retry";
 
-import { NativeKey, NativeValue } from "../../../types/native-types";
+import { NativeValue } from "../../dynatron";
 import {
   BUILD,
   createShortCircuit,
@@ -16,6 +16,7 @@ import {
   LONG_MAX_LATENCY,
   RETRY_OPTIONS,
   TAKING_TOO_LONG_EXCEPTION,
+  validateKey,
 } from "../../utils/misc-utils";
 import { marshallRequestParameters } from "../../utils/request-marshaller";
 import { Amend } from "./2-amend";
@@ -26,10 +27,11 @@ export class BatchWrite extends Amend {
   constructor(
     databaseClient: DynamoDBClient,
     tableName: string,
-    private keys?: NativeKey[],
+    private keys?: NativeValue[],
     private items?: NativeValue[],
   ) {
     super(databaseClient, tableName);
+    keys && keys.forEach((key) => validateKey(key));
   }
 
   [BUILD]() {

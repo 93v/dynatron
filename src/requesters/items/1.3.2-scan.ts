@@ -7,7 +7,7 @@ import {
 import { unmarshall } from "@aws-sdk/util-dynamodb";
 import AsyncRetry from "async-retry";
 
-import { NativeValue } from "../../../types/native-types";
+import { NativeValue } from "../../dynatron";
 import {
   BUILD,
   createShortCircuit,
@@ -163,7 +163,7 @@ export class Scan extends ListFetch {
       }
     }
 
-    let outputs: (ScanOutput | undefined)[] = [];
+    let outputs: (ScanOutput | undefined)[];
     if (requestInput.Segment != undefined) {
       const segmentParameters = { ...requestInput };
       if (!segmentParameters.TotalSegments) {

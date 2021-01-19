@@ -6,8 +6,8 @@ import {
 import { marshall, marshallOptions } from "@aws-sdk/util-dynamodb";
 
 import { AndCondition, Condition } from "../../types/conditions";
-import { NativeKey, NativeValue } from "../../types/native-types";
-import { UpdateType } from "../../types/update";
+import { NativeValue } from "../dynatron";
+import { UpdateType } from "../requesters/items/2.1.3-update";
 import {
   marshallConditionExpression,
   marshallProjectionExpression,
@@ -16,13 +16,13 @@ import {
 
 type NativeRequestParameters = {
   _ConditionExpressions?: Condition[];
-  _ExclusiveStartKey?: NativeKey;
+  _ExclusiveStartKey?: NativeValue;
   _FilterExpressions?: Condition[];
   _Item?: NativeValue;
   _Items?: NativeValue[];
-  _Key?: NativeKey;
+  _Key?: NativeValue;
   _KeyConditionExpression?: AndCondition;
-  _Keys?: NativeKey[];
+  _Keys?: NativeValue[];
   _ProjectionExpressions?: string[];
   _UpdateExpressions?: UpdateType[];
   ClientRequestToken?: string;
@@ -58,7 +58,6 @@ const cleanupEmptyExpressions = (
 export const marshallRequestParameters = <T>(
   requestParameters: NativeRequestParameters,
 ) => {
-  // TODO: stricter type maybe?
   const marshalledParameters: Record<string, any> = {};
 
   if (requestParameters.TableName) {

@@ -31,107 +31,107 @@ export type ExpressionKind =
   | "OR"
   | "size";
 
-interface IConditionExpression {
+type ConditionExpression = {
   kind: ExpressionKind;
-}
+};
 
-export interface AndCondition extends IConditionExpression {
+export type AndCondition = ConditionExpression & {
   kind: "AND";
   conditions: Condition[];
-}
+};
 
-export interface AttributeExistsCondition extends IConditionExpression {
+export type AttributeExistsCondition = ConditionExpression & {
   kind: "attribute_exists";
   attributePath: string;
-}
+};
 
-export interface AttributeNotExistsCondition extends IConditionExpression {
+export type AttributeNotExistsCondition = ConditionExpression & {
   kind: "attribute_not_exists";
   attributePath: string;
-}
+};
 
-export interface AttributeTypeCondition extends IConditionExpression {
+export type AttributeTypeCondition = ConditionExpression & {
   attributePath: string;
   kind: "attribute_type";
   value: string;
-}
+};
 
-export interface BeginsWithCondition extends IConditionExpression {
+export type BeginsWithCondition = ConditionExpression & {
   attributePath: string;
   kind: "begins_with";
   value: string;
-}
+};
 
-export interface BetweenCondition extends IConditionExpression {
+export type BetweenCondition = ConditionExpression & {
   attributePath: string | SizeCondition;
   kind: "BETWEEN";
   values: [NativeAttributeValue, NativeAttributeValue];
-}
+};
 
-export interface ContainsCondition extends IConditionExpression {
+export type ContainsCondition = ConditionExpression & {
   attributePath: string;
   kind: "contains";
   value: string;
-}
+};
 
-export interface EqualsCondition extends IConditionExpression {
+export type EqualsCondition = ConditionExpression & {
   attributePath: string | SizeCondition;
   kind: "=";
   value: NativeAttributeValue;
-}
+};
 
-export interface GreaterThanCondition extends IConditionExpression {
+export type GreaterThanCondition = ConditionExpression & {
   attributePath: string | SizeCondition;
   kind: ">";
   value: NativeAttributeValue;
-}
+};
 
-export interface GreaterThanOrEqualsCondition extends IConditionExpression {
+export type GreaterThanOrEqualsCondition = ConditionExpression & {
   attributePath: string | SizeCondition;
   kind: ">=";
   value: NativeAttributeValue;
-}
+};
 
-export interface InCondition extends IConditionExpression {
+export type InCondition = ConditionExpression & {
   attributePath: string | SizeCondition;
   kind: "IN";
   values: NativeAttributeValue[];
-}
+};
 
-export interface LessThanCondition extends IConditionExpression {
+export type LessThanCondition = ConditionExpression & {
   attributePath: string | SizeCondition;
   kind: "<";
   value: NativeAttributeValue;
-}
+};
 
-export interface LessThanOrEqualsCondition extends IConditionExpression {
+export type LessThanOrEqualsCondition = ConditionExpression & {
   attributePath: string | SizeCondition;
   kind: "<=";
   value: NativeAttributeValue;
-}
+};
 
-export interface NotCondition extends IConditionExpression {
+export type NotCondition = ConditionExpression & {
   kind: "NOT";
   condition: Condition;
-}
+};
 
-export interface NotEqualsCondition extends IConditionExpression {
+export type NotEqualsCondition = ConditionExpression & {
   attributePath: string | SizeCondition;
   kind: "<>";
   value: NativeAttributeValue;
-}
+};
 
-export interface OrCondition extends IConditionExpression {
+export type OrCondition = ConditionExpression & {
   kind: "OR";
   conditions: Condition[];
-}
+};
 
-export interface SizeCondition extends IConditionExpression {
+export type SizeCondition = ConditionExpression & {
   attributePath: string;
   kind: "size";
-}
+};
 
-type KeyCondition =
+export type KeyCondition =
   | BeginsWithCondition
   | BetweenCondition
   | EqualsCondition
@@ -140,7 +140,8 @@ type KeyCondition =
   | LessThanCondition
   | LessThanOrEqualsCondition;
 
-type NonKeyCondition =
+export type Condition =
+  | KeyCondition
   | AndCondition
   | AttributeExistsCondition
   | AttributeNotExistsCondition
@@ -150,5 +151,3 @@ type NonKeyCondition =
   | NotCondition
   | NotEqualsCondition
   | OrCondition;
-
-export type Condition = KeyCondition | NonKeyCondition;

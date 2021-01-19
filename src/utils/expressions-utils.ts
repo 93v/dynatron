@@ -2,15 +2,23 @@ import { NativeAttributeValue } from "@aws-sdk/util-dynamodb";
 import fastEquals from "fast-deep-equal";
 
 import { Condition } from "../../types/conditions";
-import { NativeValue } from "../../types/native-types";
-import { RawUpdate, RawUpdateType, UpdateType } from "../../types/update";
 import { and } from "../condition-expression-builders";
+import { NativeValue } from "../dynatron";
+import { UpdateType } from "../requesters/items/2.1.3-update";
 import { assertNever } from "./misc-utils";
 import { nextAlpha } from "./next-alpha-char-generator";
 
 type PathElement =
   | { type: "AttributeName"; name: string }
   | { type: "ListIndex"; index: number };
+
+type NativeUpdateType = "SET" | "ADD" | "REMOVE" | "DELETE";
+
+type NativeExpressionModel = {
+  expressionString: string;
+  expressionAttributeNames: Record<string, string>;
+  expressionAttributeValues?: NativeValue;
+};
 
 const parseAttributePath = (attributePath: string): PathElement[] => {
   const enum ParserMode {
@@ -139,7 +147,7 @@ const serializeExpressionValue = (
 const serializeUpdateExpression = (
   update: UpdateType,
   prefix = "",
-): { Type: RawUpdateType } & RawUpdate => {
+): { Type: NativeUpdateType } & NativeExpressionModel => {
   const { expressionString, expressionAttributeNames } = serializeAttributePath(
     update.attributePath,
     prefix,
@@ -154,9 +162,9 @@ const serializeUpdateExpression = (
     case "delete":
       return {
         Type: update.kind === "add" ? "ADD" : "DELETE",
-        Expression: `${expressionString} ${attributeValue.name}`,
-        ExpressionAttributeNames: expressionAttributeNames,
-        ExpressionAttributeValues: {
+        expressionString: `${expressionString} ${attributeValue.name}`,
+        expressionAttributeNames: expressionAttributeNames,
+        expressionAttributeValues: {
           [attributeValue.name]: attributeValue.value,
         },
       };
@@ -164,13 +172,13 @@ const serializeUpdateExpression = (
     case "prepend":
       return {
         Type: "SET",
-        Expression: `${expressionString}=list_append(${
+        expressionString: `${expressionString}=list_append(${
           update.kind === "append" ? expressionString : attributeValue.name
         },${
           update.kind === "append" ? attributeValue.name : expressionString
         })`,
-        ExpressionAttributeNames: expressionAttributeNames,
-        ExpressionAttributeValues: {
+        expressionAttributeNames: expressionAttributeNames,
+        expressionAttributeValues: {
           [attributeValue.name]: attributeValue.value,
         },
       };
@@ -178,28 +186,28 @@ const serializeUpdateExpression = (
     case "increment":
       return {
         Type: "SET",
-        Expression: `${expressionString}=${expressionString}${
+        expressionString: `${expressionString}=${expressionString}${
           update.kind === "increment" ? "+" : "-"
         }${attributeValue.name}`,
-        ExpressionAttributeNames: expressionAttributeNames,
-        ExpressionAttributeValues: {
+        expressionAttributeNames: expressionAttributeNames,
+        expressionAttributeValues: {
           [attributeValue.name]: attributeValue.value,
         },
       };
     case "remove":
       return {
         Type: "REMOVE",
-        Expression: `${expressionString}`,
-        ExpressionAttributeNames: expressionAttributeNames,
+        expressionString: `${expressionString}`,
+        expressionAttributeNames: expressionAttributeNames,
       };
     case "set":
       return {
         Type: "SET",
-        Expression: `${expressionString}=${
+        expressionString: `${expressionString}=${
           update.ifNotExist ? "if_not_exists(" + expressionString + "," : ""
         }${attributeValue.name}${update.ifNotExist ? ")" : ""}`,
-        ExpressionAttributeNames: expressionAttributeNames,
-        ExpressionAttributeValues: {
+        expressionAttributeNames: expressionAttributeNames,
+        expressionAttributeValues: {
           [attributeValue.name]: attributeValue.value,
         },
       };
@@ -212,11 +220,7 @@ const serializeConditionExpression = (
   condition: Condition,
   prefix = "",
   level = 0,
-): {
-  expressionString: string;
-  expressionAttributeNames: Record<string, string>;
-  expressionAttributeValues?: NativeValue;
-} => {
+): NativeExpressionModel => {
   switch (condition.kind) {
     case "attribute_exists":
     case "attribute_not_exists": {
@@ -417,14 +421,14 @@ export const marshallProjectionExpression = (
   ].map((projection) => serializeAttributePath(projection, "projection_"));
 
   const aggregatedProjections: {
-    expressions: string[];
+    expressionStrings: string[];
     expressionAttributeNames: Record<string, string>;
-  } = { expressions: [], expressionAttributeNames: {} };
+  } = { expressionStrings: [], expressionAttributeNames: {} };
 
   for (const projection of serializedProjections) {
-    aggregatedProjections.expressions = [
+    aggregatedProjections.expressionStrings = [
       ...new Set([
-        ...aggregatedProjections.expressions,
+        ...aggregatedProjections.expressionStrings,
         projection.expressionString,
       ]),
     ];
@@ -435,7 +439,7 @@ export const marshallProjectionExpression = (
   }
 
   return {
-    expressionString: aggregatedProjections?.expressions
+    expressionString: aggregatedProjections?.expressionStrings
       .filter((t) => t.trim() !== "")
       .join(", "),
     expressionAttributeNames: aggregatedProjections?.expressionAttributeNames,
@@ -446,7 +450,9 @@ export const marshallUpdateExpression = (
   updates: UpdateType[],
   prefix = "",
 ) => {
-  const updateMap: { [group in RawUpdateType]?: RawUpdate[] } = {};
+  const updateMap: {
+    [group in NativeUpdateType]?: NativeExpressionModel[];
+  } = {};
 
   for (const update of updates) {
     const { Type, ...updateExpression } = serializeUpdateExpression(
@@ -457,51 +463,51 @@ export const marshallUpdateExpression = (
     (updateMap[Type] || []).push(updateExpression);
   }
 
-  const updateObject = {
-    expression: "",
+  const updateObject: NativeExpressionModel = {
+    expressionString: "",
     expressionAttributeNames: {},
     expressionAttributeValues: {},
   };
 
   for (const updateGroup of Object.keys(updateMap)) {
-    const group: RawUpdate[] = updateMap[updateGroup];
+    const group: NativeExpressionModel[] = updateMap[updateGroup];
     const flatGroup = group.reduce((p, c) => {
       return {
-        Expression: p.Expression
-          ? `${p.Expression}, ${c.Expression}`
-          : c.Expression,
-        ExpressionAttributeNames: {
-          ...p.ExpressionAttributeNames,
-          ...c.ExpressionAttributeNames,
+        expressionString: p.expressionString
+          ? `${p.expressionString}, ${c.expressionString}`
+          : c.expressionString,
+        expressionAttributeNames: {
+          ...p.expressionAttributeNames,
+          ...c.expressionAttributeNames,
         },
-        ExpressionAttributeValues: {
-          ...p.ExpressionAttributeValues,
-          ...c.ExpressionAttributeValues,
+        expressionAttributeValues: {
+          ...p.expressionAttributeValues,
+          ...c.expressionAttributeValues,
         },
       };
     });
 
-    if (!flatGroup.Expression) {
+    if (!flatGroup.expressionString) {
       continue;
     }
 
-    updateObject.expression =
-      updateObject.expression +
-      ` ${updateGroup.toUpperCase()} ${flatGroup.Expression}`;
+    updateObject.expressionString =
+      updateObject.expressionString +
+      ` ${updateGroup.toUpperCase()} ${flatGroup.expressionString}`;
 
     updateObject.expressionAttributeNames = {
       ...updateObject.expressionAttributeNames,
-      ...flatGroup.ExpressionAttributeNames,
+      ...flatGroup.expressionAttributeNames,
     };
 
     updateObject.expressionAttributeValues = {
       ...updateObject.expressionAttributeValues,
-      ...flatGroup.ExpressionAttributeValues,
+      ...flatGroup.expressionAttributeValues,
     };
   }
 
   return {
-    expressionString: updateObject.expression.trim(),
+    expressionString: updateObject.expressionString.trim(),
     expressionAttributeNames: updateObject.expressionAttributeNames,
     expressionAttributeValues: updateObject.expressionAttributeValues,
   };
@@ -513,22 +519,18 @@ export const marshallConditionExpression = (
 ) => serializeConditionExpression(and(conditions), prefix);
 
 // TODO: use this
-export const optimizeExpression = (
-  expression: string,
-  attributeNames: Record<string, string>,
-  attributeValues?: Record<string, any>,
-): {
-  expression: string;
-  expressionAttributeNames: Record<string, string>;
-  expressionAttributeValues?: Record<string, any>;
-} => {
-  let optimizedExpression = expression;
+export const optimizeExpression = ({
+  expressionString,
+  expressionAttributeNames,
+  expressionAttributeValues,
+}: NativeExpressionModel): NativeExpressionModel => {
+  let optimizedExpression = expressionString;
 
   const optimizedNames: Record<string, string> = {};
   const optimizedValues: Record<string, any> = {};
 
-  for (const key in attributeNames) {
-    const attributeName = attributeNames[key];
+  for (const key in expressionAttributeNames) {
+    const attributeName = expressionAttributeNames[key];
     if (optimizedNames[attributeName] == undefined) {
       optimizedNames[attributeName] = key;
     } else {
@@ -538,9 +540,9 @@ export const optimizeExpression = (
     }
   }
 
-  if (attributeValues != undefined) {
-    for (const key in attributeValues) {
-      const value = attributeValues[key];
+  if (expressionAttributeValues != undefined) {
+    for (const key in expressionAttributeValues) {
+      const value = expressionAttributeValues[key];
       const optimizedKey = Object.keys(optimizedValues).find((k) =>
         fastEquals(optimizedValues[k], value),
       );
@@ -559,8 +561,10 @@ export const optimizeExpression = (
   }
 
   return {
-    expression: optimizedExpression,
+    expressionString: optimizedExpression,
     expressionAttributeNames: aggregatedOptimizedNames,
-    ...(attributeValues && { expressionAttributeValues: optimizedValues }),
+    ...(expressionAttributeValues && {
+      expressionAttributeValues: optimizedValues,
+    }),
   };
 };
