@@ -152,10 +152,7 @@ const serializeUpdateExpression = (
     update.attributePath,
     prefix,
   );
-  const attributeValue = serializeExpressionValue(
-    update["value"] ?? undefined,
-    prefix,
-  );
+  const attributeValue = serializeExpressionValue(update["value"], prefix);
 
   switch (update.kind) {
     case "add":
@@ -439,10 +436,10 @@ export const marshallProjectionExpression = (
   }
 
   return {
-    expressionString: aggregatedProjections?.expressionStrings
+    expressionString: aggregatedProjections.expressionStrings
       .filter((t) => t.trim() !== "")
       .join(", "),
-    expressionAttributeNames: aggregatedProjections?.expressionAttributeNames,
+    expressionAttributeNames: aggregatedProjections.expressionAttributeNames,
   };
 };
 
@@ -459,8 +456,7 @@ export const marshallUpdateExpression = (
       update,
       prefix,
     );
-    updateMap[Type] = updateMap[Type] || [];
-    (updateMap[Type] || []).push(updateExpression);
+    updateMap[Type] = [...(updateMap[Type] || []), updateExpression];
   }
 
   const updateObject: NativeExpressionModel = {

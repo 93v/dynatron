@@ -25,7 +25,7 @@ export class Request {
     if (patienceRatio <= 0) {
       throw new Error("The ratio must be positive");
     }
-    this.patienceRatio = Math.abs(patienceRatio);
+    this.patienceRatio = patienceRatio;
     return this;
   };
 
