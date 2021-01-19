@@ -189,9 +189,9 @@ export const size = (attributePath: string): SizeCondition => ({
 });
 
 export const isConditionEmptyDeep = (
-  arguments_: (Condition | Condition[] | undefined)[],
+  conditions: (Condition | Condition[] | undefined)[],
 ): boolean => {
-  return arguments_.every((argument) => {
+  return conditions.every((argument) => {
     if (argument == undefined) {
       return true;
     }

@@ -21,19 +21,21 @@ export class TableList {
 
   constructor(protected readonly client: DynamoDBClient) {}
 
-  limit = (parameters: { limit: number; exclusiveStartTableName?: string }) => {
-    if (
-      parameters.limit <= 0 ||
-      !Number.isInteger(parameters.limit) ||
-      parameters.limit > 100
-    ) {
+  limit = (limit: number) => {
+    if (limit <= 0 || !Number.isInteger(limit) || limit > 100) {
       throw new Error(
         "The limit must be a positive integer less than or equal to 100",
       );
     }
 
-    this.#Limit = parameters.limit;
-    this.#ExclusiveStartTableName = parameters.exclusiveStartTableName;
+    this.#Limit = limit;
+    return this;
+  };
+
+  start = (exclusiveStartTableName?: string) => {
+    if (exclusiveStartTableName != undefined) {
+      this.#ExclusiveStartTableName = exclusiveStartTableName;
+    }
     return this;
   };
 
