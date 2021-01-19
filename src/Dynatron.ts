@@ -18,7 +18,7 @@ import { Put } from "./requesters/items/2.1.2-put";
 import { Update } from "./requesters/items/2.1.3-update";
 import { BatchWrite } from "./requesters/items/2.2-batch-write";
 import { TransactWrite } from "./requesters/2.4-transact-write";
-import { TransactGet } from "./requesters/3-transact-get";
+import { TransactGet } from "./requesters/items/3-transact-get";
 import { TableCreate } from "./requesters/tables/table-create";
 import { TableDelete } from "./requesters/tables/table-delete";
 import { TableDescribe } from "./requesters/tables/table-describe";

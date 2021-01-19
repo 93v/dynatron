@@ -1,6 +1,6 @@
 import { Dynatron } from "../src/dynatron";
 import { TransactWrite } from "../src/requesters/2.4-transact-write";
-import { TransactGet } from "../src/requesters/3-transact-get";
+import { TransactGet } from "../src/requesters/items/3-transact-get";
 import { Get } from "../src/requesters/items/1.1-get";
 import { BatchGet } from "../src/requesters/items/1.2-batch-get";
 import { Query } from "../src/requesters/items/1.3.1-query";
