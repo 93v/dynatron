@@ -35,7 +35,16 @@ describe("Database Client", () => {
   });
 
   test("should return an instance of Dynatron", () => {
-    const dynatron = new Dynatron("", { region: "localhost" });
+    const dynatron = new Dynatron(
+      "",
+      { region: "eu-central-1" },
+      "newInstance",
+    );
+    expect(dynatron).toBeInstanceOf(Dynatron);
+  });
+
+  test("should return an instance of Dynatron", () => {
+    const dynatron = new Dynatron("", { region: "local" }, "newInstance2");
     expect(dynatron).toBeInstanceOf(Dynatron);
   });
 });

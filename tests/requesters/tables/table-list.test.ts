@@ -98,4 +98,67 @@ describe("Table List", () => {
       expect(error).toBeDefined();
     }
   });
+
+  test("should return an instance of TableList", async () => {
+    DynamoDBClient.prototype.send = async () => {
+      return;
+    };
+
+    const instance = new TableList(databaseClient);
+    expect(instance).toBeInstanceOf(TableList);
+
+    expect(await instance.$()).toBeUndefined();
+  });
+
+  test("should return an instance of TableList", async () => {
+    DynamoDBClient.prototype.send = async () => {
+      return {};
+    };
+
+    const instance = new TableList(databaseClient);
+    expect(instance).toBeInstanceOf(TableList);
+
+    expect(await instance.limit(1).$()).toBeUndefined();
+  });
+
+  test("should return an instance of TableList", async () => {
+    let page = 1;
+    DynamoDBClient.prototype.send = async () => {
+      page -= 1;
+      return page >= 0
+        ? {
+            TableNames: ["table1", "table2"],
+            LastEvaluatedTableName: "hello",
+          }
+        : { TableNames: ["table3", "table4"] };
+    };
+
+    const instance = new TableList(databaseClient);
+    expect(instance).toBeInstanceOf(TableList);
+
+    expect(await instance.$()).toEqual([
+      "table1",
+      "table2",
+      "table3",
+      "table4",
+    ]);
+  });
+
+  test("should return an instance of TableList", async () => {
+    let page = 1;
+    DynamoDBClient.prototype.send = async () => {
+      page -= 1;
+      return page >= 0
+        ? {
+            TableNames: ["table1", "table2"],
+            LastEvaluatedTableName: "hello",
+          }
+        : { TableNames: ["table3", "table4"] };
+    };
+
+    const instance = new TableList(databaseClient);
+    expect(instance).toBeInstanceOf(TableList);
+
+    expect(await instance.limit(2).$()).toEqual(["table1", "table2"]);
+  });
 });

@@ -1,5 +1,5 @@
 import { NativeAttributeValue } from "@aws-sdk/util-dynamodb";
-import fastEquals from "fast-deep-equal";
+// import fastEquals from "fast-deep-equal";
 
 import { Condition } from "../../types/conditions";
 import { and } from "../condition-expression-builders";
@@ -138,15 +138,12 @@ const parseAttributePath = (attributePath: string): PathElement[] => {
 
 const serializeExpressionValue = (
   value: NativeAttributeValue,
-  prefix = "",
-) => ({
-  name: `:${prefix}${nextAlpha.getNext()}`,
-  value,
-});
+  prefix: string,
+) => ({ name: `:${prefix}${nextAlpha.getNext()}`, value });
 
 const serializeUpdateExpression = (
   update: UpdateType,
-  prefix = "",
+  prefix: string,
 ): { Type: NativeUpdateType } & NativeExpressionModel => {
   const { expressionString, expressionAttributeNames } = serializeAttributePath(
     update.attributePath,
@@ -215,7 +212,7 @@ const serializeUpdateExpression = (
 
 const serializeConditionExpression = (
   condition: Condition,
-  prefix = "",
+  prefix: string,
   level = 0,
 ): NativeExpressionModel => {
   switch (condition.kind) {
@@ -361,7 +358,7 @@ const serializeConditionExpression = (
   }
 };
 
-const serializeAttributePath = (attributePath: string, prefix = "") => {
+const serializeAttributePath = (attributePath: string, prefix: string) => {
   const parsedAttributePath = parseAttributePath(attributePath);
 
   let expressionString = "";
@@ -400,7 +397,7 @@ const serializeAttributePath = (attributePath: string, prefix = "") => {
 };
 
 export const isTopLevelAttributePath = (attributePath: string): boolean => {
-  const serializedPath = serializeAttributePath(attributePath);
+  const serializedPath = serializeAttributePath(attributePath, "");
   return (
     !serializedPath.expressionString.includes(".") &&
     !(
@@ -514,53 +511,53 @@ export const marshallConditionExpression = (
   prefix = "",
 ) => serializeConditionExpression(and(conditions), prefix);
 
-// TODO: use this
-export const optimizeExpression = ({
-  expressionString,
-  expressionAttributeNames,
-  expressionAttributeValues,
-}: NativeExpressionModel): NativeExpressionModel => {
-  let optimizedExpression = expressionString;
+// // TODO: use this
+// export const optimizeExpression = ({
+//   expressionString,
+//   expressionAttributeNames,
+//   expressionAttributeValues,
+// }: NativeExpressionModel): NativeExpressionModel => {
+//   let optimizedExpression = expressionString;
 
-  const optimizedNames: Record<string, string> = {};
-  const optimizedValues: Record<string, any> = {};
+//   const optimizedNames: Record<string, string> = {};
+//   const optimizedValues: Record<string, any> = {};
 
-  for (const key in expressionAttributeNames) {
-    const attributeName = expressionAttributeNames[key];
-    if (optimizedNames[attributeName] == undefined) {
-      optimizedNames[attributeName] = key;
-    } else {
-      optimizedExpression = optimizedExpression
-        .split(key)
-        .join(optimizedNames[attributeName]);
-    }
-  }
+//   for (const key in expressionAttributeNames) {
+//     const attributeName = expressionAttributeNames[key];
+//     if (optimizedNames[attributeName] == undefined) {
+//       optimizedNames[attributeName] = key;
+//     } else {
+//       optimizedExpression = optimizedExpression
+//         .split(key)
+//         .join(optimizedNames[attributeName]);
+//     }
+//   }
 
-  if (expressionAttributeValues != undefined) {
-    for (const key in expressionAttributeValues) {
-      const value = expressionAttributeValues[key];
-      const optimizedKey = Object.keys(optimizedValues).find((k) =>
-        fastEquals(optimizedValues[k], value),
-      );
-      if (optimizedKey) {
-        optimizedExpression = optimizedExpression.split(key).join(optimizedKey);
-      } else {
-        optimizedValues[key] = value;
-      }
-    }
-  }
+//   if (expressionAttributeValues != undefined) {
+//     for (const key in expressionAttributeValues) {
+//       const value = expressionAttributeValues[key];
+//       const optimizedKey = Object.keys(optimizedValues).find((k) =>
+//         fastEquals(optimizedValues[k], value),
+//       );
+//       if (optimizedKey) {
+//         optimizedExpression = optimizedExpression.split(key).join(optimizedKey);
+//       } else {
+//         optimizedValues[key] = value;
+//       }
+//     }
+//   }
 
-  const aggregatedOptimizedNames: Record<string, string> = {};
+//   const aggregatedOptimizedNames: Record<string, string> = {};
 
-  for (const key in optimizedNames) {
-    aggregatedOptimizedNames[optimizedNames[key]] = key;
-  }
+//   for (const key in optimizedNames) {
+//     aggregatedOptimizedNames[optimizedNames[key]] = key;
+//   }
 
-  return {
-    expressionString: optimizedExpression,
-    expressionAttributeNames: aggregatedOptimizedNames,
-    ...(expressionAttributeValues && {
-      expressionAttributeValues: optimizedValues,
-    }),
-  };
-};
+//   return {
+//     expressionString: optimizedExpression,
+//     expressionAttributeNames: aggregatedOptimizedNames,
+//     ...(expressionAttributeValues && {
+//       expressionAttributeValues: optimizedValues,
+//     }),
+//   };
+// };

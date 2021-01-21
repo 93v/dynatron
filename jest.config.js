@@ -5,10 +5,10 @@ module.exports = {
   collectCoverageFrom: ["src/**/*.ts", "src/**/*.js"],
   coverageThreshold: {
     global: {
-      branches: 30,
+      branches: 40,
       functions: 70,
-      lines: 65,
-      statements: 65,
+      lines: 70,
+      statements: 70,
     },
   },
   testEnvironment: "node",

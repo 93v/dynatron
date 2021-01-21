@@ -57,11 +57,7 @@ export class Dynatron {
       maxAttempts: 3,
     };
 
-    // TODO: smarter check
-    if (
-      configuration.region !== "local" &&
-      configuration.region !== "localhost"
-    ) {
+    if (configuration.region !== "local") {
       // Experiments have shown that this is the optimal number for sockets
       const MAX_SOCKETS = 256;
 
