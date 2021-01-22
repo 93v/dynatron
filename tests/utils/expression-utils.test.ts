@@ -23,6 +23,136 @@ beforeEach(() => {
   nextAlpha.reset();
 });
 
+// describe("parseAttributePath", () => {
+//   test("should fail on empty path", () => {
+//     expect(() => {
+//       parseAttributePath("");
+//     }).toThrowError("Empty path");
+//   });
+
+//   test("should return an array", () => {
+//     expect(parseAttributePath("id")).toEqual([{ type: "name", name: "id" }]);
+//   });
+
+//   test("should return an array", () => {
+//     expect(parseAttributePath("user.name")).toEqual([
+//       { type: "name", name: "user" },
+//       { type: "name", name: "name" },
+//     ]);
+//   });
+
+//   test("should return an array", () => {
+//     expect(parseAttributePath("tags[0]")).toEqual([
+//       { type: "name", name: "tags" },
+//       { type: "index", index: 0 },
+//     ]);
+//   });
+
+//   test("should return an array", () => {
+//     expect(parseAttributePath("tags\\[0]")).toEqual([
+//       { type: "name", name: "tags[0]" },
+//     ]);
+//   });
+
+//   test("should return an array", () => {
+//     expect(parseAttributePath("tags[0][2]")).toEqual([
+//       { type: "name", name: "tags" },
+//       { type: "index", index: 0 },
+//       { type: "index", index: 2 },
+//     ]);
+//   });
+
+//   test("should return an array", () => {
+//     expect(parseAttributePath("tags[0].value")).toEqual([
+//       { type: "name", name: "tags" },
+//       { type: "index", index: 0 },
+//       { type: "name", name: "value" },
+//     ]);
+//   });
+
+//   test("should return an array", () => {
+//     expect(
+//       parseAttributePath("user.profile.addresses.homeAddress[1].street.name"),
+//     ).toEqual([
+//       { type: "name", name: "user" },
+//       { type: "name", name: "profile" },
+//       { type: "name", name: "addresses" },
+//       { type: "name", name: "homeAddress" },
+//       { type: "index", index: 1 },
+//       { type: "name", name: "street" },
+//       { type: "name", name: "name" },
+//     ]);
+//   });
+
+//   test("should return an array", () => {
+//     expect(parseAttributePath("user\\.name")).toEqual([
+//       { type: "name", name: "user.name" },
+//     ]);
+//   });
+
+//   test("should return an array", () => {
+//     expect(parseAttributePath("user\\name")).toEqual([
+//       { type: "name", name: "user\\name" },
+//     ]);
+//   });
+
+//   test("should throw", () => {
+//     expect(() => {
+//       parseAttributePath("[0]");
+//     }).toThrowError(
+//       `Invalid control character encountered in path "[0]" at index [0]`,
+//     );
+//   });
+
+//   test("should throw", () => {
+//     expect(() => {
+//       parseAttributePath("tags[0]name");
+//     }).toThrowError(
+//       `Bare identifier encountered between list index accesses in path "tags[0]name" at index [7]`,
+//     );
+//   });
+
+//   test("should throw", () => {
+//     expect(() => {
+//       parseAttributePath("tags[index]");
+//     }).toThrowError(
+//       `Invalid array index character "i" encountered in path "tags[index]" at index [5]`,
+//     );
+//   });
+
+//   test("should throw", () => {
+//     expect(() => {
+//       parseAttributePath("tags[]");
+//     }).toThrowError(
+//       `Empty array index encountered in path "tags[]" at index [5]`,
+//     );
+//   });
+
+//   test("should throw", () => {
+//     expect(() => {
+//       parseAttributePath("tags..");
+//     }).toThrowError(
+//       'Invalid control character encountered in path "tags.." at index [5]',
+//     );
+//   });
+
+//   test("should throw", () => {
+//     expect(() => {
+//       parseAttributePath("tags.");
+//     }).toThrowError(
+//       'Invalid control character encountered in path "tags." at index [4]',
+//     );
+//   });
+
+//   test("should throw", () => {
+//     expect(() => {
+//       parseAttributePath("tags[0].");
+//     }).toThrowError(
+//       'Invalid control character encountered in path "tags[0]." at index [7]',
+//     );
+//   });
+// });
+
 describe("isTopLevelAttributePath", () => {
   test("should return true", () => {
     expect(isTopLevelAttributePath("id")).toBe(true);
@@ -38,6 +168,15 @@ describe("isTopLevelAttributePath", () => {
 
   test("should return false", () => {
     expect(isTopLevelAttributePath("id[0]")).toBe(false);
+  });
+
+  test("should return false", () => {
+    expect(isTopLevelAttributePath("id\\[0]")).toBe(true);
+  });
+
+  test("should throw", () => {
+    expect(isTopLevelAttributePath("")).toBe(false);
+    expect(isTopLevelAttributePath("id.")).toBe(false);
   });
 });
 
@@ -236,7 +375,7 @@ describe("Update expression marshaller", () => {
     expect(
       marshallUpdateExpression([
         { kind: "add", attributePath: "id", value: 5 },
-        { kind: "set", attributePath: "id", value: 5, ifNotExist: true },
+        { kind: "set", attributePath: "id", value: 5, ifDoesNotExist: true },
       ]),
     ).toEqual({
       expressionString: "ADD #a :b SET #c=if_not_exists(#c,:d)",
@@ -310,7 +449,7 @@ describe("Update expression marshaller", () => {
     nextAlpha.reset();
     expect(
       marshallUpdateExpression([
-        { kind: "set", attributePath: "id", value: 5, ifNotExist: false },
+        { kind: "set", attributePath: "id", value: 5, ifDoesNotExist: false },
       ]),
     ).toEqual({
       expressionString: "SET #a=:b",

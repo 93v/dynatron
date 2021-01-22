@@ -64,7 +64,7 @@ export type UpdateSet = {
   kind: "set";
   attributePath: string;
   value: NativeAttributeValue;
-  ifNotExist: boolean;
+  ifDoesNotExist: boolean;
 };
 
 export type UpdateType =
@@ -80,13 +80,13 @@ export type UpdateType =
 export class Update extends Check {
   #UpdateExpressions: UpdateType[] = [];
 
-  assign(item: NativeValue, ifNotExist = false) {
+  assign(item: NativeValue, ifDoesNotExist = false) {
     Object.entries(item).forEach(([attributePath, value]) => {
       this.#UpdateExpressions.push({
         kind: "set",
         attributePath,
         value,
-        ifNotExist,
+        ifDoesNotExist: ifDoesNotExist,
       } as UpdateSet);
     });
     return this;
@@ -182,15 +182,14 @@ export class Update extends Check {
     value?: Set<string | number> | (string | number) | (string | number)[],
   ) {
     if (value == undefined) {
+      if (!isTopLevelAttributePath(attributePath)) {
+        throw new Error("DELETE can only be used on top-level attributes");
+      }
       this.#UpdateExpressions.push({
         kind: "remove",
         attributePath: attributePath,
       } as UpdateRemove);
       return this;
-    }
-
-    if (!isTopLevelAttributePath(attributePath)) {
-      throw new Error("DELETE can only be used on top-level attributes");
     }
 
     this.#UpdateExpressions.push({
@@ -207,7 +206,7 @@ export class Update extends Check {
   [BUILD]() {
     return {
       ...super[BUILD](),
-      ...(this.#UpdateExpressions?.length && {
+      ...(this.#UpdateExpressions.length > 0 && {
         _UpdateExpressions: this.#UpdateExpressions,
       }),
     };

@@ -8,10 +8,6 @@ import { UpdateType } from "../requesters/items/2.1.3-update";
 import { assertNever } from "./misc-utils";
 import { nextAlpha } from "./next-alpha-char-generator";
 
-type PathElement =
-  | { type: "AttributeName"; name: string }
-  | { type: "ListIndex"; index: number };
-
 type NativeUpdateType = "SET" | "ADD" | "REMOVE" | "DELETE";
 
 type NativeExpressionModel = {
@@ -20,119 +16,112 @@ type NativeExpressionModel = {
   expressionAttributeValues?: NativeValue;
 };
 
-const parseAttributePath = (attributePath: string): PathElement[] => {
-  const enum ParserMode {
-    AFTER_LIST_INDEX_MODE,
-    LIST_INDEX_MODE,
-    NORMAL_MODE,
-    ESCAPED_MODE,
+const parseAttributePath = (attributePath: string) => {
+  const enum Mode {
+    AFTER_LIST_INDEX,
+    ESCAPED,
+    LIST_INDEX,
+    NORMAL,
   }
-
-  const enum Character {
-    ESCAPE_CHARACTER = "\\",
+  const enum SpecialChar {
+    DOT = ".",
+    ESCAPE = "\\",
     LEFT_BRACKET = "[",
-    PATH_DELIMITER = ".",
     RIGHT_BRACKET = "]",
   }
-
-  const elements: PathElement[] = [];
-  let mode: ParserMode = ParserMode.NORMAL_MODE;
-  let buffer = "";
-
-  [...attributePath].forEach((char, index, chars) => {
-    switch (mode) {
-      case ParserMode.ESCAPED_MODE:
-        buffer += char;
-        mode = ParserMode.NORMAL_MODE;
-        break;
-      case ParserMode.NORMAL_MODE:
-        switch (char) {
-          case Character.ESCAPE_CHARACTER: {
-            const nextChar = chars[index + 1];
-            if (
-              nextChar === Character.PATH_DELIMITER ||
-              nextChar === Character.LEFT_BRACKET ||
-              nextChar === Character.ESCAPE_CHARACTER
-            ) {
-              mode = ParserMode.ESCAPED_MODE;
-              break;
-            }
-            buffer += char;
-            break;
-          }
-          case Character.PATH_DELIMITER:
-          case Character.LEFT_BRACKET:
-            if (buffer === "") {
-              throw new Error(
-                `Invalid control character encountered in path [${attributePath}] at index [${index}]`,
-              );
-            }
-            elements.push({
-              type: "AttributeName",
-              name: buffer,
-            });
-            buffer = "";
-
-            if (char === Character.LEFT_BRACKET) {
-              mode = ParserMode.LIST_INDEX_MODE;
-            }
-
-            break;
-          default:
-            buffer += char;
-        }
-        break;
-      case ParserMode.AFTER_LIST_INDEX_MODE:
-        switch (char) {
-          case Character.LEFT_BRACKET:
-            mode = ParserMode.LIST_INDEX_MODE;
-            break;
-          case Character.PATH_DELIMITER:
-            mode = ParserMode.NORMAL_MODE;
-            break;
-          default:
-            throw new Error(
-              `Bare identifier encountered between list index accesses in path [${attributePath}] at index [${index}]`,
-            );
-        }
-        break;
-      case ParserMode.LIST_INDEX_MODE:
-        if (char === Character.RIGHT_BRACKET) {
-          const listIndexValue = Number.parseInt(buffer);
-          if (!Number.isFinite(listIndexValue)) {
-            throw new TypeError(
-              `Invalid array index character [${buffer}] encountered in path [${attributePath}] at index ${
-                index - buffer.length
-              } `,
-            );
-          }
-          elements.push({
-            type: "ListIndex",
-            index: listIndexValue,
-          });
-          buffer = "";
-          mode = ParserMode.AFTER_LIST_INDEX_MODE;
-        } else {
-          if (!/^\d$/.test(char)) {
-            throw new Error(
-              `Invalid array index character [${char}] encountered in path [${attributePath}] at index ${index} `,
-            );
-          }
-          buffer += char;
-        }
-        break;
-      default:
-        throw assertNever(mode);
-    }
-  });
-
-  if (buffer.length > 0) {
-    elements.push({
-      type: "AttributeName",
-      name: buffer,
-    });
+  if (attributePath.length === 0) {
+    throw new Error("Empty path");
   }
+  if (attributePath.slice(-1) === SpecialChar.DOT) {
+    throw new Error(
+      `Invalid control character encountered in path "${attributePath}" at index [${
+        attributePath.length - 1
+      }]`,
+    );
+  }
+  let mode: Mode = Mode.NORMAL;
+  let buffer = "";
+  const elements: (
+    | { type: "name"; name: string }
+    | { type: "index"; index: number }
+  )[] = [];
+  [...attributePath].forEach((char, index, chars) => {
+    if (mode === Mode.ESCAPED) {
+      buffer += char;
+      mode = Mode.NORMAL;
+      return;
+    }
 
+    if (mode === Mode.LIST_INDEX) {
+      if (char === SpecialChar.RIGHT_BRACKET) {
+        const listIndexValue = Number.parseInt(buffer);
+        if (!Number.isFinite(listIndexValue)) {
+          throw new TypeError(
+            `Empty array index encountered in path "${attributePath}" at index [${
+              index - buffer.length
+            }]`,
+          );
+        }
+        elements.push({
+          type: "index",
+          index: listIndexValue,
+        });
+        buffer = "";
+        mode = Mode.AFTER_LIST_INDEX;
+        return;
+      }
+
+      if (!/^\d$/.test(char)) {
+        throw new Error(
+          `Invalid array index character "${char}" encountered in path "${attributePath}" at index [${index}]`,
+        );
+      }
+      buffer += char;
+      return;
+    }
+
+    if (mode === Mode.AFTER_LIST_INDEX) {
+      if (char !== SpecialChar.LEFT_BRACKET && char !== SpecialChar.DOT) {
+        throw new Error(
+          `Bare identifier encountered between list index accesses in path "${attributePath}" at index [${index}]`,
+        );
+      }
+      mode = char === SpecialChar.LEFT_BRACKET ? Mode.LIST_INDEX : Mode.NORMAL;
+      return;
+    }
+
+    // Normal mode
+    if (char === SpecialChar.DOT || char === SpecialChar.LEFT_BRACKET) {
+      if (buffer === "") {
+        throw new Error(
+          `Invalid control character encountered in path "${attributePath}" at index [${index}]`,
+        );
+      }
+      elements.push({ type: "name", name: buffer });
+      buffer = "";
+      if (char === SpecialChar.LEFT_BRACKET) {
+        mode = Mode.LIST_INDEX;
+      }
+      return;
+    }
+
+    if (char === SpecialChar.ESCAPE) {
+      const nextChar = chars[index + 1];
+      if (
+        nextChar === SpecialChar.DOT ||
+        nextChar === SpecialChar.LEFT_BRACKET ||
+        nextChar === SpecialChar.ESCAPE
+      ) {
+        mode = Mode.ESCAPED;
+        return;
+      }
+    }
+
+    buffer += char;
+  });
+  if (buffer.length > 0) {
+    elements.push({ type: "name", name: buffer });
+  }
   return elements;
 };
 
@@ -198,8 +187,8 @@ const serializeUpdateExpression = (
       return {
         Type: "SET",
         expressionString: `${expressionString}=${
-          update.ifNotExist ? "if_not_exists(" + expressionString + "," : ""
-        }${attributeValue.name}${update.ifNotExist ? ")" : ""}`,
+          update.ifDoesNotExist ? "if_not_exists(" + expressionString + "," : ""
+        }${attributeValue.name}${update.ifDoesNotExist ? ")" : ""}`,
         expressionAttributeNames: expressionAttributeNames,
         expressionAttributeValues: {
           [attributeValue.name]: attributeValue.value,
@@ -360,17 +349,13 @@ const serializeConditionExpression = (
 
 const serializeAttributePath = (attributePath: string, prefix: string) => {
   const parsedAttributePath = parseAttributePath(attributePath);
-
   let expressionString = "";
-
   const attributeNamesMap: Record<string, string> = {};
-
   for (const pathElement of parsedAttributePath) {
-    if (pathElement.type === "ListIndex") {
+    if (pathElement.type === "index") {
       expressionString += `[${pathElement.index}]`;
       continue;
     }
-
     const pathElementName = pathElement.name;
     attributeNamesMap[pathElementName] =
       attributeNamesMap[pathElementName] ||
@@ -379,32 +364,31 @@ const serializeAttributePath = (attributePath: string, prefix: string) => {
           ? attributeNamesMap[pathElementName]
           : `${prefix}${nextAlpha.getNext()}`
       }`;
-
     if (expressionString !== "") {
       expressionString += ".";
     }
-
     expressionString += `${attributeNamesMap[pathElementName]}`;
   }
-
   const expressionAttributeNames: Record<string, string> = {};
-
   for (const key in attributeNamesMap) {
     expressionAttributeNames[attributeNamesMap[key]] = key;
   }
-
   return { expressionString, expressionAttributeNames };
 };
 
 export const isTopLevelAttributePath = (attributePath: string): boolean => {
-  const serializedPath = serializeAttributePath(attributePath, "");
-  return (
-    !serializedPath.expressionString.includes(".") &&
-    !(
-      serializedPath.expressionString.includes("[") &&
-      serializedPath.expressionString.endsWith("]")
-    )
-  );
+  try {
+    const serializedPath = serializeAttributePath(attributePath, "");
+    return (
+      !serializedPath.expressionString.includes(".") &&
+      !(
+        serializedPath.expressionString.includes("[") &&
+        serializedPath.expressionString.endsWith("]")
+      )
+    );
+  } catch {
+    return false;
+  }
 };
 
 export const marshallProjectionExpression = (
