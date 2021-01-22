@@ -45,7 +45,7 @@ export class Get extends Fetch {
     );
     return AsyncRetry(async (bail, attempt) => {
       const shortCircuit = createShortCircuit({
-        duration: attempt * SHORT_MAX_LATENCY * (this.patienceRatio || 1),
+        duration: attempt * SHORT_MAX_LATENCY * this.patienceRatio,
         error: new Error(TAKING_TOO_LONG_EXCEPTION),
       });
       try {

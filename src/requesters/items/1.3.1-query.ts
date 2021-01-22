@@ -81,7 +81,7 @@ export class Query extends ListFetch {
     return AsyncRetry(async (bail, attempt) => {
       while (!operationCompleted) {
         const shortCircuit = createShortCircuit({
-          duration: attempt * LONG_MAX_LATENCY * (this.patienceRatio || 1),
+          duration: attempt * LONG_MAX_LATENCY * this.patienceRatio,
           error: new Error(TAKING_TOO_LONG_EXCEPTION),
         });
         try {

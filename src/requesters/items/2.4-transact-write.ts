@@ -101,7 +101,7 @@ export class TransactWrite extends Amend {
 
     return AsyncRetry(async (bail, attempt) => {
       const shortCircuit = createShortCircuit({
-        duration: attempt * LONG_MAX_LATENCY * (this.patienceRatio || 1),
+        duration: attempt * LONG_MAX_LATENCY * this.patienceRatio,
         error: new Error(TAKING_TOO_LONG_EXCEPTION),
       });
       try {

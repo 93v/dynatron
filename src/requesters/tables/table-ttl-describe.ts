@@ -13,12 +13,15 @@ import {
   SHORT_MAX_LATENCY,
   TAKING_TOO_LONG_EXCEPTION,
 } from "../../utils/misc-utils";
+import { TableRequest } from "./0-table-request";
 
-export class TableTTLDescribe {
+export class TableTTLDescribe extends TableRequest {
   constructor(
     protected readonly client: DynamoDBClient,
     protected tableName: string,
-  ) {}
+  ) {
+    super();
+  }
 
   [BUILD](): DescribeTimeToLiveInput {
     return { TableName: this.tableName };
@@ -28,7 +31,7 @@ export class TableTTLDescribe {
     const requestInput = this[BUILD]();
     return AsyncRetry(async (bail, attempt) => {
       const shortCircuit = createShortCircuit({
-        duration: attempt * SHORT_MAX_LATENCY,
+        duration: attempt * SHORT_MAX_LATENCY * this.patienceRatio,
         error: new Error(TAKING_TOO_LONG_EXCEPTION),
       });
       try {

@@ -14,12 +14,15 @@ import {
   RETRY_OPTIONS,
   TAKING_TOO_LONG_EXCEPTION,
 } from "../../utils/misc-utils";
+import { TableRequest } from "./0-table-request";
 
-export class TableList {
+export class TableList extends TableRequest {
   #Limit?: number;
   #ExclusiveStartTableName?: string;
 
-  constructor(protected readonly client: DynamoDBClient) {}
+  constructor(protected readonly client: DynamoDBClient) {
+    super();
+  }
 
   limit = (limit: number) => {
     if (limit <= 0 || !Number.isInteger(limit) || limit > 100) {
@@ -58,7 +61,7 @@ export class TableList {
     return AsyncRetry(async (bail, attempt) => {
       while (!operationCompleted) {
         const shortCircuit = createShortCircuit({
-          duration: attempt * LONG_MAX_LATENCY,
+          duration: attempt * LONG_MAX_LATENCY * this.patienceRatio,
           error: new Error(TAKING_TOO_LONG_EXCEPTION),
         });
 
@@ -89,9 +92,10 @@ export class TableList {
 
           if (
             requestInput.Limit &&
-            (aggregatedResponse.TableNames?.length || 0) >= requestInput.Limit
+            aggregatedResponse.TableNames &&
+            aggregatedResponse.TableNames.length >= requestInput.Limit
           ) {
-            aggregatedResponse.TableNames = aggregatedResponse.TableNames?.slice(
+            aggregatedResponse.TableNames = aggregatedResponse.TableNames.slice(
               0,
               requestInput.Limit,
             );
