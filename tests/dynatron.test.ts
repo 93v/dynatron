@@ -1,4 +1,4 @@
-import { Dynatron } from "../src/dynatron";
+import { Dynatron } from "../src/dynatron-class";
 import { Get } from "../src/requesters/items/1.1-get";
 import { BatchGet } from "../src/requesters/items/1.2-batch-get";
 import { Query } from "../src/requesters/items/1.3.1-query";

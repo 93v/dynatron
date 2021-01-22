@@ -9,7 +9,7 @@ import AsyncRetry from "async-retry";
 
 import { EqualsCondition, KeyCondition } from "../../../types/conditions";
 import { and } from "../../condition-expression-builders";
-import { NativeValue } from "../../dynatron";
+import { NativeValue } from "../../dynatron-class";
 import {
   BUILD,
   createShortCircuit,

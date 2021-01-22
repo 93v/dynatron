@@ -1,7 +1,7 @@
 import { loadSharedConfigFiles } from "@aws-sdk/shared-ini-file-loader";
 import { Options } from "async-retry";
 
-import { NativeValue } from "../dynatron";
+import { NativeValue } from "../dynatron-class";
 
 export const BUILD: unique symbol = Symbol("Build._build");
 

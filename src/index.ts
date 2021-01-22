@@ -1,4 +1,4 @@
-export { Dynatron } from "./dynatron";
+export { Dynatron } from "./dynatron-class";
 
 export {
   and,

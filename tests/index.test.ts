@@ -26,12 +26,10 @@ import {
   loadProfileCredentials,
 } from "../src";
 
-import { Dynatron as DynatronClass } from "../src/dynatron";
-
 describe("Check exports", () => {
   test("should export Dynatron", () => {
     expect(Dynatron).toBeDefined();
-    expect(new Dynatron("")).toBeInstanceOf(DynatronClass);
+    expect(new Dynatron("")).toBeInstanceOf(Dynatron);
   });
   test("should export and", () => {
     expect(and).toBeDefined();
