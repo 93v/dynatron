@@ -16,9 +16,17 @@ afterAll(() => {
 
 describe("Table Create", () => {
   test("should return an instance of TableCreate", () => {
-    const instance = new TableCreate(databaseClient, {} as any);
+    const instance = new TableCreate(databaseClient, {
+      AttributeDefinitions: [],
+      KeySchema: [],
+      TableName: "tableName",
+    });
     expect(instance).toBeInstanceOf(TableCreate);
-    expect(instance[BUILD]()).toEqual({});
+    expect(instance[BUILD]()).toEqual({
+      AttributeDefinitions: [],
+      KeySchema: [],
+      TableName: "tableName",
+    });
   });
 
   test("should return an instance of TableCreate", async () => {
@@ -26,7 +34,11 @@ describe("Table Create", () => {
       return {};
     };
 
-    const instance = new TableCreate(databaseClient, {} as any);
+    const instance = new TableCreate(databaseClient, {
+      AttributeDefinitions: [],
+      KeySchema: [],
+      TableName: "tableName",
+    });
     expect(instance).toBeInstanceOf(TableCreate);
 
     expect(await instance.$()).toBeUndefined();
@@ -37,7 +49,11 @@ describe("Table Create", () => {
       throw new Error("ECONN");
     };
 
-    const instance = new TableCreate(databaseClient, {} as any);
+    const instance = new TableCreate(databaseClient, {
+      AttributeDefinitions: [],
+      KeySchema: [],
+      TableName: "tableName",
+    });
     expect(instance).toBeInstanceOf(TableCreate);
 
     try {
@@ -52,7 +68,11 @@ describe("Table Create", () => {
       throw new Error("Unknown");
     };
 
-    const instance = new TableCreate(databaseClient, {} as any);
+    const instance = new TableCreate(databaseClient, {
+      AttributeDefinitions: [],
+      KeySchema: [],
+      TableName: "tableName",
+    });
     expect(instance).toBeInstanceOf(TableCreate);
 
     try {

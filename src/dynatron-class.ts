@@ -45,7 +45,7 @@ export class Dynatron {
     private instanceId = "default",
   ) {
     Dynatron.DynamoDBClients[this.instanceId] =
-      Dynatron.DynamoDBClients[this.instanceId] ||
+      Dynatron.DynamoDBClients[this.instanceId] ??
       this.initializeDatabaseClient(this.clientConfiguration);
   }
 
@@ -70,7 +70,7 @@ export class Dynatron {
           secureProtocol: "TLSv1_method",
           ciphers: "ALL",
         }),
-        socketTimeout: connectionParameters?.timeout || LONG_MAX_LATENCY + 1000,
+        socketTimeout: connectionParameters?.timeout ?? LONG_MAX_LATENCY + 1000,
       });
     }
 

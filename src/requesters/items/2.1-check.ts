@@ -40,7 +40,7 @@ export class Check extends Amend {
             : [currentCondition]),
         ];
       },
-      this.#ConditionExpressions || [],
+      this.#ConditionExpressions ?? [],
     );
     return this;
   };

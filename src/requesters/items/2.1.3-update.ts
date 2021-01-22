@@ -7,7 +7,6 @@ import { NativeAttributeValue, unmarshall } from "@aws-sdk/util-dynamodb";
 import AsyncRetry from "async-retry";
 
 import { NativeValue } from "../../dynatron-class";
-import { isTopLevelAttributePath } from "../../utils/expressions-utils";
 import {
   BUILD,
   createShortCircuit,
@@ -29,12 +28,6 @@ export type UpdateAppend = {
   kind: "append";
   attributePath: string;
   value: NativeAttributeValue | NativeAttributeValue[];
-};
-
-export type UpdateDecrement = {
-  kind: "decrement";
-  attributePath: string;
-  value: number;
 };
 
 export type UpdateDelete = {
@@ -70,7 +63,6 @@ export type UpdateSet = {
 export type UpdateType =
   | UpdateAdd
   | UpdateAppend
-  | UpdateDecrement
   | UpdateDelete
   | UpdateIncrement
   | UpdatePrepend
@@ -86,7 +78,7 @@ export class Update extends Check {
         kind: "set",
         attributePath,
         value,
-        ifDoesNotExist: ifDoesNotExist,
+        ifDoesNotExist,
       } as UpdateSet);
     });
     return this;
@@ -97,19 +89,11 @@ export class Update extends Check {
     value: number,
     createIfAttributePathDoesNotExist = true,
   ) {
-    this.#UpdateExpressions.push(
-      createIfAttributePathDoesNotExist
-        ? ({
-            kind: "add",
-            attributePath,
-            value,
-          } as UpdateAdd)
-        : ({
-            kind: "increment",
-            attributePath,
-            value,
-          } as UpdateIncrement),
-    );
+    this.#UpdateExpressions.push({
+      kind: createIfAttributePathDoesNotExist ? "add" : "increment",
+      attributePath,
+      value,
+    });
     return this;
   }
 
@@ -118,88 +102,54 @@ export class Update extends Check {
     value: number,
     createIfAttributePathDoesNotExist = true,
   ) {
-    this.#UpdateExpressions.push(
-      createIfAttributePathDoesNotExist
-        ? ({
-            kind: "add",
-            attributePath,
-            value: -1 * value,
-          } as UpdateAdd)
-        : ({
-            kind: "decrement",
-            attributePath,
-            value,
-          } as UpdateDecrement),
+    return this.increment(
+      attributePath,
+      -1 * value,
+      createIfAttributePathDoesNotExist,
     );
-    return this;
   }
 
-  append(
-    attributePath: string,
-    value: NativeAttributeValue | NativeAttributeValue[],
-  ) {
+  append(attributePath: string, value: NativeAttributeValue[]) {
     this.#UpdateExpressions.push({
       kind: "append",
       attributePath,
-      value: Array.isArray(value) ? value : [value],
-    } as UpdateAppend);
+      value,
+    });
     return this;
   }
 
-  prepend(
-    attributePath: string,
-    value: NativeAttributeValue | NativeAttributeValue[],
-  ) {
+  prepend(attributePath: string, value: NativeAttributeValue[]) {
     this.#UpdateExpressions.push({
       kind: "prepend",
       attributePath,
-      value: Array.isArray(value) ? value : [value],
-    } as UpdatePrepend);
+      value,
+    });
     return this;
   }
 
-  add(
-    attributePath: string,
-    value: Set<string | number> | string | number | (string | number)[],
-  ) {
-    if (!isTopLevelAttributePath(attributePath)) {
-      throw new Error("ADD can only be used on top-level attributes");
-    }
-
+  add(attributePath: string, value: Set<string | number>) {
     this.#UpdateExpressions.push({
       kind: "add",
       attributePath,
-      value:
-        value instanceof Set
-          ? value
-          : new Set(Array.isArray(value) ? value : [value]),
+      value,
     });
     return this;
   }
 
-  drop(
-    attributePath: string,
-    value?: Set<string | number> | (string | number) | (string | number)[],
-  ) {
-    if (value == undefined) {
-      if (!isTopLevelAttributePath(attributePath)) {
-        throw new Error("DELETE can only be used on top-level attributes");
-      }
-      this.#UpdateExpressions.push({
-        kind: "remove",
-        attributePath: attributePath,
-      } as UpdateRemove);
-      return this;
-    }
-
+  delete(attributePath: string, value: Set<string | number>) {
     this.#UpdateExpressions.push({
       kind: "delete",
       attributePath,
-      value:
-        value instanceof Set
-          ? value
-          : new Set(Array.isArray(value) ? value : [value]),
+      value,
     });
+    return this;
+  }
+
+  drop(attributePath: string) {
+    this.#UpdateExpressions.push({
+      kind: "remove",
+      attributePath: attributePath,
+    } as UpdateRemove);
     return this;
   }
 
@@ -234,11 +184,10 @@ export class Update extends Check {
           ? output
           : output.Attributes && unmarshall(output.Attributes)) as any;
       } catch (error) {
-        if (!isRetryableError(error)) {
-          bail(error);
-          return;
+        if (isRetryableError(error)) {
+          throw error;
         }
-        throw error;
+        bail(error);
       } finally {
         shortCircuit.halt();
       }

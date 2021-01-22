@@ -1,5 +1,6 @@
 import {
   DescribeTimeToLiveCommand,
+  DescribeTimeToLiveCommandOutput,
   DescribeTimeToLiveInput,
   DynamoDBClient,
 } from "@aws-sdk/client-dynamodb";
@@ -29,7 +30,9 @@ export class TableTTLDescribe extends TableRequest {
 
   $ = async () => {
     const requestInput = this[BUILD]();
-    return AsyncRetry(async (bail, attempt) => {
+    return AsyncRetry(async (bail, attempt): Promise<
+      DescribeTimeToLiveCommandOutput["TimeToLiveDescription"] | void
+    > => {
       const shortCircuit = createShortCircuit({
         duration: attempt * SHORT_MAX_LATENCY * this.patienceRatio,
         error: new Error(TAKING_TOO_LONG_EXCEPTION),
@@ -41,11 +44,10 @@ export class TableTTLDescribe extends TableRequest {
         ]);
         return output.TimeToLiveDescription;
       } catch (error) {
-        if (!isRetryableError(error)) {
-          bail(error);
-          return;
+        if (isRetryableError(error)) {
+          throw error;
         }
-        throw error;
+        bail(error);
       } finally {
         shortCircuit.halt();
       }

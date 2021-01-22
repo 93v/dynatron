@@ -1,5 +1,6 @@
 import {
   CreateTableCommand,
+  CreateTableCommandOutput,
   CreateTableInput,
   DynamoDBClient,
 } from "@aws-sdk/client-dynamodb";
@@ -29,7 +30,9 @@ export class TableCreate extends TableRequest {
 
   $ = async () => {
     const requestInput = this[BUILD]();
-    return AsyncRetry(async (bail, attempt) => {
+    return AsyncRetry(async (bail, attempt): Promise<
+      CreateTableCommandOutput["TableDescription"] | void
+    > => {
       const shortCircuit = createShortCircuit({
         duration: attempt * LONG_MAX_LATENCY * this.patienceRatio,
         error: new Error(TAKING_TOO_LONG_EXCEPTION),
@@ -41,11 +44,10 @@ export class TableCreate extends TableRequest {
         ]);
         return output.TableDescription;
       } catch (error) {
-        if (!isRetryableError(error)) {
-          bail(error);
-          return;
+        if (isRetryableError(error)) {
+          throw error;
         }
-        throw error;
+        bail(error);
       } finally {
         shortCircuit.halt();
       }

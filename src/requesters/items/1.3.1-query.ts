@@ -98,47 +98,46 @@ export class Query extends ListFetch {
           }
           if (output.Items) {
             aggregatedOutput.Items = [
-              ...(aggregatedOutput.Items || []),
+              ...(aggregatedOutput.Items ?? []),
               ...output.Items,
             ];
           }
           if (output.Count) {
             aggregatedOutput.Count =
-              (aggregatedOutput.Count || 0) + output.Count;
+              (aggregatedOutput.Count ?? 0) + output.Count;
           }
           if (output.ScannedCount) {
             aggregatedOutput.ScannedCount =
-              (aggregatedOutput.ScannedCount || 0) + output.ScannedCount;
+              (aggregatedOutput.ScannedCount ?? 0) + output.ScannedCount;
           }
           if (output.ConsumedCapacity) {
             if (!aggregatedOutput.ConsumedCapacity) {
               aggregatedOutput.ConsumedCapacity = output.ConsumedCapacity;
             } else {
               aggregatedOutput.ConsumedCapacity.CapacityUnits =
-                (aggregatedOutput.ConsumedCapacity.CapacityUnits || 0) +
-                (output.ConsumedCapacity?.CapacityUnits || 0);
+                (aggregatedOutput.ConsumedCapacity.CapacityUnits ?? 0) +
+                (output.ConsumedCapacity?.CapacityUnits ?? 0);
             }
           }
           if (
             requestInput.Limit &&
-            (aggregatedOutput.Items?.length || 0) >= requestInput.Limit
+            (aggregatedOutput.Items?.length ?? 0) >= requestInput.Limit
           ) {
             aggregatedOutput.Items = aggregatedOutput.Items?.slice(
               0,
               requestInput.Limit,
             );
-            aggregatedOutput.Count = aggregatedOutput.Items?.length || 0;
+            aggregatedOutput.Count = aggregatedOutput.Items?.length ?? 0;
             operationCompleted = true;
           }
           if (disableRecursion && output.LastEvaluatedKey != undefined) {
             aggregatedOutput.LastEvaluatedKey = output.LastEvaluatedKey;
           }
         } catch (error) {
-          if (!isRetryableError(error)) {
-            bail(error);
-            return;
+          if (isRetryableError(error)) {
+            throw error;
           }
-          throw error;
+          bail(error);
         } finally {
           shortCircuit.halt();
         }

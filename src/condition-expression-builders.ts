@@ -90,7 +90,7 @@ export const between = (
 
 export const contains = (
   attributePath: string,
-  substr: string,
+  substr: string | number,
 ): ContainsCondition => ({
   kind: "contains",
   attributePath,

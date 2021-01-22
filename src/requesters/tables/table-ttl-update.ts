@@ -1,6 +1,7 @@
 import {
   DynamoDBClient,
   UpdateTimeToLiveCommand,
+  UpdateTimeToLiveCommandOutput,
   UpdateTimeToLiveInput,
 } from "@aws-sdk/client-dynamodb";
 import AsyncRetry from "async-retry";
@@ -29,7 +30,9 @@ export class TableTTLUpdate extends TableRequest {
 
   $ = async () => {
     const requestInput = this[BUILD]();
-    return AsyncRetry(async (bail, attempt) => {
+    return AsyncRetry(async (bail, attempt): Promise<
+      UpdateTimeToLiveCommandOutput["TimeToLiveSpecification"] | void
+    > => {
       const shortCircuit = createShortCircuit({
         duration: attempt * SHORT_MAX_LATENCY * this.patienceRatio,
         error: new Error(TAKING_TOO_LONG_EXCEPTION),
@@ -41,11 +44,10 @@ export class TableTTLUpdate extends TableRequest {
         ]);
         return output.TimeToLiveSpecification;
       } catch (error) {
-        if (!isRetryableError(error)) {
-          bail(error);
-          return;
+        if (isRetryableError(error)) {
+          throw error;
         }
-        throw error;
+        bail(error);
       } finally {
         shortCircuit.halt();
       }

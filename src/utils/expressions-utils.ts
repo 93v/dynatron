@@ -16,7 +16,7 @@ type NativeExpressionModel = {
   expressionAttributeValues?: NativeValue;
 };
 
-const parseAttributePath = (attributePath: string) => {
+export const parseAttributePath = (attributePath: string) => {
   const enum Mode {
     AFTER_LIST_INDEX,
     ESCAPED,
@@ -165,7 +165,6 @@ const serializeUpdateExpression = (
           [attributeValue.name]: attributeValue.value,
         },
       };
-    case "decrement":
     case "increment":
       return {
         Type: "SET",
@@ -358,7 +357,7 @@ const serializeAttributePath = (attributePath: string, prefix: string) => {
     }
     const pathElementName = pathElement.name;
     attributeNamesMap[pathElementName] =
-      attributeNamesMap[pathElementName] ||
+      attributeNamesMap[pathElementName] ??
       `#${
         typeof attributeNamesMap[pathElementName] === "number"
           ? attributeNamesMap[pathElementName]
@@ -374,21 +373,6 @@ const serializeAttributePath = (attributePath: string, prefix: string) => {
     expressionAttributeNames[attributeNamesMap[key]] = key;
   }
   return { expressionString, expressionAttributeNames };
-};
-
-export const isTopLevelAttributePath = (attributePath: string): boolean => {
-  try {
-    const serializedPath = serializeAttributePath(attributePath, "");
-    return (
-      !serializedPath.expressionString.includes(".") &&
-      !(
-        serializedPath.expressionString.includes("[") &&
-        serializedPath.expressionString.endsWith("]")
-      )
-    );
-  } catch {
-    return false;
-  }
 };
 
 export const marshallProjectionExpression = (
@@ -437,7 +421,7 @@ export const marshallUpdateExpression = (
       update,
       prefix,
     );
-    updateMap[Type] = [...(updateMap[Type] || []), updateExpression];
+    updateMap[Type] = [...(updateMap[Type] ?? []), updateExpression];
   }
 
   const updateObject: NativeExpressionModel = {

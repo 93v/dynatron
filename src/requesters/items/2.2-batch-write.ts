@@ -59,7 +59,7 @@ export class BatchWrite extends Amend {
             this.databaseClient.send(new BatchWriteItemCommand(requestInput)),
             shortCircuit.launch(),
           ]);
-          if (output?.UnprocessedItems?.[this.tableName] == undefined) {
+          if (output.UnprocessedItems?.[this.tableName] == undefined) {
             operationCompleted = true;
           } else {
             requestInput.RequestItems = output.UnprocessedItems;
@@ -70,8 +70,8 @@ export class BatchWrite extends Amend {
               response.ConsumedCapacity = output.ConsumedCapacity;
             } else {
               response.ConsumedCapacity[0].CapacityUnits =
-                (response.ConsumedCapacity[0].CapacityUnits || 0) +
-                (output.ConsumedCapacity[0].CapacityUnits || 0);
+                (response.ConsumedCapacity[0].CapacityUnits ?? 0) +
+                (output.ConsumedCapacity[0].CapacityUnits ?? 0);
             }
           }
 
@@ -80,17 +80,16 @@ export class BatchWrite extends Amend {
               response.ItemCollectionMetrics = output.ItemCollectionMetrics;
             } else {
               response.ItemCollectionMetrics[this.tableName] = [
-                ...(response.ItemCollectionMetrics[this.tableName] || []),
-                ...(output.ItemCollectionMetrics[this.tableName] || []),
+                ...(response.ItemCollectionMetrics[this.tableName] ?? []),
+                ...(output.ItemCollectionMetrics[this.tableName] ?? []),
               ];
             }
           }
         } catch (error) {
-          if (!isRetryableError(error)) {
-            bail(error);
-            return;
+          if (isRetryableError(error)) {
+            throw error;
           }
-          throw error;
+          bail(error);
         } finally {
           shortCircuit.halt();
         }
@@ -171,8 +170,8 @@ export class BatchWrite extends Amend {
           aggregatedOutput.ConsumedCapacity = output.ConsumedCapacity;
         } else {
           aggregatedOutput.ConsumedCapacity[0].CapacityUnits =
-            (aggregatedOutput.ConsumedCapacity[0].CapacityUnits || 0) +
-            (output.ConsumedCapacity[0].CapacityUnits || 0);
+            (aggregatedOutput.ConsumedCapacity[0].CapacityUnits ?? 0) +
+            (output.ConsumedCapacity[0].CapacityUnits ?? 0);
         }
       }
 
@@ -181,8 +180,8 @@ export class BatchWrite extends Amend {
           aggregatedOutput.ItemCollectionMetrics = output.ItemCollectionMetrics;
         } else {
           aggregatedOutput.ItemCollectionMetrics[this.tableName] = [
-            ...(aggregatedOutput.ItemCollectionMetrics[this.tableName] || []),
-            ...(output.ItemCollectionMetrics[this.tableName] || []),
+            ...(aggregatedOutput.ItemCollectionMetrics[this.tableName] ?? []),
+            ...(output.ItemCollectionMetrics[this.tableName] ?? []),
           ];
         }
       }

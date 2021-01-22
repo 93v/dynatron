@@ -82,41 +82,40 @@ export class Scan extends ListFetch {
             requestInput.ExclusiveStartKey = output.LastEvaluatedKey;
           }
           if (output.Items) {
-            response.Items = [...(response.Items || []), ...output.Items];
+            response.Items = [...(response.Items ?? []), ...output.Items];
           }
           if (output.Count) {
-            response.Count = (response.Count || 0) + output.Count;
+            response.Count = (response.Count ?? 0) + output.Count;
           }
           if (output.ScannedCount) {
             response.ScannedCount =
-              (response.ScannedCount || 0) + output.ScannedCount;
+              (response.ScannedCount ?? 0) + output.ScannedCount;
           }
           if (output.ConsumedCapacity) {
             if (!response.ConsumedCapacity) {
               response.ConsumedCapacity = output.ConsumedCapacity;
             } else {
               response.ConsumedCapacity.CapacityUnits =
-                (response.ConsumedCapacity.CapacityUnits || 0) +
-                (output.ConsumedCapacity?.CapacityUnits || 0);
+                (response.ConsumedCapacity.CapacityUnits ?? 0) +
+                (output.ConsumedCapacity?.CapacityUnits ?? 0);
             }
           }
           if (
             requestInput.Limit &&
-            (response.Items?.length || 0) >= requestInput.Limit
+            (response.Items?.length ?? 0) >= requestInput.Limit
           ) {
             response.Items = response.Items?.slice(0, requestInput.Limit);
-            response.Count = response.Items?.length || 0;
+            response.Count = response.Items?.length ?? 0;
             operationCompleted = true;
           }
           if (disableRecursion && output.LastEvaluatedKey != undefined) {
             response.LastEvaluatedKey = output.LastEvaluatedKey;
           }
         } catch (error) {
-          if (!isRetryableError(error)) {
-            bail(error);
-            return;
+          if (isRetryableError(error)) {
+            throw error;
           }
-          throw error;
+          bail(error);
         } finally {
           shortCircuit.halt();
         }
@@ -172,7 +171,7 @@ export class Scan extends ListFetch {
       outputs = [await this.scanSegment(requestInput, disableRecursion)];
     } else {
       outputs = await Promise.all(
-        [...Array.from({ length: requestInput.TotalSegments || 1 }).keys()].map(
+        [...Array.from({ length: requestInput.TotalSegments ?? 1 }).keys()].map(
           async (segment) => {
             const segmentParameters = { ...requestInput };
             if (segmentParameters.TotalSegments) {
@@ -186,14 +185,14 @@ export class Scan extends ListFetch {
     const aggregatedOutput = outputs.reduce(
       (aggregated: ScanOutput, currentOutput) => {
         const output: ScanOutput = {
-          Items: [...(aggregated.Items || []), ...(currentOutput?.Items || [])],
-          Count: (aggregated.Count || 0) + (currentOutput?.Count || 0),
+          Items: [...(aggregated.Items ?? []), ...(currentOutput?.Items ?? [])],
+          Count: (aggregated.Count ?? 0) + (currentOutput?.Count ?? 0),
           ScannedCount:
-            (aggregated.ScannedCount || 0) + (currentOutput?.ScannedCount || 0),
+            (aggregated.ScannedCount ?? 0) + (currentOutput?.ScannedCount ?? 0),
           ...(disableRecursion
             ? {
                 LastEvaluatedKey:
-                  aggregated.LastEvaluatedKey ||
+                  aggregated.LastEvaluatedKey ??
                   currentOutput?.LastEvaluatedKey,
               }
             : {}),
@@ -202,19 +201,19 @@ export class Scan extends ListFetch {
           if (!aggregated.ConsumedCapacity) {
             output.ConsumedCapacity = currentOutput.ConsumedCapacity;
           } else {
-            output.ConsumedCapacity = output.ConsumedCapacity || {};
+            output.ConsumedCapacity = output.ConsumedCapacity ?? {};
             output.ConsumedCapacity.CapacityUnits =
-              (aggregated.ConsumedCapacity.CapacityUnits || 0) +
-              (currentOutput.ConsumedCapacity?.CapacityUnits || 0);
+              (aggregated.ConsumedCapacity.CapacityUnits ?? 0) +
+              (currentOutput.ConsumedCapacity?.CapacityUnits ?? 0);
           }
         }
         return output;
       },
       {},
     );
-    if (initialLimit && (aggregatedOutput.Items?.length || 0) >= initialLimit) {
+    if (initialLimit && (aggregatedOutput.Items?.length ?? 0) >= initialLimit) {
       aggregatedOutput.Items = aggregatedOutput.Items?.slice(0, initialLimit);
-      aggregatedOutput.Count = aggregatedOutput.Items?.length || 0;
+      aggregatedOutput.Count = aggregatedOutput.Items?.length ?? 0;
     }
     return (returnRawResponse
       ? aggregatedOutput

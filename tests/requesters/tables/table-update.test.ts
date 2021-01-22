@@ -16,9 +16,11 @@ afterAll(() => {
 
 describe("Table Update", () => {
   test("should return an instance of TableUpdate", () => {
-    const instance = new TableUpdate(databaseClient, {} as any);
+    const instance = new TableUpdate(databaseClient, {
+      TableName: "tableName",
+    });
     expect(instance).toBeInstanceOf(TableUpdate);
-    expect(instance[BUILD]()).toEqual({});
+    expect(instance[BUILD]()).toEqual({ TableName: "tableName" });
   });
 
   test("should return an instance of TableUpdate", async () => {
@@ -26,7 +28,9 @@ describe("Table Update", () => {
       return {};
     };
 
-    const instance = new TableUpdate(databaseClient, {} as any);
+    const instance = new TableUpdate(databaseClient, {
+      TableName: "tableName",
+    });
     expect(instance).toBeInstanceOf(TableUpdate);
 
     expect(await instance.$()).toBeUndefined();
@@ -37,7 +41,9 @@ describe("Table Update", () => {
       throw new Error("ECONN");
     };
 
-    const instance = new TableUpdate(databaseClient, {} as any);
+    const instance = new TableUpdate(databaseClient, {
+      TableName: "tableName",
+    });
     expect(instance).toBeInstanceOf(TableUpdate);
 
     try {
@@ -52,7 +58,9 @@ describe("Table Update", () => {
       throw new Error("Unknown");
     };
 
-    const instance = new TableUpdate(databaseClient, {} as any);
+    const instance = new TableUpdate(databaseClient, {
+      TableName: "tableName",
+    });
     expect(instance).toBeInstanceOf(TableUpdate);
 
     try {

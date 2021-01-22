@@ -30,7 +30,41 @@ describe("Database Client", () => {
   });
 
   test("should return an instance of Dynatron", () => {
+    const dynatron = new Dynatron("", { timeout: undefined });
+    expect(dynatron).toBeInstanceOf(Dynatron);
+  });
+
+  test("should return an instance of Dynatron", () => {
     const dynatron = new Dynatron("", { region: "local" });
+    expect(dynatron).toBeInstanceOf(Dynatron);
+  });
+
+  test("should return an instance of Dynatron", () => {
+    const dynatron = new Dynatron("", { region: "local", timeout: 100 });
+    expect(dynatron).toBeInstanceOf(Dynatron);
+  });
+
+  test("should return an instance of Dynatron", () => {
+    const dynatron = new Dynatron(
+      "other1",
+      {
+        region: "eu-central-1",
+        timeout: undefined,
+      },
+      "otherInstance1",
+    );
+    expect(dynatron).toBeInstanceOf(Dynatron);
+  });
+
+  test("should return an instance of Dynatron", () => {
+    const dynatron = new Dynatron(
+      "other1",
+      {
+        region: "eu-central-1",
+        timeout: 100,
+      },
+      "otherInstance2",
+    );
     expect(dynatron).toBeInstanceOf(Dynatron);
   });
 
@@ -91,7 +125,13 @@ describe("Dynatron instance", () => {
     expect(dynatron.transactWrite([])).toBeInstanceOf(TransactWrite);
   });
   test("should be an instance of TableCreator", () => {
-    expect(dynatron.Tables.create({} as any)).toBeInstanceOf(TableCreate);
+    expect(
+      dynatron.Tables.create({
+        AttributeDefinitions: [],
+        KeySchema: [],
+        TableName: "tableName",
+      }),
+    ).toBeInstanceOf(TableCreate);
   });
   test("should be an instance of TableDelete", () => {
     expect(dynatron.Tables.delete()).toBeInstanceOf(TableDelete);
@@ -106,9 +146,21 @@ describe("Dynatron instance", () => {
     expect(dynatron.Tables.describeTTL()).toBeInstanceOf(TableTTLDescribe);
   });
   test("should be an instance of TableTTLUpdate", () => {
-    expect(dynatron.Tables.updateTTL({} as any)).toBeInstanceOf(TableTTLUpdate);
+    expect(
+      dynatron.Tables.updateTTL({
+        TableName: "tableName",
+        TimeToLiveSpecification: {
+          AttributeName: "name",
+          Enabled: true,
+        },
+      }),
+    ).toBeInstanceOf(TableTTLUpdate);
   });
   test("should be an instance of TableUpdate", () => {
-    expect(dynatron.Tables.update({} as any)).toBeInstanceOf(TableUpdate);
+    expect(
+      dynatron.Tables.update({
+        TableName: "tableName",
+      }),
+    ).toBeInstanceOf(TableUpdate);
   });
 });

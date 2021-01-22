@@ -41,11 +41,10 @@ export class Delete extends Check {
           ? output
           : output.Attributes && unmarshall(output.Attributes)) as any;
       } catch (error) {
-        if (!isRetryableError(error)) {
-          bail(error);
-          return;
+        if (isRetryableError(error)) {
+          throw error;
         }
-        throw error;
+        bail(error);
       } finally {
         shortCircuit.halt();
       }

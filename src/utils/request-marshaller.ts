@@ -46,10 +46,10 @@ const cleanupEmptyExpressions = (
   requestParameters: NativeRequestParameters,
 ) => {
   const parameters = { ...requestParameters };
-  if (Object.keys(parameters.ExpressionAttributeNames || {}).length === 0) {
+  if (Object.keys(parameters.ExpressionAttributeNames ?? {}).length === 0) {
     delete parameters.ExpressionAttributeNames;
   }
-  if (Object.keys(parameters.ExpressionAttributeValues || {}).length === 0) {
+  if (Object.keys(parameters.ExpressionAttributeValues ?? {}).length === 0) {
     delete parameters.ExpressionAttributeValues;
   }
   return parameters;

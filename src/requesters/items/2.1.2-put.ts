@@ -57,11 +57,10 @@ export class Put extends Check {
           ? output
           : requestInput.Item && unmarshall(requestInput.Item)) as any;
       } catch (error) {
-        if (!isRetryableError(error)) {
-          bail(error);
-          return;
+        if (isRetryableError(error)) {
+          throw error;
         }
-        throw error;
+        bail(error);
       } finally {
         shortCircuit.halt();
       }

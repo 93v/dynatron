@@ -82,6 +82,30 @@ describe("ListFetch", () => {
       ],
     });
   });
+
+  test("should return an instance of ListFetch", () => {
+    const instance = new ListFetch(databaseClient, "");
+
+    expect(instance.where(eq("id", "uuid")).where(eq("value", 7))).toBe(
+      instance,
+    );
+    expect(instance[BUILD]()).toEqual({
+      TableName: "",
+      _FilterExpressions: [
+        {
+          kind: "=",
+          attributePath: "id",
+          value: "uuid",
+        },
+        {
+          kind: "=",
+          attributePath: "value",
+          value: 7,
+        },
+      ],
+    });
+  });
+
   test("should return an instance of ListFetch", () => {
     const instance = new ListFetch(databaseClient, "");
 

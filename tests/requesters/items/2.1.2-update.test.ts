@@ -86,14 +86,14 @@ describe("Item Update", () => {
       TableName: "tableName",
       _Key: { id: "uuid" },
       _UpdateExpressions: [
-        { attributePath: "value", kind: "decrement", value: 7 },
+        { attributePath: "value", kind: "increment", value: -7 },
       ],
     });
   });
 
   test("should return an instance of Update", () => {
     const instance = new Update(databaseClient, "tableName", { id: "uuid" });
-    expect(instance.add("value", 7)).toBeInstanceOf(Update);
+    expect(instance.add("value", new Set([7]))).toBeInstanceOf(Update);
     expect(instance[BUILD]()).toEqual({
       TableName: "tableName",
       _Key: { id: "uuid" },
@@ -105,7 +105,7 @@ describe("Item Update", () => {
 
   test("should return an instance of Update", () => {
     const instance = new Update(databaseClient, "tableName", { id: "uuid" });
-    expect(instance.append("value", 7)).toBeInstanceOf(Update);
+    expect(instance.append("value", [7])).toBeInstanceOf(Update);
     expect(instance[BUILD]()).toEqual({
       TableName: "tableName",
       _Key: { id: "uuid" },
@@ -117,7 +117,7 @@ describe("Item Update", () => {
 
   test("should return an instance of Update", () => {
     const instance = new Update(databaseClient, "tableName", { id: "uuid" });
-    expect(instance.prepend("value", 7)).toBeInstanceOf(Update);
+    expect(instance.prepend("value", [7])).toBeInstanceOf(Update);
     expect(instance[BUILD]()).toEqual({
       TableName: "tableName",
       _Key: { id: "uuid" },
@@ -165,7 +165,7 @@ describe("Item Update", () => {
 
   test("should return an instance of Update", () => {
     const instance = new Update(databaseClient, "tableName", { id: "uuid" });
-    expect(instance.add("value", [7])).toBeInstanceOf(Update);
+    expect(instance.add("value", new Set([7]))).toBeInstanceOf(Update);
     expect(instance[BUILD]()).toEqual({
       TableName: "tableName",
       _Key: { id: "uuid" },
@@ -177,22 +177,7 @@ describe("Item Update", () => {
 
   test("should return an instance of Update", () => {
     const instance = new Update(databaseClient, "tableName", { id: "uuid" });
-    expect(instance.drop("value")).toBeInstanceOf(Update);
-    expect(instance[BUILD]()).toEqual({
-      TableName: "tableName",
-      _Key: { id: "uuid" },
-      _UpdateExpressions: [{ attributePath: "value", kind: "remove" }],
-    });
-  });
-
-  test("should return an instance of Update", () => {
-    const instance = new Update(databaseClient, "tableName", { id: "uuid" });
-    expect(() => instance.drop("value.type")).toThrow();
-  });
-
-  test("should return an instance of Update", () => {
-    const instance = new Update(databaseClient, "tableName", { id: "uuid" });
-    expect(instance.drop("value", 7)).toBeInstanceOf(Update);
+    expect(instance.delete("value", new Set([7]))).toBeInstanceOf(Update);
     expect(instance[BUILD]()).toEqual({
       TableName: "tableName",
       _Key: { id: "uuid" },
@@ -204,7 +189,7 @@ describe("Item Update", () => {
 
   test("should return an instance of Update", () => {
     const instance = new Update(databaseClient, "tableName", { id: "uuid" });
-    expect(instance.drop("value", [7])).toBeInstanceOf(Update);
+    expect(instance.delete("value", new Set([7]))).toBeInstanceOf(Update);
     expect(instance[BUILD]()).toEqual({
       TableName: "tableName",
       _Key: { id: "uuid" },
@@ -216,7 +201,7 @@ describe("Item Update", () => {
 
   test("should return an instance of Update", () => {
     const instance = new Update(databaseClient, "tableName", { id: "uuid" });
-    expect(instance.drop("value", new Set([7]))).toBeInstanceOf(Update);
+    expect(instance.delete("value", new Set([7]))).toBeInstanceOf(Update);
     expect(instance[BUILD]()).toEqual({
       TableName: "tableName",
       _Key: { id: "uuid" },
@@ -224,11 +209,6 @@ describe("Item Update", () => {
         { attributePath: "value", kind: "delete", value: new Set([7]) },
       ],
     });
-  });
-
-  test("should return an instance of Update", () => {
-    const instance = new Update(databaseClient, "tableName", { id: "uuid" });
-    expect(() => instance.add("value.name", [7])).toThrow();
   });
 
   test("should return an instance of Update", async () => {

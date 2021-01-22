@@ -71,7 +71,7 @@ export type BetweenCondition = ConditionExpression & {
 export type ContainsCondition = ConditionExpression & {
   attributePath: string;
   kind: "contains";
-  value: string;
+  value: string | number;
 };
 
 export type EqualsCondition = ConditionExpression & {

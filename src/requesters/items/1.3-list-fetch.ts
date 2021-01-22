@@ -24,7 +24,7 @@ export class ListFetch extends Fetch {
           ...(Array.isArray(condition) ? condition : [condition]),
         ];
       },
-      this.#FilterExpressions || [],
+      this.#FilterExpressions ?? [],
     );
     return this;
   };

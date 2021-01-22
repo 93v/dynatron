@@ -64,6 +64,27 @@ describe("Check", () => {
   test("should return an instance of Amend", () => {
     const instance = new Check(databaseClient, "");
 
+    expect(instance.if(eq("id", "uuid")).if(eq("value", 7))).toBe(instance);
+    expect(instance[BUILD]()).toEqual({
+      TableName: "",
+      _ConditionExpressions: [
+        {
+          attributePath: "id",
+          kind: "=",
+          value: "uuid",
+        },
+        {
+          attributePath: "value",
+          kind: "=",
+          value: 7,
+        },
+      ],
+    });
+  });
+
+  test("should return an instance of Amend", () => {
+    const instance = new Check(databaseClient, "");
+
     expect(instance.if(eq("id", "uuid"), undefined, eq("value", 3))).toBe(
       instance,
     );

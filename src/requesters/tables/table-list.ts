@@ -85,7 +85,7 @@ export class TableList extends TableRequest {
 
           if (output.TableNames) {
             aggregatedResponse.TableNames = [
-              ...(aggregatedResponse.TableNames || []),
+              ...(aggregatedResponse.TableNames ?? []),
               ...output.TableNames,
             ];
           }
@@ -102,11 +102,10 @@ export class TableList extends TableRequest {
             operationCompleted = true;
           }
         } catch (error) {
-          if (!isRetryableError(error)) {
-            bail(error);
-            return;
+          if (isRetryableError(error)) {
+            throw error;
           }
-          throw error;
+          bail(error);
         } finally {
           shortCircuit.halt();
         }

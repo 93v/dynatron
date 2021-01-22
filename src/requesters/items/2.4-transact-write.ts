@@ -2,6 +2,7 @@ import {
   DynamoDBClient,
   TransactWriteItemsCommand,
   TransactWriteItemsCommandInput,
+  TransactWriteItemsOutput,
 } from "@aws-sdk/client-dynamodb";
 import AsyncRetry from "async-retry";
 
@@ -99,28 +100,32 @@ export class TransactWrite extends Amend {
       }),
     };
 
-    return AsyncRetry(async (bail, attempt) => {
-      const shortCircuit = createShortCircuit({
-        duration: attempt * LONG_MAX_LATENCY * this.patienceRatio,
-        error: new Error(TAKING_TOO_LONG_EXCEPTION),
-      });
-      try {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { $metadata, ...output } = await Promise.race([
-          this.databaseClient.send(new TransactWriteItemsCommand(requestInput)),
-          shortCircuit.launch(),
-        ]);
+    return AsyncRetry(
+      async (bail, attempt): Promise<TransactWriteItemsOutput | void> => {
+        const shortCircuit = createShortCircuit({
+          duration: attempt * LONG_MAX_LATENCY * this.patienceRatio,
+          error: new Error(TAKING_TOO_LONG_EXCEPTION),
+        });
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { $metadata, ...output } = await Promise.race([
+            this.databaseClient.send(
+              new TransactWriteItemsCommand(requestInput),
+            ),
+            shortCircuit.launch(),
+          ]);
 
-        return output;
-      } catch (error) {
-        if (!isRetryableError(error)) {
+          return output;
+        } catch (error) {
+          if (isRetryableError(error)) {
+            throw error;
+          }
           bail(error);
-          return;
+        } finally {
+          shortCircuit.halt();
         }
-        throw error;
-      } finally {
-        shortCircuit.halt();
-      }
-    }, RETRY_OPTIONS);
+      },
+      RETRY_OPTIONS,
+    );
   };
 }

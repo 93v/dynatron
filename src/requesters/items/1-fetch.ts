@@ -24,8 +24,8 @@ export class Fetch extends Request {
       }
       this.#ProjectionExpressions = [
         ...new Set([
-          ...(this.#ProjectionExpressions || []),
-          ...(attributePath || []),
+          ...(this.#ProjectionExpressions ?? []),
+          ...(attributePath ?? []),
         ]),
       ];
     });

@@ -54,35 +54,36 @@ export class BatchGet extends Fetch {
             this.databaseClient.send(new BatchGetItemCommand(requestInput)),
             shortCircuit.launch(),
           ]);
-          if (output?.UnprocessedKeys?.[this.tableName] == undefined) {
+          if (output.UnprocessedKeys?.[this.tableName] == undefined) {
             operationCompleted = true;
           } else {
             requestInput.RequestItems = output.UnprocessedKeys;
           }
 
-          if (output?.Responses?.[this.tableName]) {
-            response.Responses = response.Responses || {};
+          if (output.Responses?.[this.tableName] != undefined) {
+            response.Responses = response.Responses ?? {};
             response.Responses[this.tableName] = [
-              ...(response.Responses[this.tableName] || []),
-              ...(output.Responses[this.tableName] || []),
+              ...(response.Responses[this.tableName] ?? []),
+              ...output.Responses[this.tableName],
             ];
           }
 
           if (output.ConsumedCapacity) {
-            if (!response.ConsumedCapacity) {
+            if (response.ConsumedCapacity == undefined) {
               response.ConsumedCapacity = output.ConsumedCapacity;
             } else {
-              response.ConsumedCapacity[0].CapacityUnits =
-                (response.ConsumedCapacity[0].CapacityUnits || 0) +
-                (output.ConsumedCapacity[0].CapacityUnits || 0);
+              if (response.ConsumedCapacity[0] != undefined) {
+                response.ConsumedCapacity[0].CapacityUnits =
+                  (response.ConsumedCapacity[0].CapacityUnits ?? 0) +
+                  (output.ConsumedCapacity[0]?.CapacityUnits ?? 0);
+              }
             }
           }
         } catch (error) {
-          if (!isRetryableError(error)) {
-            bail(error);
-            return;
+          if (isRetryableError(error)) {
+            throw error;
           }
-          throw error;
+          bail(error);
         } finally {
           shortCircuit.halt();
         }
@@ -125,23 +126,21 @@ export class BatchGet extends Fetch {
     const aggregatedOutput: BatchGetItemOutput = {};
 
     for (const output of outputs) {
-      if (output == undefined) {
-        continue;
-      }
-
-      aggregatedOutput.Responses = aggregatedOutput.Responses || {};
+      aggregatedOutput.Responses = aggregatedOutput.Responses ?? {};
       aggregatedOutput.Responses[TableName] = [
-        ...(aggregatedOutput.Responses[TableName] || []),
-        ...(output.Responses?.[TableName] || []),
+        ...(aggregatedOutput.Responses[TableName] ?? []),
+        ...(output.Responses?.[TableName] ?? []),
       ];
 
       if (output.ConsumedCapacity) {
-        if (!aggregatedOutput.ConsumedCapacity) {
+        if (aggregatedOutput.ConsumedCapacity == undefined) {
           aggregatedOutput.ConsumedCapacity = output.ConsumedCapacity;
         } else {
-          aggregatedOutput.ConsumedCapacity[0].CapacityUnits =
-            (aggregatedOutput.ConsumedCapacity[0].CapacityUnits || 0) +
-            (output.ConsumedCapacity[0].CapacityUnits || 0);
+          if (aggregatedOutput.ConsumedCapacity[0] != undefined) {
+            aggregatedOutput.ConsumedCapacity[0].CapacityUnits =
+              (aggregatedOutput.ConsumedCapacity[0].CapacityUnits ?? 0) +
+              (output.ConsumedCapacity[0]?.CapacityUnits ?? 0);
+          }
         }
       }
     }
@@ -150,6 +149,6 @@ export class BatchGet extends Fetch {
       ? aggregatedOutput
       : aggregatedOutput.Responses?.[TableName]?.map((item) =>
           unmarshall(item),
-        )) as any;
+        ) ?? []) as any;
   };
 }

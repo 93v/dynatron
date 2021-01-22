@@ -16,9 +16,21 @@ afterAll(() => {
 
 describe("Table TTL Update", () => {
   test("should return an instance of TableTTLUpdate", () => {
-    const instance = new TableTTLUpdate(databaseClient, {} as any);
+    const instance = new TableTTLUpdate(databaseClient, {
+      TableName: "tableName",
+      TimeToLiveSpecification: {
+        AttributeName: "name",
+        Enabled: true,
+      },
+    });
     expect(instance).toBeInstanceOf(TableTTLUpdate);
-    expect(instance[BUILD]()).toEqual({});
+    expect(instance[BUILD]()).toEqual({
+      TableName: "tableName",
+      TimeToLiveSpecification: {
+        AttributeName: "name",
+        Enabled: true,
+      },
+    });
   });
 
   test("should return an instance of TableTTLUpdate", async () => {
@@ -26,7 +38,13 @@ describe("Table TTL Update", () => {
       return {};
     };
 
-    const instance = new TableTTLUpdate(databaseClient, {} as any);
+    const instance = new TableTTLUpdate(databaseClient, {
+      TableName: "tableName",
+      TimeToLiveSpecification: {
+        AttributeName: "name",
+        Enabled: true,
+      },
+    });
     expect(instance).toBeInstanceOf(TableTTLUpdate);
 
     expect(await instance.$()).toBeUndefined();
@@ -37,7 +55,13 @@ describe("Table TTL Update", () => {
       throw new Error("ECONN");
     };
 
-    const instance = new TableTTLUpdate(databaseClient, {} as any);
+    const instance = new TableTTLUpdate(databaseClient, {
+      TableName: "tableName",
+      TimeToLiveSpecification: {
+        AttributeName: "name",
+        Enabled: true,
+      },
+    });
     expect(instance).toBeInstanceOf(TableTTLUpdate);
 
     try {
@@ -52,7 +76,13 @@ describe("Table TTL Update", () => {
       throw new Error("Unknown");
     };
 
-    const instance = new TableTTLUpdate(databaseClient, {} as any);
+    const instance = new TableTTLUpdate(databaseClient, {
+      TableName: "tableName",
+      TimeToLiveSpecification: {
+        AttributeName: "name",
+        Enabled: true,
+      },
+    });
     expect(instance).toBeInstanceOf(TableTTLUpdate);
 
     try {
