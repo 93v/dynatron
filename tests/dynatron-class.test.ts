@@ -8,7 +8,7 @@ import { Delete } from "../src/requesters/items/2.1.1-delete";
 import { Put } from "../src/requesters/items/2.1.2-put";
 import { Update } from "../src/requesters/items/2.1.3-update";
 import { BatchWrite } from "../src/requesters/items/2.2-batch-write";
-import { TransactWrite } from "../src/requesters/items/2.4-transact-write";
+import { TransactWrite } from "../src/requesters/items/2.3-transact-write";
 import { TransactGet } from "../src/requesters/items/3-transact-get";
 import { TableCreate } from "../src/requesters/tables/table-create";
 import { TableDelete } from "../src/requesters/tables/table-delete";
