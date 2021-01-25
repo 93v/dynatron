@@ -6,7 +6,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "lint": "eslint './src/**/*.{js,ts,tsx}'",
-    "test": "jest",
+    "test": "jest --forceExit",
     "test:watch": "jest --watchAll",
     "build": "rm -rf ./dist && webpack",
     "watch": "rm -rf ./dist && webpack -w",
