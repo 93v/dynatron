@@ -21,13 +21,25 @@ export const isRetryableError = (error: Error) =>
   error.message === TAKING_TOO_LONG_EXCEPTION ||
   (Object.prototype.hasOwnProperty.call(error, "retryable") &&
     (error as any).retryable) ||
-  ["ECONN", "NetworkingError", "InternalServerError"].some((message) =>
+  [
+    "ECONN",
+    "Internal Server Error",
+    "InternalServerError",
+    "NetworkingError",
+    "Service Unavailable",
+  ].some((message) =>
     error.toString().toUpperCase().includes(message.toUpperCase()),
   ) ||
   (Object.prototype.hasOwnProperty.call(error, "code") &&
-    ["ProvisionedThroughputExceededException", "ThrottlingException"].includes(
-      (error as any).code,
-    ));
+    [
+      "ItemCollectionSizeLimitExceededException",
+      "LimitExceededException",
+      "ProvisionedThroughputExceededException",
+      "RequestLimitExceeded",
+      "ResourceInUseException",
+      "ThrottlingException",
+      "UnrecognizedClientException",
+    ].includes((error as any).code));
 
 export const validateKey = (key: NativeValue) => {
   const keysLength = Object.keys(key).length;
