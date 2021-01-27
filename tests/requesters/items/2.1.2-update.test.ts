@@ -211,6 +211,16 @@ describe("Item Update", () => {
     });
   });
 
+  test("should return an instance of Update", () => {
+    const instance = new Update(databaseClient, "tableName", { id: "uuid" });
+    expect(instance.drop("value")).toBeInstanceOf(Update);
+    expect(instance[BUILD]()).toEqual({
+      TableName: "tableName",
+      _Key: { id: "uuid" },
+      _UpdateExpressions: [{ attributePath: "value", kind: "remove" }],
+    });
+  });
+
   test("should return an instance of Update", async () => {
     DynamoDBClient.prototype.send = async () => {
       return {};
