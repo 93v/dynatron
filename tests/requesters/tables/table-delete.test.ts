@@ -1,7 +1,7 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import nock from "nock";
-import { TableRequest } from "../../../src/requesters/tables/0-table-request";
 
+import { TableRequest } from "../../../src/requesters/tables/0-table-request";
 import { TableDelete } from "../../../src/requesters/tables/table-delete";
 import { BUILD } from "../../../src/utils/misc-utils";
 
@@ -28,7 +28,7 @@ describe("Table Delete", () => {
   });
 
   test("should return a response", async () => {
-    nock("https://localhost:8000")
+    const scope = nock("https://localhost:8000")
       .post("/")
       .reply(200, { TableDescription: {} });
 
@@ -38,6 +38,7 @@ describe("Table Delete", () => {
     );
 
     expect(await instance.$()).toEqual({});
+    scope.persist(false);
   });
 
   test("should retry on retryable error", async () => {

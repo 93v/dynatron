@@ -71,11 +71,6 @@ export class TableList extends TableRequest {
             shortCircuit.launch(),
           ]);
 
-          if (output == undefined) {
-            operationCompleted = true;
-            return;
-          }
-
           if (output.LastEvaluatedTableName == undefined) {
             operationCompleted = true;
           } else {

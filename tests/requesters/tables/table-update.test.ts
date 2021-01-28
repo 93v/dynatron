@@ -1,72 +1,68 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import nock from "nock";
+
+import { TableRequest } from "../../../src/requesters/tables/0-table-request";
 import { TableUpdate } from "../../../src/requesters/tables/table-update";
-import { BUILD } from "../../../src/utils/misc-utils";
 
-const initialSend = DynamoDBClient.prototype.send;
-
-let databaseClient: DynamoDBClient;
-
-beforeAll(() => {
-  databaseClient = new DynamoDBClient({ region: "local" });
-});
-
-afterAll(() => {
-  DynamoDBClient.prototype.send = initialSend;
+afterEach(() => {
+  nock.abortPendingRequests();
+  nock.cleanAll();
 });
 
 describe("Table Update", () => {
-  test("should return an instance of TableUpdate", () => {
-    const instance = new TableUpdate(databaseClient, {
+  test("should return an instance of TableRequest", () => {
+    const instance = new TableUpdate(new DynamoDBClient({ region: "local" }), {
       TableName: "tableName",
     });
-    expect(instance).toBeInstanceOf(TableUpdate);
-    expect(instance[BUILD]()).toEqual({ TableName: "tableName" });
+    expect(instance).toBeInstanceOf(TableRequest);
   });
 
-  test("should return an instance of TableUpdate", async () => {
-    DynamoDBClient.prototype.send = async () => {
-      return {};
-    };
+  test("should return a response", async () => {
+    const scope = nock("https://localhost:8000")
+      .post("/")
+      .reply(200, { TableDescription: {} });
 
-    const instance = new TableUpdate(databaseClient, {
+    const instance = new TableUpdate(new DynamoDBClient({ region: "local" }), {
       TableName: "tableName",
     });
-    expect(instance).toBeInstanceOf(TableUpdate);
 
-    expect(await instance.$()).toBeUndefined();
+    expect(await instance.$()).toEqual({});
+    scope.persist(false);
   });
 
-  test("should return an instance of TableUpdate", async () => {
-    DynamoDBClient.prototype.send = async () => {
-      throw new Error("ECONN");
-    };
+  test("should retry on retryable error", async () => {
+    const scope = nock("https://localhost:8000")
+      .persist(true)
+      .post("/")
+      .replyWithError("ECONN: Connection error");
 
-    const instance = new TableUpdate(databaseClient, {
+    const instance = new TableUpdate(new DynamoDBClient({ region: "local" }), {
       TableName: "tableName",
     });
-    expect(instance).toBeInstanceOf(TableUpdate);
 
     try {
       await instance.$();
     } catch (error) {
       expect(error).toBeDefined();
     }
+    scope.persist(false);
   });
 
-  test("should return an instance of TableUpdate", async () => {
-    DynamoDBClient.prototype.send = async () => {
-      throw new Error("Unknown");
-    };
+  test("should fail on non-retryable error", async () => {
+    const scope = nock("https://localhost:8000")
+      .persist(true)
+      .post("/")
+      .replyWithError("Unknown");
 
-    const instance = new TableUpdate(databaseClient, {
+    const instance = new TableUpdate(new DynamoDBClient({ region: "local" }), {
       TableName: "tableName",
     });
-    expect(instance).toBeInstanceOf(TableUpdate);
 
     try {
       await instance.$();
     } catch (error) {
       expect(error).toBeDefined();
     }
+    scope.persist(false);
   });
 });

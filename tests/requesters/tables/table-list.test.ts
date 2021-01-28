@@ -1,164 +1,84 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import nock from "nock";
+
+import { TableRequest } from "../../../src/requesters/tables/0-table-request";
 import { TableList } from "../../../src/requesters/tables/table-list";
 import { BUILD } from "../../../src/utils/misc-utils";
 
-const initialSend = DynamoDBClient.prototype.send;
-
-let databaseClient: DynamoDBClient;
-
-beforeAll(() => {
-  databaseClient = new DynamoDBClient({ region: "local" });
-});
-
-afterAll(() => {
-  DynamoDBClient.prototype.send = initialSend;
+afterEach(() => {
+  nock.abortPendingRequests();
+  nock.cleanAll();
 });
 
 describe("Table List", () => {
-  test("should return an instance of TableList", () => {
-    const instance = new TableList(databaseClient);
-    expect(instance).toBeInstanceOf(TableList);
-    expect(instance[BUILD]()).toEqual({});
+  test("should return an instance of TableRequest", () => {
+    const instance = new TableList(new DynamoDBClient({ region: "local" }));
+    expect(instance).toBeInstanceOf(TableRequest);
   });
 
-  test("should return an instance of TableList", () => {
-    const instance = new TableList(databaseClient);
-    instance.limit(1);
-    expect(instance).toBeInstanceOf(TableList);
-    expect(instance[BUILD]()).toEqual({ Limit: 1 });
-  });
-
-  test("should throw", () => {
-    const instance = new TableList(databaseClient);
+  test("should throw on negative limit", () => {
+    const instance = new TableList(new DynamoDBClient({ region: "local" }));
     expect(() => instance.limit(-1)).toThrow();
   });
 
-  test("should return an instance of TableList", () => {
-    const instance = new TableList(databaseClient);
-    instance.start();
-    expect(instance).toBeInstanceOf(TableList);
-    expect(instance[BUILD]()).toEqual({});
-
-    instance.start("startTableName");
+  test("should correctly build", () => {
+    const instance = new TableList(new DynamoDBClient({ region: "local" }));
+    instance.limit(1).start().start("startTableName");
     expect(instance).toBeInstanceOf(TableList);
     expect(instance[BUILD]()).toEqual({
+      Limit: 1,
       ExclusiveStartTableName: "startTableName",
     });
   });
 
-  test("should return an instance of TableList", () => {
-    const instance = new TableList(databaseClient);
-    expect(instance).toBeInstanceOf(TableList);
-    expect(instance[BUILD]()).toEqual({});
+  test("should return a list", async () => {
+    nock("https://localhost:8000").post("/").reply(200, {
+      LastEvaluatedTableName: "hello",
+    });
+    nock("https://localhost:8000")
+      .post("/")
+      .reply(200, {
+        TableNames: ["table1", "table2"],
+        LastEvaluatedTableName: "hello",
+      });
+    nock("https://localhost:8000")
+      .post("/")
+      .reply(200, { TableNames: ["table3", "table4"] });
+
+    const instance = new TableList(new DynamoDBClient({ region: "local" }));
+
+    expect(await instance.limit(3).$()).toEqual(["table1", "table2", "table3"]);
   });
 
-  test("should return an instance of TableList", () => {
-    const instance = new TableList(databaseClient);
-    expect(instance).toBeInstanceOf(TableList);
-    expect(instance[BUILD]()).toEqual({});
-  });
+  test("should retry on retryable error", async () => {
+    const scope = nock("https://localhost:8000")
+      .persist(true)
+      .post("/")
+      .replyWithError("ECONN: Connection error");
 
-  test("should return an instance of TableList", async () => {
-    DynamoDBClient.prototype.send = async () => {
-      return {};
-    };
-
-    const instance = new TableList(databaseClient);
-    expect(instance).toBeInstanceOf(TableList);
-
-    expect(await instance.$()).toBeUndefined();
-  });
-
-  test("should return an instance of TableList", async () => {
-    DynamoDBClient.prototype.send = async () => {
-      throw new Error("ECONN");
-    };
-
-    const instance = new TableList(databaseClient);
-    expect(instance).toBeInstanceOf(TableList);
+    const instance = new TableList(new DynamoDBClient({ region: "local" }));
 
     try {
       await instance.$();
     } catch (error) {
       expect(error).toBeDefined();
     }
+    scope.persist(false);
   });
 
-  test("should return an instance of TableList", async () => {
-    DynamoDBClient.prototype.send = async () => {
-      throw new Error("Unknown");
-    };
+  test("should fail on non-retryable error", async () => {
+    const scope = nock("https://localhost:8000")
+      .persist(true)
+      .post("/")
+      .replyWithError("Unknown");
 
-    const instance = new TableList(databaseClient);
-    expect(instance).toBeInstanceOf(TableList);
+    const instance = new TableList(new DynamoDBClient({ region: "local" }));
 
     try {
       await instance.$();
     } catch (error) {
       expect(error).toBeDefined();
     }
-  });
-
-  test("should return an instance of TableList", async () => {
-    DynamoDBClient.prototype.send = async () => {
-      return;
-    };
-
-    const instance = new TableList(databaseClient);
-    expect(instance).toBeInstanceOf(TableList);
-
-    expect(await instance.$()).toBeUndefined();
-  });
-
-  test("should return an instance of TableList", async () => {
-    DynamoDBClient.prototype.send = async () => {
-      return {};
-    };
-
-    const instance = new TableList(databaseClient);
-    expect(instance).toBeInstanceOf(TableList);
-
-    expect(await instance.limit(1).$()).toBeUndefined();
-  });
-
-  test("should return an instance of TableList", async () => {
-    let page = 1;
-    DynamoDBClient.prototype.send = async () => {
-      page -= 1;
-      return page >= 0
-        ? {
-            TableNames: ["table1", "table2"],
-            LastEvaluatedTableName: "hello",
-          }
-        : { TableNames: ["table3", "table4"] };
-    };
-
-    const instance = new TableList(databaseClient);
-    expect(instance).toBeInstanceOf(TableList);
-
-    expect(await instance.$()).toEqual([
-      "table1",
-      "table2",
-      "table3",
-      "table4",
-    ]);
-  });
-
-  test("should return an instance of TableList", async () => {
-    let page = 1;
-    DynamoDBClient.prototype.send = async () => {
-      page -= 1;
-      return page >= 0
-        ? {
-            TableNames: ["table1", "table2"],
-            LastEvaluatedTableName: "hello",
-          }
-        : { TableNames: ["table3", "table4"] };
-    };
-
-    const instance = new TableList(databaseClient);
-    expect(instance).toBeInstanceOf(TableList);
-
-    expect(await instance.limit(2).$()).toEqual(["table1", "table2"]);
+    scope.persist(false);
   });
 });
