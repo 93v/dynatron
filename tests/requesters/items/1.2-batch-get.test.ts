@@ -29,7 +29,6 @@ describe("Item BatchGet", () => {
       { id: "uuid1" },
       { id: "uuid2" },
     ]);
-    expect(instance).toBeInstanceOf(BatchGet);
     expect(instance[BUILD]()).toEqual({
       TableName: "tableName",
       _Keys: [{ id: "uuid1" }, { id: "uuid2" }],

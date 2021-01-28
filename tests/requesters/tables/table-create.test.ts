@@ -1,27 +1,31 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import nock from "nock";
+
+import { TableRequest } from "../../../src/requesters/tables/0-table-request";
 import { TableCreate } from "../../../src/requesters/tables/table-create";
 import { BUILD } from "../../../src/utils/misc-utils";
 
-const initialSend = DynamoDBClient.prototype.send;
-
-let databaseClient: DynamoDBClient;
-
-beforeAll(() => {
-  databaseClient = new DynamoDBClient({ region: "local" });
-});
-
-afterAll(() => {
-  DynamoDBClient.prototype.send = initialSend;
+afterEach(() => {
+  nock.abortPendingRequests();
+  nock.cleanAll();
 });
 
 describe("Table Create", () => {
-  test("should return an instance of TableCreate", () => {
-    const instance = new TableCreate(databaseClient, {
+  test("should return an instance of TableRequest", () => {
+    const instance = new TableCreate(new DynamoDBClient({ region: "local" }), {
       AttributeDefinitions: [],
       KeySchema: [],
       TableName: "tableName",
     });
-    expect(instance).toBeInstanceOf(TableCreate);
+    expect(instance).toBeInstanceOf(TableRequest);
+  });
+
+  test("should build correctly", () => {
+    const instance = new TableCreate(new DynamoDBClient({ region: "local" }), {
+      AttributeDefinitions: [],
+      KeySchema: [],
+      TableName: "tableName",
+    });
     expect(instance[BUILD]()).toEqual({
       AttributeDefinitions: [],
       KeySchema: [],
@@ -29,56 +33,56 @@ describe("Table Create", () => {
     });
   });
 
-  test("should return an instance of TableCreate", async () => {
-    DynamoDBClient.prototype.send = async () => {
-      return {};
-    };
+  test("should return a response", async () => {
+    nock("https://localhost:8000")
+      .post("/")
+      .reply(200, { TableDescription: {} });
 
-    const instance = new TableCreate(databaseClient, {
+    const instance = new TableCreate(new DynamoDBClient({ region: "local" }), {
       AttributeDefinitions: [],
       KeySchema: [],
       TableName: "tableName",
     });
-    expect(instance).toBeInstanceOf(TableCreate);
-
-    expect(await instance.$()).toBeUndefined();
+    expect(await instance.$()).toEqual({});
   });
 
-  test("should return an instance of TableCreate", async () => {
-    DynamoDBClient.prototype.send = async () => {
-      throw new Error("ECONN");
-    };
+  test("should retry on retryable error", async () => {
+    const scope = nock("https://localhost:8000")
+      .persist(true)
+      .post("/")
+      .replyWithError("ECONN: Connection error");
 
-    const instance = new TableCreate(databaseClient, {
+    const instance = new TableCreate(new DynamoDBClient({ region: "local" }), {
       AttributeDefinitions: [],
       KeySchema: [],
       TableName: "tableName",
     });
-    expect(instance).toBeInstanceOf(TableCreate);
 
     try {
       await instance.$();
     } catch (error) {
       expect(error).toBeDefined();
     }
+    scope.persist(false);
   });
 
-  test("should return an instance of TableCreate", async () => {
-    DynamoDBClient.prototype.send = async () => {
-      throw new Error("Unknown");
-    };
+  test("should fail on non-retryable error", async () => {
+    const scope = nock("https://localhost:8000")
+      .persist(true)
+      .post("/")
+      .replyWithError("Unknown");
 
-    const instance = new TableCreate(databaseClient, {
+    const instance = new TableCreate(new DynamoDBClient({ region: "local" }), {
       AttributeDefinitions: [],
       KeySchema: [],
       TableName: "tableName",
     });
-    expect(instance).toBeInstanceOf(TableCreate);
 
     try {
       await instance.$();
     } catch (error) {
       expect(error).toBeDefined();
     }
+    scope.persist(false);
   });
 });

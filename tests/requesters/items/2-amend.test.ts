@@ -4,20 +4,14 @@ import { Request } from "../../../src/requesters/items/0-request";
 import { Amend } from "../../../src/requesters/items/2-amend";
 import { BUILD } from "../../../src/utils/misc-utils";
 
-let databaseClient: DynamoDBClient;
-
-beforeAll(() => {
-  databaseClient = new DynamoDBClient({});
-});
-
 describe("Amend", () => {
   test("should return an instance of Request", () => {
-    const instance = new Amend(databaseClient, "");
+    const instance = new Amend(new DynamoDBClient({}), "");
     expect(instance).toBeInstanceOf(Request);
   });
 
-  test("should return an instance of Amend", () => {
-    const instance = new Amend(databaseClient, "");
+  test("should return an instance of Amend and correctly build", () => {
+    const instance = new Amend(new DynamoDBClient({}), "");
 
     expect(instance.returnItemCollectionMetrics()).toBe(instance);
     expect(instance[BUILD]()).toEqual({

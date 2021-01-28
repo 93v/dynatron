@@ -69,9 +69,11 @@ export class BatchWrite extends Amend {
             if (!response.ConsumedCapacity) {
               response.ConsumedCapacity = output.ConsumedCapacity;
             } else {
-              response.ConsumedCapacity[0].CapacityUnits =
-                (response.ConsumedCapacity[0].CapacityUnits ?? 0) +
-                (output.ConsumedCapacity[0].CapacityUnits ?? 0);
+              if (response.ConsumedCapacity[0] != undefined) {
+                response.ConsumedCapacity[0].CapacityUnits =
+                  (response.ConsumedCapacity[0].CapacityUnits ?? 0) +
+                  (output.ConsumedCapacity[0]?.CapacityUnits ?? 0);
+              }
             }
           }
 
@@ -169,9 +171,11 @@ export class BatchWrite extends Amend {
         if (!aggregatedOutput.ConsumedCapacity) {
           aggregatedOutput.ConsumedCapacity = output.ConsumedCapacity;
         } else {
-          aggregatedOutput.ConsumedCapacity[0].CapacityUnits =
-            (aggregatedOutput.ConsumedCapacity[0].CapacityUnits ?? 0) +
-            (output.ConsumedCapacity[0].CapacityUnits ?? 0);
+          if (aggregatedOutput.ConsumedCapacity[0] != undefined) {
+            aggregatedOutput.ConsumedCapacity[0].CapacityUnits =
+              (aggregatedOutput.ConsumedCapacity[0].CapacityUnits ?? 0) +
+              (output.ConsumedCapacity[0]?.CapacityUnits ?? 0);
+          }
         }
       }
 

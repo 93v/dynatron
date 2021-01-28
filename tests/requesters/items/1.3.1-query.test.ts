@@ -1,125 +1,56 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { equals } from "../../../src/condition-expression-builders";
+import nock from "nock";
 
+import { equals } from "../../../src/condition-expression-builders";
+import { ListFetch } from "../../../src/requesters/items/1.3-list-fetch";
 import { Query } from "../../../src/requesters/items/1.3.1-query";
 import { BUILD } from "../../../src/utils/misc-utils";
 
-const initialSend = DynamoDBClient.prototype.send;
-
-let databaseClient: DynamoDBClient;
-
-beforeAll(() => {
-  databaseClient = new DynamoDBClient({ region: "local" });
-});
-
-afterAll(() => {
-  DynamoDBClient.prototype.send = initialSend;
+afterEach(() => {
+  nock.abortPendingRequests();
+  nock.cleanAll();
 });
 
 describe("Query", () => {
-  test("should return an instance of Query", () => {
-    const instance = new Query(databaseClient, "", equals("id", "uuid1"));
-    expect(instance).toBeInstanceOf(Query);
+  test("should return an instance of ListFetch", () => {
+    const instance = new Query(
+      new DynamoDBClient({ region: "local" }),
+      "",
+      equals("id", "uuid1"),
+    );
+    expect(instance).toBeInstanceOf(ListFetch);
   });
 
-  test("should return an instance of Query", () => {
-    const instance = new Query(databaseClient, "", equals("id", "uuid1"));
+  test("should build correctly", () => {
+    const instance = new Query(
+      new DynamoDBClient({ region: "local" }),
+      "",
+      equals("id", "uuid1"),
+    );
 
-    expect(instance[BUILD]()).toEqual({
+    expect(
+      instance.having(equals("id2", "uuid2")).sort("ASC").sort("DSC")[BUILD](),
+    ).toEqual({
       TableName: "",
-      _KeyConditionExpression: {
-        kind: "AND",
-        conditions: [{ kind: "=", attributePath: "id", value: "uuid1" }],
-      },
-    });
-
-    // eslint-disable-next-line unicorn/no-useless-undefined
-    instance.having(undefined);
-    expect(instance[BUILD]()).toEqual({
-      TableName: "",
-      _KeyConditionExpression: {
-        kind: "AND",
-        conditions: [{ kind: "=", attributePath: "id", value: "uuid1" }],
-      },
-    });
-
-    instance.having(equals("id", "uuid2"));
-    expect(instance[BUILD]()).toEqual({
-      TableName: "",
+      ScanIndexForward: false,
       _KeyConditionExpression: {
         kind: "AND",
         conditions: [
           { kind: "=", attributePath: "id", value: "uuid1" },
-          { kind: "=", attributePath: "id", value: "uuid2" },
+          { kind: "=", attributePath: "id2", value: "uuid2" },
         ],
       },
     });
   });
 
-  test("should return an instance of Query", () => {
-    const instance = new Query(databaseClient, "", equals("id", "uuid1"));
-
-    instance.sort("ASC");
-    expect(instance[BUILD]()).toEqual({
-      TableName: "",
-      _KeyConditionExpression: {
-        kind: "AND",
-        conditions: [{ kind: "=", attributePath: "id", value: "uuid1" }],
-      },
-    });
-
-    instance.sort("DSC");
-    expect(instance[BUILD]()).toEqual({
-      TableName: "",
-      ScanIndexForward: false,
-      _KeyConditionExpression: {
-        kind: "AND",
-        conditions: [{ kind: "=", attributePath: "id", value: "uuid1" }],
-      },
-    });
-  });
-
-  test("should return an instance of Query", async () => {
-    DynamoDBClient.prototype.send = async () => {
-      return {};
-    };
+  test("should handle the raw response flag", async () => {
+    const scope = nock("https://localhost:8000")
+      .persist(true)
+      .post("/")
+      .reply(200, { Items: [{ id: { S: "uuid1" } }, { id: { S: "uuid2" } }] });
 
     const instance = new Query(
-      databaseClient,
-      "tableName",
-      equals("id", "uuid1"),
-    );
-    expect(await instance.$()).toEqual(undefined);
-  });
-
-  test("should return an instance of Query", async () => {
-    DynamoDBClient.prototype.send = async () => {
-      return {
-        Items: [{ id: { S: "uuid1" } }, { id: { S: "uuid2" } }],
-      };
-    };
-
-    const instance = new Query(
-      databaseClient,
-      "tableName",
-      equals("id", "uuid1"),
-    );
-    expect(await instance.$()).toEqual([{ id: "uuid1" }, { id: "uuid2" }]);
-    expect(await instance.indexName("index").consistentRead(true).$()).toEqual([
-      { id: "uuid1" },
-      { id: "uuid2" },
-    ]);
-  });
-
-  test("should return an instance of Query", async () => {
-    DynamoDBClient.prototype.send = async () => {
-      return {
-        Items: [{ id: { S: "uuid1" } }, { id: { S: "uuid2" } }],
-      };
-    };
-
-    const instance = new Query(
-      databaseClient,
+      new DynamoDBClient({ region: "local" }),
       "tableName",
       equals("id", "uuid1"),
     );
@@ -127,36 +58,38 @@ describe("Query", () => {
     expect(await instance.$(true)).toEqual({
       Items: [{ id: { S: "uuid1" } }, { id: { S: "uuid2" } }],
     });
+    scope.persist(false);
   });
 
-  test("should return an instance of Query", async () => {
-    DynamoDBClient.prototype.send = async () => {
-      return {
-        Items: [{ id: { S: "uuid1" } }, { id: { S: "uuid2" } }],
-      };
-    };
+  test("should return limited items", async () => {
+    const scope = nock("https://localhost:8000")
+      .persist(true)
+      .post("/")
+      .reply(200, { Items: [{ id: { S: "uuid1" } }, { id: { S: "uuid2" } }] });
 
     const instance = new Query(
-      databaseClient,
+      new DynamoDBClient({ region: "local" }),
       "tableName",
       equals("id", "uuid1"),
     );
     expect(await instance.limit(1).$()).toEqual([{ id: "uuid1" }]);
+    scope.persist(false);
   });
 
   test("should return an instance of Query", async () => {
-    DynamoDBClient.prototype.send = async () => {
-      return {
+    const scope = nock("https://localhost:8000")
+      .persist(true)
+      .post("/")
+      .reply(200, {
         LastEvaluatedKey: { id: { S: "uuid1" } },
         Count: 1,
         ScannedCount: 1,
         ConsumedCapacity: { CapacityUnits: 1 },
         Items: [{ id: { S: "uuid1" } }, { id: { S: "uuid2" } }],
-      };
-    };
+      });
 
     const instance = new Query(
-      databaseClient,
+      new DynamoDBClient({ region: "local" }),
       "tableName",
       equals("id", "uuid1"),
     );
@@ -167,21 +100,23 @@ describe("Query", () => {
       LastEvaluatedKey: { id: { S: "uuid1" } },
       ScannedCount: 1,
     });
+    scope.persist(false);
   });
 
   test("should return an instance of Query", async () => {
-    DynamoDBClient.prototype.send = async () => {
-      return {
+    const scope = nock("https://localhost:8000")
+      .persist(true)
+      .post("/")
+      .reply(200, {
         LastEvaluatedKey: { id: { S: "uuid1" } },
         Count: 1,
         ScannedCount: 1,
         ConsumedCapacity: { CapacityUnits: 1 },
         Items: [{ id: { S: "uuid1" } }, { id: { S: "uuid2" } }],
-      };
-    };
+      });
 
     const instance = new Query(
-      databaseClient,
+      new DynamoDBClient({ region: "local" }),
       "tableName",
       equals("id", "uuid1"),
     );
@@ -191,15 +126,17 @@ describe("Query", () => {
       Items: [{ id: { S: "uuid1" } }],
       ScannedCount: 1,
     });
+    scope.persist(false);
   });
 
-  test("should return an instance of Query", async () => {
-    DynamoDBClient.prototype.send = async () => {
-      throw new Error("ECONN");
-    };
+  test("should retry on retryable error", async () => {
+    const scope = nock("https://localhost:8000")
+      .persist(true)
+      .post("/")
+      .replyWithError("ECONN: Connection error");
 
     const instance = new Query(
-      databaseClient,
+      new DynamoDBClient({ region: "local" }),
       "tableName",
       equals("id", "uuid1"),
     );
@@ -208,23 +145,25 @@ describe("Query", () => {
     } catch (error) {
       expect(error).toBeDefined();
     }
+    scope.persist(false);
   });
 
-  test("should return an instance of Query", async () => {
-    DynamoDBClient.prototype.send = async () => {
-      throw new Error("Unknown");
-    };
+  test("should fail on non-retryable error", async () => {
+    const scope = nock("https://localhost:8000")
+      .persist(true)
+      .post("/")
+      .replyWithError("Unknown");
 
     const instance = new Query(
-      databaseClient,
+      new DynamoDBClient({ region: "local" }),
       "tableName",
       equals("id", "uuid1"),
     );
-
     try {
       await instance.$();
     } catch (error) {
       expect(error).toBeDefined();
     }
+    scope.persist(false);
   });
 });

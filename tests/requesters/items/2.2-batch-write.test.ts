@@ -85,6 +85,396 @@ describe("Item BatchWrite", () => {
   });
 
   test("should return an instance of BatchWrite", async () => {
+    const items = Array.from({ length: 50 }).map((_, index) => ({
+      id: "uuid" + index,
+    }));
+
+    let page = 1;
+    DynamoDBClient.prototype.send = async () => {
+      page -= 1;
+      return page >= 0
+        ? {
+            Responses: {
+              tableName: [{ id: { S: "uuid1" } }, { id: { S: "uuid2" } }],
+            },
+            UnprocessedItems: {
+              tableName: items,
+            },
+          }
+        : {
+            Responses: {
+              tableName: [{ id: { S: "uuid1" } }, { id: { S: "uuid2" } }],
+            },
+            ConsumedCapacity: [{ CapacityUnits: 2 }],
+          };
+    };
+
+    const instance = new BatchWrite(databaseClient, "tableName", items);
+    expect(await instance.returnConsumedCapacity().$()).toBeUndefined();
+  });
+
+  test("should return an instance of BatchWrite", async () => {
+    const items = Array.from({ length: 50 }).map((_, index) => ({
+      id: "uuid" + index,
+    }));
+
+    let page = 1;
+    DynamoDBClient.prototype.send = async () => {
+      page -= 1;
+      return page >= 0
+        ? {
+            Responses: {
+              tableName: [{ id: { S: "uuid1" } }, { id: { S: "uuid2" } }],
+            },
+            UnprocessedItems: {
+              tableName: items,
+            },
+            ItemCollectionMetrics: {
+              tableName: [],
+            },
+          }
+        : {
+            Responses: {
+              tableName: [{ id: { S: "uuid1" } }, { id: { S: "uuid2" } }],
+            },
+            ConsumedCapacity: [{ CapacityUnits: 2 }],
+            ItemCollectionMetrics: {
+              tableName: [],
+            },
+          };
+    };
+
+    const instance = new BatchWrite(databaseClient, "tableName", items);
+    expect(
+      await instance
+        .returnConsumedCapacity()
+        .returnItemCollectionMetrics()
+        .$(true),
+    ).toEqual({
+      ConsumedCapacity: [{ CapacityUnits: 4 }],
+      ItemCollectionMetrics: { tableName: [] },
+    });
+  });
+
+  test("should return an instance of BatchWrite", async () => {
+    const items = Array.from({ length: 50 }).map((_, index) => ({
+      id: "uuid" + index,
+    }));
+
+    let page = 1;
+    DynamoDBClient.prototype.send = async () => {
+      page -= 1;
+      return page >= 0
+        ? {
+            Responses: {
+              tableName: [{ id: { S: "uuid1" } }, { id: { S: "uuid2" } }],
+            },
+            UnprocessedItems: {
+              tableName: items,
+            },
+            ItemCollectionMetrics: {
+              tableName2: [],
+            },
+          }
+        : {
+            Responses: {
+              tableName: [{ id: { S: "uuid1" } }, { id: { S: "uuid2" } }],
+            },
+            ConsumedCapacity: [{ CapacityUnits: 2 }],
+            ItemCollectionMetrics: {
+              tableName2: [],
+            },
+          };
+    };
+
+    const instance = new BatchWrite(databaseClient, "tableName", items);
+    expect(
+      await instance
+        .returnConsumedCapacity()
+        .returnItemCollectionMetrics()
+        .$(true),
+    ).toEqual({
+      ConsumedCapacity: [{ CapacityUnits: 4 }],
+      ItemCollectionMetrics: { tableName: [], tableName2: [] },
+    });
+  });
+
+  test("should return an instance of BatchWrite", async () => {
+    const items = Array.from({ length: 50 }).map((_, index) => ({
+      id: "uuid" + index,
+    }));
+
+    let page = 1;
+    DynamoDBClient.prototype.send = async () => {
+      page -= 1;
+      return page >= 0
+        ? {
+            Responses: {
+              tableName: [{ id: { S: "uuid1" } }, { id: { S: "uuid2" } }],
+            },
+            UnprocessedItems: {
+              tableName: items,
+            },
+            ConsumedCapacity: [{ CapacityUnits: 2 }],
+            ItemCollectionMetrics: {
+              tableName2: [],
+            },
+          }
+        : {
+            Responses: {
+              tableName: [{ id: { S: "uuid1" } }, { id: { S: "uuid2" } }],
+            },
+            ConsumedCapacity: [{ CapacityUnits: 2 }],
+            ItemCollectionMetrics: {
+              tableName2: [],
+            },
+          };
+    };
+
+    const instance = new BatchWrite(databaseClient, "tableName", items);
+    expect(
+      await instance
+        .returnConsumedCapacity()
+        .returnItemCollectionMetrics()
+        .$(true),
+    ).toEqual({
+      ConsumedCapacity: [{ CapacityUnits: 6 }],
+      ItemCollectionMetrics: { tableName: [], tableName2: [] },
+    });
+  });
+
+  test("should return an instance of BatchWrite", async () => {
+    const items = Array.from({ length: 50 }).map((_, index) => ({
+      id: "uuid" + index,
+    }));
+
+    let page = 1;
+    DynamoDBClient.prototype.send = async () => {
+      page -= 1;
+      return page >= 0
+        ? {
+            Responses: {
+              tableName: [{ id: { S: "uuid1" } }, { id: { S: "uuid2" } }],
+            },
+            UnprocessedItems: {
+              tableName: items,
+            },
+            ConsumedCapacity: [],
+            ItemCollectionMetrics: {
+              tableName2: [],
+            },
+          }
+        : {
+            Responses: {
+              tableName: [{ id: { S: "uuid1" } }, { id: { S: "uuid2" } }],
+            },
+            ConsumedCapacity: [],
+            ItemCollectionMetrics: {
+              tableName2: [],
+            },
+          };
+    };
+
+    const instance = new BatchWrite(databaseClient, "tableName", items);
+    expect(
+      await instance
+        .returnConsumedCapacity()
+        .returnItemCollectionMetrics()
+        .$(true),
+    ).toEqual({
+      ConsumedCapacity: [],
+      ItemCollectionMetrics: { tableName: [], tableName2: [] },
+    });
+  });
+
+  test("should return an instance of BatchWrite", async () => {
+    const items = Array.from({ length: 50 }).map((_, index) => ({
+      id: "uuid" + index,
+    }));
+
+    let page = 1;
+    DynamoDBClient.prototype.send = async () => {
+      page -= 1;
+      return page >= 0
+        ? {
+            Responses: {
+              tableName: [{ id: { S: "uuid1" } }, { id: { S: "uuid2" } }],
+            },
+            UnprocessedItems: {
+              tableName: items,
+            },
+            ConsumedCapacity: [],
+            ItemCollectionMetrics: {
+              tableName2: [],
+            },
+          }
+        : {
+            Responses: {
+              tableName: [{ id: { S: "uuid1" } }, { id: { S: "uuid2" } }],
+            },
+            ConsumedCapacity: [{ CapacityUnits: 2 }],
+            ItemCollectionMetrics: {
+              tableName2: [],
+            },
+          };
+    };
+
+    const instance = new BatchWrite(databaseClient, "tableName", items);
+    expect(
+      await instance
+        .returnConsumedCapacity()
+        .returnItemCollectionMetrics()
+        .$(true),
+    ).toEqual({
+      ConsumedCapacity: [],
+      ItemCollectionMetrics: { tableName: [], tableName2: [] },
+    });
+  });
+
+  test("should return an instance of BatchWrite", async () => {
+    const items = Array.from({ length: 50 }).map((_, index) => ({
+      id: "uuid" + index,
+    }));
+
+    let page = 1;
+    DynamoDBClient.prototype.send = async () => {
+      page -= 1;
+      return page >= 0
+        ? {
+            Responses: {
+              tableName: [{ id: { S: "uuid1" } }, { id: { S: "uuid2" } }],
+            },
+            UnprocessedItems: {
+              tableName: items,
+            },
+          }
+        : {
+            Responses: {
+              tableName: [{ id: { S: "uuid1" } }, { id: { S: "uuid2" } }],
+            },
+            ConsumedCapacity: [{ CapacityUnits: 2 }],
+            ItemCollectionMetrics: {
+              tableName: [],
+            },
+          };
+    };
+
+    const instance = new BatchWrite(databaseClient, "tableName", items);
+    expect(
+      await instance
+        .returnConsumedCapacity()
+        .returnItemCollectionMetrics()
+        .$(true),
+    ).toEqual({
+      ConsumedCapacity: [{ CapacityUnits: 4 }],
+      ItemCollectionMetrics: { tableName: [] },
+    });
+  });
+
+  test("should return an instance of BatchWrite", async () => {
+    const items = Array.from({ length: 50 }).map((_, index) => ({
+      id: "uuid" + index,
+    }));
+
+    let page = 1;
+    DynamoDBClient.prototype.send = async () => {
+      page -= 1;
+      return page >= 0
+        ? {
+            Responses: {
+              tableName: [{ id: { S: "uuid1" } }, { id: { S: "uuid2" } }],
+            },
+            UnprocessedItems: {
+              tableName: items,
+            },
+            ConsumedCapacity: [{ CapacityUnits: 2 }],
+          }
+        : {
+            Responses: {
+              tableName: [{ id: { S: "uuid1" } }, { id: { S: "uuid2" } }],
+            },
+            ConsumedCapacity: [],
+            ItemCollectionMetrics: {
+              tableName: [],
+            },
+          };
+    };
+
+    const instance = new BatchWrite(databaseClient, "tableName", items);
+    expect(
+      await instance
+        .returnConsumedCapacity()
+        .returnItemCollectionMetrics()
+        .$(true),
+    ).toEqual({
+      ConsumedCapacity: [{ CapacityUnits: 2 }],
+      ItemCollectionMetrics: { tableName: [] },
+    });
+  });
+
+  test("should return an instance of BatchWrite", async () => {
+    const items = Array.from({ length: 50 }).map((_, index) => ({
+      id: "uuid" + index,
+    }));
+
+    let page = 1;
+    DynamoDBClient.prototype.send = async () => {
+      page -= 1;
+      return page >= 0
+        ? {
+            Responses: {
+              tableName: [{ id: { S: "uuid1" } }, { id: { S: "uuid2" } }],
+            },
+            UnprocessedItems: {
+              tableName: items,
+            },
+          }
+        : {
+            Responses: {
+              tableName: [{ id: { S: "uuid1" } }, { id: { S: "uuid2" } }],
+            },
+          };
+    };
+
+    const instance = new BatchWrite(databaseClient, "tableName", items);
+    expect(await instance.returnConsumedCapacity().$(true)).toEqual({});
+  });
+
+  test("should return an instance of BatchWrite", async () => {
+    const items = Array.from({ length: 50 }).map((_, index) => ({
+      id: "uuid" + index,
+    }));
+
+    DynamoDBClient.prototype.send = async () => {
+      throw new Error("ECONN");
+    };
+
+    const instance = new BatchWrite(databaseClient, "tableName", items);
+    try {
+      await instance.$();
+    } catch (error) {
+      expect(error).toBeDefined();
+    }
+  });
+
+  test("should return an instance of BatchWrite", async () => {
+    const items = Array.from({ length: 50 }).map((_, index) => ({
+      id: "uuid" + index,
+    }));
+
+    DynamoDBClient.prototype.send = async () => {
+      throw new Error("Unknown");
+    };
+
+    const instance = new BatchWrite(databaseClient, "tableName", items);
+    try {
+      await instance.$();
+    } catch (error) {
+      expect(error).toBeDefined();
+    }
+  });
+
+  test("should return an instance of BatchWrite", async () => {
     DynamoDBClient.prototype.send = async () => {
       throw new Error("ECONN");
     };
