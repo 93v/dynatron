@@ -66,25 +66,25 @@ export class BatchWrite extends Amend {
           }
 
           if (output.ConsumedCapacity) {
-            if (!response.ConsumedCapacity) {
-              response.ConsumedCapacity = output.ConsumedCapacity;
-            } else {
+            if (response.ConsumedCapacity) {
               if (response.ConsumedCapacity[0] != undefined) {
                 response.ConsumedCapacity[0].CapacityUnits =
                   (response.ConsumedCapacity[0].CapacityUnits ?? 0) +
                   (output.ConsumedCapacity[0]?.CapacityUnits ?? 0);
               }
+            } else {
+              response.ConsumedCapacity = output.ConsumedCapacity;
             }
           }
 
           if (output.ItemCollectionMetrics) {
-            if (!response.ItemCollectionMetrics) {
-              response.ItemCollectionMetrics = output.ItemCollectionMetrics;
-            } else {
+            if (response.ItemCollectionMetrics) {
               response.ItemCollectionMetrics[this.tableName] = [
                 ...(response.ItemCollectionMetrics[this.tableName] ?? []),
                 ...(output.ItemCollectionMetrics[this.tableName] ?? []),
               ];
+            } else {
+              response.ItemCollectionMetrics = output.ItemCollectionMetrics;
             }
           }
         } catch (error) {
@@ -163,30 +163,26 @@ export class BatchWrite extends Amend {
     const aggregatedOutput: BatchWriteItemOutput = {};
 
     for (const output of outputs) {
-      if (output == undefined) {
-        continue;
-      }
-
       if (output.ConsumedCapacity) {
-        if (!aggregatedOutput.ConsumedCapacity) {
-          aggregatedOutput.ConsumedCapacity = output.ConsumedCapacity;
-        } else {
+        if (aggregatedOutput.ConsumedCapacity) {
           if (aggregatedOutput.ConsumedCapacity[0] != undefined) {
             aggregatedOutput.ConsumedCapacity[0].CapacityUnits =
               (aggregatedOutput.ConsumedCapacity[0].CapacityUnits ?? 0) +
               (output.ConsumedCapacity[0]?.CapacityUnits ?? 0);
           }
+        } else {
+          aggregatedOutput.ConsumedCapacity = output.ConsumedCapacity;
         }
       }
 
       if (output.ItemCollectionMetrics) {
-        if (!aggregatedOutput.ItemCollectionMetrics) {
-          aggregatedOutput.ItemCollectionMetrics = output.ItemCollectionMetrics;
-        } else {
+        if (aggregatedOutput.ItemCollectionMetrics) {
           aggregatedOutput.ItemCollectionMetrics[this.tableName] = [
             ...(aggregatedOutput.ItemCollectionMetrics[this.tableName] ?? []),
             ...(output.ItemCollectionMetrics[this.tableName] ?? []),
           ];
+        } else {
+          aggregatedOutput.ItemCollectionMetrics = output.ItemCollectionMetrics;
         }
       }
     }

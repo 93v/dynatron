@@ -399,11 +399,11 @@ describe("Update expression marshaller", () => {
     nextAlpha.reset();
     expect(
       marshallUpdateExpression([
-        { kind: "increment", attributePath: "id", value: 5 },
-        { kind: "increment", attributePath: "id", value: -5 },
+        { kind: "increment", attributePath: "id[0]", value: 5 },
+        { kind: "increment", attributePath: "id[0]", value: -5 },
       ]),
     ).toEqual({
-      expressionString: "SET #a=#a+:b, #c=#c+:d",
+      expressionString: "SET #a[0]=#a[0]+:b, #c[0]=#c[0]+:d",
       expressionAttributeNames: { "#a": "id", "#c": "id" },
       expressionAttributeValues: { ":b": 5, ":d": -5 },
     });

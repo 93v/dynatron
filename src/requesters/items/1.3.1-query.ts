@@ -111,23 +111,24 @@ export class Query extends ListFetch {
               (aggregatedOutput.ScannedCount ?? 0) + output.ScannedCount;
           }
           if (output.ConsumedCapacity) {
-            if (!aggregatedOutput.ConsumedCapacity) {
-              aggregatedOutput.ConsumedCapacity = output.ConsumedCapacity;
-            } else {
+            if (aggregatedOutput.ConsumedCapacity) {
               aggregatedOutput.ConsumedCapacity.CapacityUnits =
                 (aggregatedOutput.ConsumedCapacity.CapacityUnits ?? 0) +
-                (output.ConsumedCapacity?.CapacityUnits ?? 0);
+                (output.ConsumedCapacity.CapacityUnits ?? 0);
+            } else {
+              aggregatedOutput.ConsumedCapacity = output.ConsumedCapacity;
             }
           }
           if (
             requestInput.Limit &&
-            (aggregatedOutput.Items?.length ?? 0) >= requestInput.Limit
+            aggregatedOutput.Items != undefined &&
+            aggregatedOutput.Items.length >= requestInput.Limit
           ) {
-            aggregatedOutput.Items = aggregatedOutput.Items?.slice(
+            aggregatedOutput.Items = aggregatedOutput.Items.slice(
               0,
               requestInput.Limit,
             );
-            aggregatedOutput.Count = aggregatedOutput.Items?.length ?? 0;
+            aggregatedOutput.Count = aggregatedOutput.Items.length;
             operationCompleted = true;
           }
           if (disableRecursion && output.LastEvaluatedKey != undefined) {

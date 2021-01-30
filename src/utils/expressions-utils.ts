@@ -1,5 +1,4 @@
 import { NativeAttributeValue } from "@aws-sdk/util-dynamodb";
-// import fastEquals from "fast-deep-equal";
 
 import { Condition } from "../../types/conditions";
 import { and } from "../condition-expression-builders";
@@ -29,13 +28,15 @@ export const parseAttributePath = (attributePath: string) => {
     LEFT_BRACKET = "[",
     RIGHT_BRACKET = "]",
   }
-  if (attributePath.length === 0) {
+  const path = attributePath.trim();
+
+  if (path.length === 0) {
     throw new Error("Empty path");
   }
-  if (attributePath.slice(-1) === SpecialChar.DOT) {
+  if (path.slice(-1) === SpecialChar.DOT) {
     throw new Error(
-      `Invalid control character encountered in path "${attributePath}" at index [${
-        attributePath.length - 1
+      `Invalid control character encountered in path "${path}" at index [${
+        path.length - 1
       }]`,
     );
   }
@@ -45,7 +46,7 @@ export const parseAttributePath = (attributePath: string) => {
     | { type: "name"; name: string }
     | { type: "index"; index: number }
   )[] = [];
-  [...attributePath].forEach((char, index, chars) => {
+  [...path].forEach((char, index, chars) => {
     if (mode === Mode.ESCAPED) {
       buffer += char;
       mode = Mode.NORMAL;
@@ -57,7 +58,7 @@ export const parseAttributePath = (attributePath: string) => {
         const listIndexValue = Number.parseInt(buffer);
         if (!Number.isFinite(listIndexValue)) {
           throw new TypeError(
-            `Empty array index encountered in path "${attributePath}" at index [${
+            `Empty array index encountered in path "${path}" at index [${
               index - buffer.length
             }]`,
           );
@@ -73,7 +74,7 @@ export const parseAttributePath = (attributePath: string) => {
 
       if (!/^\d$/.test(char)) {
         throw new Error(
-          `Invalid array index character "${char}" encountered in path "${attributePath}" at index [${index}]`,
+          `Invalid array index character "${char}" encountered in path "${path}" at index [${index}]`,
         );
       }
       buffer += char;
@@ -83,7 +84,7 @@ export const parseAttributePath = (attributePath: string) => {
     if (mode === Mode.AFTER_LIST_INDEX) {
       if (char !== SpecialChar.LEFT_BRACKET && char !== SpecialChar.DOT) {
         throw new Error(
-          `Bare identifier encountered between list index accesses in path "${attributePath}" at index [${index}]`,
+          `Bare identifier encountered between list index accesses in path "${path}" at index [${index}]`,
         );
       }
       mode = char === SpecialChar.LEFT_BRACKET ? Mode.LIST_INDEX : Mode.NORMAL;
@@ -94,7 +95,7 @@ export const parseAttributePath = (attributePath: string) => {
     if (char === SpecialChar.DOT || char === SpecialChar.LEFT_BRACKET) {
       if (buffer === "") {
         throw new Error(
-          `Invalid control character encountered in path "${attributePath}" at index [${index}]`,
+          `Invalid control character encountered in path "${path}" at index [${index}]`,
         );
       }
       elements.push({ type: "name", name: buffer });
@@ -168,9 +169,7 @@ const serializeUpdateExpression = (
     case "increment":
       return {
         Type: "SET",
-        expressionString: `${expressionString}=${expressionString}${
-          update.kind === "increment" ? "+" : "-"
-        }${attributeValue.name}`,
+        expressionString: `${expressionString}=${expressionString}+${attributeValue.name}`,
         expressionAttributeNames: expressionAttributeNames,
         expressionAttributeValues: {
           [attributeValue.name]: attributeValue.value,
@@ -380,7 +379,7 @@ export const marshallProjectionExpression = (
 ) => {
   const serializedProjections = [
     ...new Set(projectionExpressions),
-  ].map((projection) => serializeAttributePath(projection, "projection_"));
+  ].map((projection) => serializeAttributePath(projection, "p_"));
 
   const aggregatedProjections: {
     expressionStrings: string[];
@@ -448,10 +447,6 @@ export const marshallUpdateExpression = (
       };
     });
 
-    if (!flatGroup.expressionString) {
-      continue;
-    }
-
     updateObject.expressionString =
       updateObject.expressionString +
       ` ${updateGroup.toUpperCase()} ${flatGroup.expressionString}`;
@@ -479,36 +474,78 @@ export const marshallConditionExpression = (
   prefix = "",
 ) => serializeConditionExpression(and(conditions), prefix);
 
-// // TODO: use this
-// export const optimizeExpression = ({
-//   expressionString,
-//   expressionAttributeNames,
-//   expressionAttributeValues,
-// }: NativeExpressionModel): NativeExpressionModel => {
-//   let optimizedExpression = expressionString;
-
+// export const optimizeExpression = (
+//   marshalledRequestParameters: MarshalledRequestParameters,
+// ): MarshalledRequestParameters => {
 //   const optimizedNames: Record<string, string> = {};
-//   const optimizedValues: Record<string, any> = {};
+//   const optimizedValues: Record<string, AttributeValue> = {};
 
-//   for (const key in expressionAttributeNames) {
-//     const attributeName = expressionAttributeNames[key];
+//   for (const key in marshalledRequestParameters.ExpressionAttributeNames) {
+//     const attributeName =
+//       marshalledRequestParameters.ExpressionAttributeNames[key];
 //     if (optimizedNames[attributeName] == undefined) {
 //       optimizedNames[attributeName] = key;
 //     } else {
-//       optimizedExpression = optimizedExpression
-//         .split(key)
-//         .join(optimizedNames[attributeName]);
+//       if (marshalledRequestParameters.ConditionExpression) {
+//         marshalledRequestParameters.ConditionExpression = marshalledRequestParameters.ConditionExpression.split(
+//           key,
+//         ).join(optimizedNames[attributeName]);
+//       }
+//       if (marshalledRequestParameters.FilterExpression) {
+//         marshalledRequestParameters.FilterExpression = marshalledRequestParameters.FilterExpression.split(
+//           key,
+//         ).join(optimizedNames[attributeName]);
+//       }
+//       if (marshalledRequestParameters.KeyConditionExpression) {
+//         marshalledRequestParameters.KeyConditionExpression = marshalledRequestParameters.KeyConditionExpression.split(
+//           key,
+//         ).join(optimizedNames[attributeName]);
+//       }
+//       if (marshalledRequestParameters.ProjectionExpression) {
+//         marshalledRequestParameters.ProjectionExpression = marshalledRequestParameters.ProjectionExpression.split(
+//           key,
+//         ).join(optimizedNames[attributeName]);
+//       }
+//       if (marshalledRequestParameters.UpdateExpression) {
+//         marshalledRequestParameters.UpdateExpression = marshalledRequestParameters.UpdateExpression.split(
+//           key,
+//         ).join(optimizedNames[attributeName]);
+//       }
 //     }
 //   }
 
-//   if (expressionAttributeValues != undefined) {
-//     for (const key in expressionAttributeValues) {
-//       const value = expressionAttributeValues[key];
+//   if (marshalledRequestParameters.ExpressionAttributeValues != undefined) {
+//     for (const key in marshalledRequestParameters.ExpressionAttributeValues) {
+//       const value = marshalledRequestParameters.ExpressionAttributeValues[key];
 //       const optimizedKey = Object.keys(optimizedValues).find((k) =>
 //         fastEquals(optimizedValues[k], value),
 //       );
 //       if (optimizedKey) {
-//         optimizedExpression = optimizedExpression.split(key).join(optimizedKey);
+//         if (marshalledRequestParameters.ConditionExpression) {
+//           marshalledRequestParameters.ConditionExpression = marshalledRequestParameters.ConditionExpression.split(
+//             key,
+//           ).join(optimizedKey);
+//         }
+//         if (marshalledRequestParameters.FilterExpression) {
+//           marshalledRequestParameters.FilterExpression = marshalledRequestParameters.FilterExpression.split(
+//             key,
+//           ).join(optimizedKey);
+//         }
+//         if (marshalledRequestParameters.KeyConditionExpression) {
+//           marshalledRequestParameters.KeyConditionExpression = marshalledRequestParameters.KeyConditionExpression.split(
+//             key,
+//           ).join(optimizedKey);
+//         }
+//         if (marshalledRequestParameters.ProjectionExpression) {
+//           marshalledRequestParameters.ProjectionExpression = marshalledRequestParameters.ProjectionExpression.split(
+//             key,
+//           ).join(optimizedKey);
+//         }
+//         if (marshalledRequestParameters.UpdateExpression) {
+//           marshalledRequestParameters.UpdateExpression = marshalledRequestParameters.UpdateExpression.split(
+//             key,
+//           ).join(optimizedKey);
+//         }
 //       } else {
 //         optimizedValues[key] = value;
 //       }
@@ -521,11 +558,5 @@ export const marshallConditionExpression = (
 //     aggregatedOptimizedNames[optimizedNames[key]] = key;
 //   }
 
-//   return {
-//     expressionString: optimizedExpression,
-//     expressionAttributeNames: aggregatedOptimizedNames,
-//     ...(expressionAttributeValues && {
-//       expressionAttributeValues: optimizedValues,
-//     }),
-//   };
+//   return marshalledRequestParameters;
 // };

@@ -78,9 +78,9 @@ describe("Request Marshaller", () => {
     expect(
       marshallRequestParameters({ _ProjectionExpressions: ["id"] }),
     ).toEqual({
-      ProjectionExpression: "#projection_a",
+      ProjectionExpression: "#p_a",
       ExpressionAttributeNames: {
-        "#projection_a": "id",
+        "#p_a": "id",
       },
     });
 
@@ -88,12 +88,12 @@ describe("Request Marshaller", () => {
     expect(
       marshallRequestParameters({ _FilterExpressions: [eq("id", "value")] }),
     ).toEqual({
-      FilterExpression: "#filter_a=:filter_b",
+      FilterExpression: "#f_a=:f_b",
       ExpressionAttributeNames: {
-        "#filter_a": "id",
+        "#f_a": "id",
       },
       ExpressionAttributeValues: marshall({
-        ":filter_b": "value",
+        ":f_b": "value",
       }),
     });
 
@@ -103,12 +103,12 @@ describe("Request Marshaller", () => {
         _KeyConditionExpression: and([eq("id", "value")]),
       }),
     ).toEqual({
-      KeyConditionExpression: "#key_a=:key_b",
+      KeyConditionExpression: "#k_a=:k_b",
       ExpressionAttributeNames: {
-        "#key_a": "id",
+        "#k_a": "id",
       },
       ExpressionAttributeValues: marshall({
-        ":key_b": "value",
+        ":k_b": "value",
       }),
     });
 
@@ -118,12 +118,12 @@ describe("Request Marshaller", () => {
         _ConditionExpressions: [eq("id", "value")],
       }),
     ).toEqual({
-      ConditionExpression: "#condition_a=:condition_b",
+      ConditionExpression: "#c_a=:c_b",
       ExpressionAttributeNames: {
-        "#condition_a": "id",
+        "#c_a": "id",
       },
       ExpressionAttributeValues: marshall({
-        ":condition_b": "value",
+        ":c_b": "value",
       }),
     });
 
@@ -135,12 +135,12 @@ describe("Request Marshaller", () => {
         ],
       }),
     ).toEqual({
-      UpdateExpression: "ADD #update_a :update_b",
+      UpdateExpression: "ADD #u_a :u_b",
       ExpressionAttributeNames: {
-        "#update_a": "id",
+        "#u_a": "id",
       },
       ExpressionAttributeValues: marshall({
-        ":update_b": new Set(["value"]),
+        ":u_b": new Set(["value"]),
       }),
     });
   });

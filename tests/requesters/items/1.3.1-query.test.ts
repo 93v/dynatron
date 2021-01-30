@@ -54,7 +54,10 @@ describe("Query", () => {
       "tableName",
       equals("id", "uuid1"),
     );
-    expect(await instance.$()).toEqual([{ id: "uuid1" }, { id: "uuid2" }]);
+    expect(await instance.indexName("indexName").$()).toEqual([
+      { id: "uuid1" },
+      { id: "uuid2" },
+    ]);
     expect(await instance.$(true)).toEqual({
       Items: [{ id: { S: "uuid1" } }, { id: { S: "uuid2" } }],
     });

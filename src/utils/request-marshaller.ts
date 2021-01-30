@@ -1,4 +1,5 @@
 import {
+  AttributeValue,
   ReturnConsumedCapacity,
   ReturnItemCollectionMetrics,
   ReturnValue,
@@ -40,6 +41,34 @@ type NativeRequestParameters = {
   TotalSegments?: number;
 };
 
+export type MarshalledRequestParameters = {
+  ClientRequestToken?: string;
+  ConsistentRead?: boolean;
+  ExclusiveStartKey?: Record<string, AttributeValue>;
+  IndexName?: string;
+  Item?: Record<string, AttributeValue>;
+  Items?: Record<string, AttributeValue>[];
+  Key?: Record<string, AttributeValue>;
+  Keys?: Record<string, AttributeValue>[];
+  Limit?: number;
+  ReturnConsumedCapacity?: ReturnConsumedCapacity;
+  ReturnItemCollectionMetrics?: ReturnItemCollectionMetrics;
+  ReturnValues?: ReturnValue;
+  ScanIndexForward?: boolean;
+  Segment?: number;
+  TableName?: string;
+  TotalSegments?: number;
+
+  ConditionExpression?: string;
+  FilterExpression?: string;
+  KeyConditionExpression?: string;
+  ProjectionExpression?: string;
+  UpdateExpression?: string;
+
+  ExpressionAttributeNames?: Record<string, string>;
+  ExpressionAttributeValues?: Record<string, AttributeValue>;
+};
+
 const MARSHALL_OPTIONS: marshallOptions = { removeUndefinedValues: true };
 
 const cleanupEmptyExpressions = (
@@ -58,7 +87,7 @@ const cleanupEmptyExpressions = (
 export const marshallRequestParameters = <T>(
   requestParameters: NativeRequestParameters,
 ) => {
-  const marshalledParameters: Record<string, any> = {};
+  const marshalledParameters: MarshalledRequestParameters = {};
 
   if (requestParameters.TableName) {
     marshalledParameters.TableName = requestParameters.TableName;
@@ -157,7 +186,7 @@ export const marshallRequestParameters = <T>(
   if (requestParameters._FilterExpressions?.length) {
     const marshalledFilterExpression = marshallConditionExpression(
       requestParameters._FilterExpressions,
-      "filter_",
+      "f_",
     );
 
     marshalledParameters.FilterExpression =
@@ -177,7 +206,7 @@ export const marshallRequestParameters = <T>(
   if (requestParameters._KeyConditionExpression) {
     const marshalledKeyConditionExpression = marshallConditionExpression(
       [requestParameters._KeyConditionExpression],
-      "key_",
+      "k_",
     );
 
     marshalledParameters.KeyConditionExpression =
@@ -197,7 +226,7 @@ export const marshallRequestParameters = <T>(
   if (requestParameters._ConditionExpressions) {
     const marshalledConditionExpression = marshallConditionExpression(
       requestParameters._ConditionExpressions,
-      "condition_",
+      "c_",
     );
 
     marshalledParameters.ConditionExpression =
@@ -217,7 +246,7 @@ export const marshallRequestParameters = <T>(
   if (requestParameters._UpdateExpressions) {
     const marshalledUpdateExpression = marshallUpdateExpression(
       requestParameters._UpdateExpressions,
-      "update_",
+      "u_",
     );
 
     marshalledParameters.UpdateExpression =
@@ -234,7 +263,6 @@ export const marshallRequestParameters = <T>(
     };
   }
 
-  // TODO: optimize before marshalling
   if (marshalledParameters.ExpressionAttributeValues) {
     marshalledParameters.ExpressionAttributeValues = marshall(
       marshalledParameters.ExpressionAttributeValues,

@@ -54,7 +54,7 @@ export class Scan extends ListFetch {
 
   private scanSegment = async (
     requestInput: ScanInput,
-    disableRecursion = false,
+    disableRecursion: boolean,
   ) => {
     let operationCompleted = false;
     if (requestInput.Segment != undefined && requestInput.TotalSegments) {
@@ -92,20 +92,21 @@ export class Scan extends ListFetch {
               (response.ScannedCount ?? 0) + output.ScannedCount;
           }
           if (output.ConsumedCapacity) {
-            if (!response.ConsumedCapacity) {
-              response.ConsumedCapacity = output.ConsumedCapacity;
-            } else {
+            if (response.ConsumedCapacity) {
               response.ConsumedCapacity.CapacityUnits =
                 (response.ConsumedCapacity.CapacityUnits ?? 0) +
-                (output.ConsumedCapacity?.CapacityUnits ?? 0);
+                (output.ConsumedCapacity.CapacityUnits ?? 0);
+            } else {
+              response.ConsumedCapacity = output.ConsumedCapacity;
             }
           }
           if (
             requestInput.Limit &&
-            (response.Items?.length ?? 0) >= requestInput.Limit
+            response.Items != undefined &&
+            response.Items.length >= requestInput.Limit
           ) {
-            response.Items = response.Items?.slice(0, requestInput.Limit);
-            response.Count = response.Items?.length ?? 0;
+            response.Items = response.Items.slice(0, requestInput.Limit);
+            response.Count = response.Items.length;
             operationCompleted = true;
           }
           if (disableRecursion && output.LastEvaluatedKey != undefined) {
@@ -162,12 +163,10 @@ export class Scan extends ListFetch {
       }
     }
 
-    let outputs: (ScanOutput | undefined)[];
+    let outputs: ScanOutput[];
     if (requestInput.Segment != undefined) {
       const segmentParameters = { ...requestInput };
-      if (!segmentParameters.TotalSegments) {
-        segmentParameters.TotalSegments = 1;
-      }
+      segmentParameters.TotalSegments = segmentParameters.TotalSegments || 1;
       outputs = [await this.scanSegment(requestInput, disableRecursion)];
     } else {
       outputs = await Promise.all(
@@ -182,35 +181,31 @@ export class Scan extends ListFetch {
         ),
       );
     }
-    const aggregatedOutput = outputs.reduce(
-      (aggregated: ScanOutput, currentOutput) => {
-        const output: ScanOutput = {
-          Items: [...(aggregated.Items ?? []), ...(currentOutput?.Items ?? [])],
-          Count: (aggregated.Count ?? 0) + (currentOutput?.Count ?? 0),
-          ScannedCount:
-            (aggregated.ScannedCount ?? 0) + (currentOutput?.ScannedCount ?? 0),
-          ...(disableRecursion
-            ? {
-                LastEvaluatedKey:
-                  aggregated.LastEvaluatedKey ??
-                  currentOutput?.LastEvaluatedKey,
-              }
-            : {}),
-        };
-        if (currentOutput?.ConsumedCapacity) {
-          if (!aggregated.ConsumedCapacity) {
-            output.ConsumedCapacity = currentOutput.ConsumedCapacity;
-          } else {
-            output.ConsumedCapacity = output.ConsumedCapacity ?? {};
-            output.ConsumedCapacity.CapacityUnits =
-              (aggregated.ConsumedCapacity.CapacityUnits ?? 0) +
-              (currentOutput.ConsumedCapacity?.CapacityUnits ?? 0);
-          }
+    const aggregatedOutput = outputs.reduce((aggregated, currentOutput) => {
+      const output: ScanOutput = {
+        Items: [...(aggregated.Items ?? []), ...(currentOutput.Items ?? [])],
+        Count: (aggregated.Count ?? 0) + (currentOutput.Count ?? 0),
+        ScannedCount:
+          (aggregated.ScannedCount ?? 0) + (currentOutput.ScannedCount ?? 0),
+        ...(disableRecursion
+          ? {
+              LastEvaluatedKey:
+                aggregated.LastEvaluatedKey ?? currentOutput.LastEvaluatedKey,
+            }
+          : {}),
+      };
+      if (currentOutput.ConsumedCapacity) {
+        if (aggregated.ConsumedCapacity) {
+          output.ConsumedCapacity = output.ConsumedCapacity ?? {};
+          output.ConsumedCapacity.CapacityUnits =
+            (aggregated.ConsumedCapacity.CapacityUnits ?? 0) +
+            (currentOutput.ConsumedCapacity.CapacityUnits ?? 0);
+        } else {
+          output.ConsumedCapacity = currentOutput.ConsumedCapacity;
         }
-        return output;
-      },
-      {},
-    );
+      }
+      return output;
+    }, {});
     if (initialLimit && (aggregatedOutput.Items?.length ?? 0) >= initialLimit) {
       aggregatedOutput.Items = aggregatedOutput.Items?.slice(0, initialLimit);
       aggregatedOutput.Count = aggregatedOutput.Items?.length ?? 0;
