@@ -23,7 +23,7 @@ jobs:
           echo -n "aws_secret_access_key=aws_secret_access_key" >> ~/.aws/credentials
       - run: npm ci
       - run: npm run lint
-      - run: npm test
+      # - run: npm test
 
   # Publishing to gpr automatically published to npm too
   build-and-publish-gpr:

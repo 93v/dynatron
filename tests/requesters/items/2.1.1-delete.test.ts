@@ -6,8 +6,8 @@ import { Delete } from "../../../src/requesters/items/2.1.1-delete";
 import { BUILD } from "../../../src/utils/misc-utils";
 
 afterEach(() => {
-  nock.abortPendingRequests();
-  nock.cleanAll();
+  // nock.abortPendingRequests();
+  // nock.cleanAll();
 });
 
 describe("Item Delete", () => {
@@ -48,6 +48,7 @@ describe("Item Delete", () => {
       Attributes: { id: { S: "uuid" } },
     });
     scope.persist(false);
+    nock.cleanAll();
   });
 
   test("should retry on retryable error", async () => {
@@ -67,6 +68,7 @@ describe("Item Delete", () => {
       expect(error).toBeDefined();
     }
     scope.persist(false);
+    nock.cleanAll();
   });
 
   test("should fail on non-retryable error", async () => {
@@ -86,5 +88,6 @@ describe("Item Delete", () => {
       expect(error).toBeDefined();
     }
     scope.persist(false);
+    nock.cleanAll();
   });
 });

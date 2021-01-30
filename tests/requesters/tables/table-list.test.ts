@@ -6,8 +6,8 @@ import { TableList } from "../../../src/requesters/tables/table-list";
 import { BUILD } from "../../../src/utils/misc-utils";
 
 afterEach(() => {
-  nock.abortPendingRequests();
-  nock.cleanAll();
+  // nock.abortPendingRequests();
+  // nock.cleanAll();
 });
 
 describe("Table List", () => {
@@ -32,22 +32,26 @@ describe("Table List", () => {
   });
 
   test("should return a list", async () => {
-    nock("https://localhost:8000").post("/").reply(200, {
-      LastEvaluatedTableName: "hello",
-    });
-    nock("https://localhost:8000")
+    const scope = nock("https://localhost:8000")
+      .post("/")
+      .reply(200, {
+        LastEvaluatedTableName: "hello",
+      })
       .post("/")
       .reply(200, {
         TableNames: ["table1", "table2"],
         LastEvaluatedTableName: "hello",
-      });
-    nock("https://localhost:8000")
+      })
+      .post("/")
+      .reply(200, { TableNames: ["table3", "table4"] })
       .post("/")
       .reply(200, { TableNames: ["table3", "table4"] });
 
     const instance = new TableList(new DynamoDBClient({ region: "local" }));
 
     expect(await instance.limit(3).$()).toEqual(["table1", "table2", "table3"]);
+    scope.persist(false);
+    nock.cleanAll();
   });
 
   test("should retry on retryable error", async () => {
@@ -64,6 +68,7 @@ describe("Table List", () => {
       expect(error).toBeDefined();
     }
     scope.persist(false);
+    nock.cleanAll();
   });
 
   test("should fail on non-retryable error", async () => {
@@ -80,5 +85,6 @@ describe("Table List", () => {
       expect(error).toBeDefined();
     }
     scope.persist(false);
+    nock.cleanAll();
   });
 });

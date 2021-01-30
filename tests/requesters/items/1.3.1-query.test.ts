@@ -7,8 +7,8 @@ import { Query } from "../../../src/requesters/items/1.3.1-query";
 import { BUILD } from "../../../src/utils/misc-utils";
 
 afterEach(() => {
-  nock.abortPendingRequests();
-  nock.cleanAll();
+  // nock.abortPendingRequests();
+  // nock.cleanAll();
 });
 
 describe("Query", () => {
@@ -62,6 +62,7 @@ describe("Query", () => {
       Items: [{ id: { S: "uuid1" } }, { id: { S: "uuid2" } }],
     });
     scope.persist(false);
+    nock.cleanAll();
   });
 
   test("should return limited items", async () => {
@@ -77,6 +78,7 @@ describe("Query", () => {
     );
     expect(await instance.limit(1).$()).toEqual([{ id: "uuid1" }]);
     scope.persist(false);
+    nock.cleanAll();
   });
 
   test("should return an instance of Query", async () => {
@@ -104,6 +106,7 @@ describe("Query", () => {
       ScannedCount: 1,
     });
     scope.persist(false);
+    nock.cleanAll();
   });
 
   test("should return an instance of Query", async () => {
@@ -130,6 +133,7 @@ describe("Query", () => {
       ScannedCount: 1,
     });
     scope.persist(false);
+    nock.cleanAll();
   });
 
   test("should retry on retryable error", async () => {
@@ -149,6 +153,7 @@ describe("Query", () => {
       expect(error).toBeDefined();
     }
     scope.persist(false);
+    nock.cleanAll();
   });
 
   test("should fail on non-retryable error", async () => {
@@ -168,5 +173,6 @@ describe("Query", () => {
       expect(error).toBeDefined();
     }
     scope.persist(false);
+    nock.cleanAll();
   });
 });

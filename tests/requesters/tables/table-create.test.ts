@@ -6,8 +6,8 @@ import { TableCreate } from "../../../src/requesters/tables/table-create";
 import { BUILD } from "../../../src/utils/misc-utils";
 
 afterEach(() => {
-  nock.abortPendingRequests();
-  nock.cleanAll();
+  // nock.abortPendingRequests();
+  // nock.cleanAll();
 });
 
 describe("Table Create", () => {
@@ -34,7 +34,8 @@ describe("Table Create", () => {
   });
 
   test("should return a response", async () => {
-    nock("https://localhost:8000")
+    const scope = nock("https://localhost:8000")
+      .persist(true)
       .post("/")
       .reply(200, { TableDescription: {} });
 
@@ -44,6 +45,8 @@ describe("Table Create", () => {
       TableName: "tableName",
     });
     expect(await instance.$()).toEqual({});
+    scope.persist(false);
+    nock.cleanAll();
   });
 
   test("should retry on retryable error", async () => {
@@ -64,6 +67,7 @@ describe("Table Create", () => {
       expect(error).toBeDefined();
     }
     scope.persist(false);
+    nock.cleanAll();
   });
 
   test("should fail on non-retryable error", async () => {
@@ -84,5 +88,6 @@ describe("Table Create", () => {
       expect(error).toBeDefined();
     }
     scope.persist(false);
+    nock.cleanAll();
   });
 });

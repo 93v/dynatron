@@ -7,8 +7,8 @@ import { TransactGet } from "../../../src/requesters/items/3-transact-get";
 import { BUILD } from "../../../src/utils/misc-utils";
 
 afterEach(() => {
-  nock.abortPendingRequests();
-  nock.cleanAll();
+  // nock.abortPendingRequests();
+  // nock.cleanAll();
 });
 
 describe("Item TransactGet", () => {
@@ -51,6 +51,7 @@ describe("Item TransactGet", () => {
       Responses: undefined,
     });
     scope.persist(false);
+    nock.cleanAll();
   });
 
   test("should handle raw response flag correctly", async () => {
@@ -70,6 +71,7 @@ describe("Item TransactGet", () => {
       Responses: [{ Item: { id: { S: "uuid" } } }],
     });
     scope.persist(false);
+    nock.cleanAll();
   });
 
   test("should retry on retryable error", async () => {
@@ -89,6 +91,7 @@ describe("Item TransactGet", () => {
       expect(error).toBeDefined();
     }
     scope.persist(false);
+    nock.cleanAll();
   });
 
   test("should fail on non-retryable error", async () => {
@@ -108,5 +111,6 @@ describe("Item TransactGet", () => {
       expect(error).toBeDefined();
     }
     scope.persist(false);
+    nock.cleanAll();
   });
 });

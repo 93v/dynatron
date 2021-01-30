@@ -5,8 +5,8 @@ import { TableRequest } from "../../../src/requesters/tables/0-table-request";
 import { TableUpdate } from "../../../src/requesters/tables/table-update";
 
 afterEach(() => {
-  nock.abortPendingRequests();
-  nock.cleanAll();
+  // nock.abortPendingRequests();
+  // nock.cleanAll();
 });
 
 describe("Table Update", () => {
@@ -28,6 +28,7 @@ describe("Table Update", () => {
 
     expect(await instance.$()).toEqual({});
     scope.persist(false);
+    nock.cleanAll();
   });
 
   test("should retry on retryable error", async () => {
@@ -46,6 +47,7 @@ describe("Table Update", () => {
       expect(error).toBeDefined();
     }
     scope.persist(false);
+    nock.cleanAll();
   });
 
   test("should fail on non-retryable error", async () => {
@@ -64,5 +66,6 @@ describe("Table Update", () => {
       expect(error).toBeDefined();
     }
     scope.persist(false);
+    nock.cleanAll();
   });
 });

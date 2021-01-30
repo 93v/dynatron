@@ -6,8 +6,8 @@ import { Update } from "../../../src/requesters/items/2.1.3-update";
 import { BUILD } from "../../../src/utils/misc-utils";
 
 afterEach(() => {
-  nock.abortPendingRequests();
-  nock.cleanAll();
+  // nock.abortPendingRequests();
+  // nock.cleanAll();
 });
 
 describe("Item Update", () => {
@@ -78,6 +78,7 @@ describe("Item Update", () => {
       Attributes: { id: { S: "uuid" } },
     });
     scope.persist(false);
+    nock.cleanAll();
   });
 
   test("should retry on retryable error", async () => {
@@ -97,6 +98,7 @@ describe("Item Update", () => {
       expect(error).toBeDefined();
     }
     scope.persist(false);
+    nock.cleanAll();
   });
 
   test("should fail on non-retryable error", async () => {
@@ -116,5 +118,6 @@ describe("Item Update", () => {
       expect(error).toBeDefined();
     }
     scope.persist(false);
+    nock.cleanAll();
   });
 });

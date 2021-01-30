@@ -6,8 +6,8 @@ import { Scan } from "../../../src/requesters/items/1.3.2-scan";
 import { BUILD } from "../../../src/utils/misc-utils";
 
 afterEach(() => {
-  nock.abortPendingRequests();
-  nock.cleanAll();
+  // nock.abortPendingRequests();
+  // nock.cleanAll();
 });
 
 describe("Scan", () => {
@@ -79,6 +79,7 @@ describe("Scan", () => {
       ScannedCount: 0,
     });
     scope.persist(false);
+    nock.cleanAll();
   });
 
   test("should return an instance of Scan", async () => {
@@ -112,6 +113,7 @@ describe("Scan", () => {
       ScannedCount: 0,
     });
     scope.persist(false);
+    nock.cleanAll();
   });
 
   test("should return an instance of Scan", async () => {
@@ -128,6 +130,7 @@ describe("Scan", () => {
     instance.totalSegments(1);
     expect(await instance.limit(1).$()).toEqual([{ id: "uuid1" }]);
     scope.persist(false);
+    nock.cleanAll();
   });
 
   test("should return an instance of Scan", async () => {
@@ -146,6 +149,7 @@ describe("Scan", () => {
     instance.totalSegments(1);
     expect(await instance.limit(1).$(false, true)).toEqual([{ id: "uuid1" }]);
     scope.persist(false);
+    nock.cleanAll();
   });
 
   test("should return an instance of Scan", async () => {
@@ -164,6 +168,7 @@ describe("Scan", () => {
     instance.totalSegments(1);
     expect(await instance.limit(1).$()).toEqual([{ id: "uuid1" }]);
     scope.persist(false);
+    nock.cleanAll();
   });
 
   test("should return an instance of Scan", async () => {
@@ -183,6 +188,7 @@ describe("Scan", () => {
       await instance.indexName("index").start({ id: "uuid1" }).$(),
     ).toEqual([{ id: "uuid1" }, { id: "uuid2" }]);
     scope.persist(false);
+    nock.cleanAll();
   });
 
   test("should return an instance of Scan", async () => {
@@ -210,6 +216,7 @@ describe("Scan", () => {
     });
 
     scope.persist(false);
+    nock.cleanAll();
   });
 
   test("should return an instance of Scan", async () => {
@@ -235,6 +242,7 @@ describe("Scan", () => {
       ConsumedCapacity: { CapacityUnits: 1 },
     });
     scope.persist(false);
+    nock.cleanAll();
   });
 
   test("should retry on retryable error", async () => {
@@ -253,6 +261,7 @@ describe("Scan", () => {
       expect(error).toBeDefined();
     }
     scope.persist(false);
+    nock.cleanAll();
   });
 
   test("should fail on non-retryable error", async () => {
@@ -271,5 +280,6 @@ describe("Scan", () => {
       expect(error).toBeDefined();
     }
     scope.persist(false);
+    nock.cleanAll();
   });
 });

@@ -6,8 +6,8 @@ import { Get } from "../../../src/requesters/items/1.1-get";
 import { BUILD } from "../../../src/utils/misc-utils";
 
 afterEach(() => {
-  nock.abortPendingRequests();
-  nock.cleanAll();
+  // nock.abortPendingRequests();
+  // nock.cleanAll();
 });
 
 describe("Item Get", () => {
@@ -46,6 +46,7 @@ describe("Item Get", () => {
     expect(await instance.$()).toEqual({ id: "uuid" });
     expect(await instance.$(true)).toEqual({ Item: { id: { S: "uuid" } } });
     scope.persist(false);
+    nock.cleanAll();
   });
 
   test("should retry on retryable error", async () => {
@@ -65,6 +66,7 @@ describe("Item Get", () => {
       expect(error).toBeDefined();
     }
     scope.persist(false);
+    nock.cleanAll();
   });
 
   test("should fail on non-retryable error", async () => {
@@ -84,5 +86,6 @@ describe("Item Get", () => {
       expect(error).toBeDefined();
     }
     scope.persist(false);
+    nock.cleanAll();
   });
 });

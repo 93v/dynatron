@@ -6,8 +6,8 @@ import { Put } from "../../../src/requesters/items/2.1.2-put";
 import { BUILD } from "../../../src/utils/misc-utils";
 
 afterEach(() => {
-  nock.abortPendingRequests();
-  nock.cleanAll();
+  // nock.abortPendingRequests();
+  // nock.cleanAll();
 });
 
 describe("Item Put", () => {
@@ -51,6 +51,7 @@ describe("Item Put", () => {
       ItemCollectionMetrics: undefined,
     });
     scope.persist(false);
+    nock.cleanAll();
   });
 
   test("should retry on retryable error", async () => {
@@ -70,6 +71,7 @@ describe("Item Put", () => {
       expect(error).toBeDefined();
     }
     scope.persist(false);
+    nock.cleanAll();
   });
 
   test("should fail on non-retryable error", async () => {
@@ -89,5 +91,6 @@ describe("Item Put", () => {
       expect(error).toBeDefined();
     }
     scope.persist(false);
+    nock.cleanAll();
   });
 });

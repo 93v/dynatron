@@ -6,8 +6,8 @@ import { TableTTLDescribe } from "../../../src/requesters/tables/table-ttl-descr
 import { BUILD } from "../../../src/utils/misc-utils";
 
 afterEach(() => {
-  nock.abortPendingRequests();
-  nock.cleanAll();
+  // nock.abortPendingRequests();
+  // nock.cleanAll();
 });
 
 describe("Table TableTTLDescribe", () => {
@@ -28,7 +28,7 @@ describe("Table TableTTLDescribe", () => {
   });
 
   test("should return a response", async () => {
-    nock("https://localhost:8000")
+    const scope = nock("https://localhost:8000")
       .post("/")
       .reply(200, { TimeToLiveDescription: {} });
 
@@ -38,6 +38,8 @@ describe("Table TableTTLDescribe", () => {
     );
 
     expect(await instance.$()).toEqual({});
+    scope.persist(false);
+    nock.cleanAll();
   });
 
   test("should retry on retryable error", async () => {
@@ -57,6 +59,7 @@ describe("Table TableTTLDescribe", () => {
       expect(error).toBeDefined();
     }
     scope.persist(false);
+    nock.cleanAll();
   });
 
   test("should fail on non-retryable error", async () => {
@@ -76,5 +79,6 @@ describe("Table TableTTLDescribe", () => {
       expect(error).toBeDefined();
     }
     scope.persist(false);
+    nock.cleanAll();
   });
 });

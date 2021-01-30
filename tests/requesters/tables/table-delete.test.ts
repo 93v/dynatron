@@ -6,8 +6,8 @@ import { TableDelete } from "../../../src/requesters/tables/table-delete";
 import { BUILD } from "../../../src/utils/misc-utils";
 
 afterEach(() => {
-  nock.abortPendingRequests();
-  nock.cleanAll();
+  // nock.abortPendingRequests();
+  // nock.cleanAll();
 });
 
 describe("Table Delete", () => {
@@ -39,6 +39,7 @@ describe("Table Delete", () => {
 
     expect(await instance.$()).toEqual({});
     scope.persist(false);
+    nock.cleanAll();
   });
 
   test("should retry on retryable error", async () => {
@@ -58,6 +59,7 @@ describe("Table Delete", () => {
       expect(error).toBeDefined();
     }
     scope.persist(false);
+    nock.cleanAll();
   });
 
   test("should fail on non-retryable error", async () => {
@@ -77,5 +79,6 @@ describe("Table Delete", () => {
       expect(error).toBeDefined();
     }
     scope.persist(false);
+    nock.cleanAll();
   });
 });

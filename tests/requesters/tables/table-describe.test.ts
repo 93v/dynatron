@@ -6,8 +6,8 @@ import { TableDescribe } from "../../../src/requesters/tables/table-describe";
 import { BUILD } from "../../../src/utils/misc-utils";
 
 afterEach(() => {
-  nock.abortPendingRequests();
-  nock.cleanAll();
+  // nock.abortPendingRequests();
+  // nock.cleanAll();
 });
 
 describe("Table Describe", () => {
@@ -28,7 +28,9 @@ describe("Table Describe", () => {
   });
 
   test("should return a response", async () => {
-    nock("https://localhost:8000").post("/").reply(200, { Table: {} });
+    const scope = nock("https://localhost:8000")
+      .post("/")
+      .reply(200, { Table: {} });
 
     const instance = new TableDescribe(
       new DynamoDBClient({ region: "local" }),
@@ -36,6 +38,8 @@ describe("Table Describe", () => {
     );
 
     expect(await instance.$()).toEqual({});
+    scope.persist(false);
+    nock.cleanAll();
   });
 
   test("should retry on retryable error", async () => {
@@ -55,6 +59,7 @@ describe("Table Describe", () => {
       expect(error).toBeDefined();
     }
     scope.persist(false);
+    nock.cleanAll();
   });
 
   test("should fail on non-retryable error", async () => {
@@ -74,5 +79,6 @@ describe("Table Describe", () => {
       expect(error).toBeDefined();
     }
     scope.persist(false);
+    nock.cleanAll();
   });
 });
