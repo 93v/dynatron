@@ -28,6 +28,9 @@ export class TableDescribe extends TableRequest {
     return { TableName: this.tableName };
   }
 
+  /**
+   * Execute the Describe Table request
+   */
   $ = async () => {
     const requestInput = this[BUILD]();
     return AsyncRetry(async (bail, attempt): Promise<

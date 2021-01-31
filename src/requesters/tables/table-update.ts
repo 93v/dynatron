@@ -28,6 +28,9 @@ export class TableUpdate extends TableRequest {
     return { ...this.parameters };
   }
 
+  /**
+   * Execute the Update Table request
+   */
   $ = async () => {
     const requestInput = this[BUILD]();
     return AsyncRetry(async (bail, attempt): Promise<

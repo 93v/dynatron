@@ -34,6 +34,10 @@ export class Query extends ListFetch {
     super(databaseClient, tableName);
   }
 
+  /**
+   * The condition that specifies the key values for items to be retrieved by the Query action.
+   * @param keyCondition KeyCondition
+   */
   having = (keyCondition: KeyCondition | undefined) => {
     if (keyCondition != undefined) {
       this.sortKeyCondition = keyCondition;
@@ -41,6 +45,12 @@ export class Query extends ListFetch {
     return this;
   };
 
+  /**
+   * Specifies the order for index traversal: either in ascending or descending order.
+   *
+   * Items with the same partition key value are stored in sorted order by sort key. If the sort key data type is Number, the results are stored in numeric order. For type String, the results are stored in order of UTF-8 bytes. For type Binary, DynamoDB treats each byte of the binary data as unsigned.
+   * @param sort "ASC" | "DSC"
+   */
   sort = (sort: "ASC" | "DSC") => {
     if (sort === "DSC") {
       this.#ScanIndexForward = false;
@@ -63,6 +73,11 @@ export class Query extends ListFetch {
     };
   }
 
+  /**
+   * Execute the Query request
+   * @param returnRawResponse boolean
+   * @param disableRecursion boolean
+   */
   $ = async <T = NativeValue[] | undefined, U extends boolean = false>(
     returnRawResponse?: U,
     disableRecursion = false,
@@ -75,8 +90,22 @@ export class Query extends ListFetch {
       delete requestInput.ConsistentRead;
     }
 
+    // When both the Limit and FilterExpressions are provided we calculate
+    // how complex is the FilterExpression
+    // Initial complexity is 0 which sets the limit to the provided value
+    let filterExpressionComplexity = 0;
+    if (requestInput.Limit && requestInput.FilterExpression) {
+      filterExpressionComplexity =
+        (requestInput.FilterExpression.match(/AND|OR/g) || []).length + 1;
+    }
+    // Then the complexity is used with the following base number to request
+    // for more elements when the filter is more complex for a faster resolution
+    const FILTER_EXPRESSION_LIMIT_POWER_BASE = 5;
+
     let operationCompleted = false;
     const aggregatedOutput: QueryOutput = {};
+
+    let keyAttributes: string[] = [];
 
     return AsyncRetry(async (bail, attempt) => {
       while (!operationCompleted) {
@@ -87,7 +116,17 @@ export class Query extends ListFetch {
         try {
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
           const { $metadata, ...output } = await Promise.race([
-            this.databaseClient.send(new QueryCommand(requestInput)),
+            this.databaseClient.send(
+              new QueryCommand({
+                ...requestInput,
+                ...(requestInput.Limit && {
+                  Limit:
+                    requestInput.Limit *
+                    FILTER_EXPRESSION_LIMIT_POWER_BASE **
+                      filterExpressionComplexity,
+                }),
+              }),
+            ),
             shortCircuit.launch(),
           ]);
 
@@ -95,6 +134,7 @@ export class Query extends ListFetch {
             operationCompleted = true;
           } else {
             requestInput.ExclusiveStartKey = output.LastEvaluatedKey;
+            keyAttributes = Object.keys(output.LastEvaluatedKey);
           }
           if (output.Items) {
             aggregatedOutput.Items = [
@@ -129,6 +169,15 @@ export class Query extends ListFetch {
               requestInput.Limit,
             );
             aggregatedOutput.Count = aggregatedOutput.Items.length;
+            const lastEvaluatedKey = {
+              ...aggregatedOutput.Items[aggregatedOutput.Items.length - 1],
+            };
+            Object.keys(lastEvaluatedKey).forEach((key) => {
+              if (!keyAttributes.includes(key)) {
+                delete lastEvaluatedKey[key];
+              }
+            });
+            aggregatedOutput.LastEvaluatedKey = lastEvaluatedKey;
             operationCompleted = true;
           }
           if (disableRecursion && output.LastEvaluatedKey != undefined) {
@@ -138,6 +187,7 @@ export class Query extends ListFetch {
           if (isRetryableError(error)) {
             throw error;
           }
+          operationCompleted = true;
           bail(error);
         } finally {
           shortCircuit.halt();

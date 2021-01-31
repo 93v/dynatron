@@ -83,6 +83,7 @@ export class BatchGet extends Fetch {
           if (isRetryableError(error)) {
             throw error;
           }
+          operationCompleted = true;
           bail(error);
         } finally {
           shortCircuit.halt();
@@ -92,6 +93,10 @@ export class BatchGet extends Fetch {
     }, RETRY_OPTIONS);
   };
 
+  /**
+   * Execute the BatchGet request
+   * @param returnRawResponse boolean
+   */
   $ = async <T = NativeValue[] | undefined, U extends boolean = false>(
     returnRawResponse?: U,
   ): Promise<U extends true ? BatchGetItemOutput : T | undefined> => {

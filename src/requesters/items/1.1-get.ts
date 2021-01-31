@@ -37,6 +37,10 @@ export class Get extends Fetch {
     };
   }
 
+  /**
+   * Execute the Get request
+   * @param returnRawResponse boolean
+   */
   $ = async <T = NativeValue | undefined, U extends boolean = false>(
     returnRawResponse?: U,
   ): Promise<U extends true ? GetItemOutput : T | undefined> => {

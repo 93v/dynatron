@@ -91,6 +91,7 @@ export class BatchWrite extends Amend {
           if (isRetryableError(error)) {
             throw error;
           }
+          operationCompleted = true;
           bail(error);
         } finally {
           shortCircuit.halt();
@@ -100,6 +101,10 @@ export class BatchWrite extends Amend {
     }, RETRY_OPTIONS);
   };
 
+  /**
+   * Execute the BatchWrite request
+   * @param returnRawResponse boolean
+   */
   $ = async <T = NativeValue[] | undefined, U extends boolean = false>(
     returnRawResponse?: U,
   ): Promise<U extends true ? BatchWriteItemOutput : T | undefined> => {

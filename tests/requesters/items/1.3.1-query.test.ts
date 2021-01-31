@@ -127,9 +127,22 @@ describe("Query", () => {
       equals("id", "uuid1"),
     );
     expect(await instance.limit(1).$(true, false)).toEqual({
-      ConsumedCapacity: { CapacityUnits: 1 },
+      ConsumedCapacity: {
+        CapacityUnits: 1,
+        GlobalSecondaryIndexes: undefined,
+        LocalSecondaryIndexes: undefined,
+        ReadCapacityUnits: undefined,
+        Table: undefined,
+        TableName: undefined,
+        WriteCapacityUnits: undefined,
+      },
       Count: 1,
       Items: [{ id: { S: "uuid1" } }],
+      LastEvaluatedKey: {
+        id: {
+          S: "uuid1",
+        },
+      },
       ScannedCount: 1,
     });
     scope.persist(false);

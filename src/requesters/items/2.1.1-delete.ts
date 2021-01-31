@@ -19,6 +19,10 @@ import { marshallRequestParameters } from "../../utils/request-marshaller";
 import { Check } from "./2.1-check";
 
 export class Delete extends Check {
+  /**
+   * Execute the Delete request
+   * @param returnRawResponse boolean
+   */
   $ = async <T = NativeValue | undefined, U extends boolean = false>(
     returnRawResponse?: U,
   ): Promise<U extends true ? DeleteItemOutput : T | undefined> => {

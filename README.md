@@ -1,4 +1,4 @@
-# ⚡️ Dynatron
+# ⚡️ Dynatron v4
 
 ![David](https://img.shields.io/david/93v/dynatron.svg)
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/93v/dynatron.svg)
@@ -50,28 +50,6 @@ the top-level `ProductReviews` document attribute.
 If a property name contains a left bracket or dot, it may be escaped with a
 backslash `\`. For example, `Product\\.Reviews` would be interpreted as a single
 top-level document attribute rather than as a map property access.
-
-### Sets of Values
-
-AWS DynamoDB has special attribute types called Sets. They are unique arrays of
-values. The following function returns a correct Set that can be assigned to a
-DB entry property.
-
-```typescript
-setOfValues(["A", "B", "C"]);
-```
-
-#### Pre-process before JSON.stringify
-
-The Sets returned from the DB when stringified are converted to arrays. This is
-fine in most of the cases, but that loses the info that the property used to be
-a set. To not loose that info `preStringify` function can be used, that converts
-the Set to an object which passed into `put` or similar functions gets written
-into the db correctly as a Set.
-
-```typescript
-preStringify(attributeMap);
-```
 
 ### Condition Expression Builders
 
@@ -243,38 +221,37 @@ in the table name. In serverless applications you can pass in env variables and
 do the configuration based on them.
 
 ```typescript
-export const db = (table: string) => {
-  let clientConfigs: DynatronDocumentClientParams;
+export const db = async (tableName: string) => {
+  const clientConfiguration: DynamoDBClientConfig = {};
 
   if (process.env.IS_OFFLINE) {
-    clientConfigs = {
-      mode: "local",
-      port: 8888, // optional - defaults to 8000
-      accessKeyId: "localhost", // optional - defaults to "localAwsAccessKeyId"
-      secretAccessKey: "localhost", // optional - defaults to "localAwsSecretAccessKey"
+    clientConfiguration = {
+      region: "local",
+      endpoint: `http://localhost:8000`,
+      credentials: {
+        accessKeyId: "localAwsAccessKeyId",
+        secretAccessKey: "localAwsSecretAccessKey",
+      },
     };
   } else if (process.env.IS_DIRECT) {
-    // Usually used within node.js code. Cannot be used in the browsers
-    clientConfigs = {
-      mode: "direct",
-      profile: "default",
-      region: "us-east-1",
-    };
+    const profile: string | undefined = undefined;
+    // const profile: string | undefined = "myia-serverless-api-dev";
 
-    // or
-    // Usually used withing browser code. Can also be used in node.js code.
-    clientConfigs = {
-      mode: "direct",
-      region: "us-east-1",
-      accessKeyId: "AKISIWVFZTIYONFVTXTQ",
-      secretAccessKey: "LYGqgVXDfOT8EfdSAj189TLfC79lge6HNJnagjNHB",
+    clientConfiguration = {
+      region: "eu-central-1",
+      credentials: profile
+        ? await loadProfileCredentials(profile)
+        : {
+            accessKeyId: "AKISIWVFZTIYONFVTXTQ",
+            secretAccessKey: "LYGqgVXDfOT8EfdSAj189TLfC79lge6HNJnagjNHB",
+          },
     };
   }
 
   // For normal connections the client configuration most of the time should not
   // be defined.
 
-  return new Dynatron({ table, ...(clientConfigs ? { clientConfigs } : {}) });
+  return new Dynatron(tableName, clientConfiguration);
 };
 ```
 
@@ -287,34 +264,6 @@ But in cases when you need to connect to multiple regions via multiple profiles
 Dynatron gives you an option to provide an instance identificator and with that
 effectively have multiple connections during the initialization process as shown
 below.
-
-```typescript
-export const db1 = (table: string) => {
-  let clientConfigs = {
-    mode: "direct",
-    profile: "dev",
-    region: "us-east-1",
-  };
-
-  return new Dynatron(
-    { table, ...(clientConfigs ? { clientConfigs } : {}) },
-    "dev",
-  );
-};
-
-export const db2 = (table: string) => {
-  let clientConfigs = {
-    mode: "direct",
-    profile: "staging",
-    region: "us-east-2",
-  };
-
-  return new Dynatron(
-    { table, ...(clientConfigs ? { clientConfigs } : {}) },
-    "staging",
-  );
-};
-```
 
 The rest of the examples will assume that you have followed the initialization step.
 
@@ -334,7 +283,7 @@ const user = await db("users-table")
     updatedAt: null,
     pending: true,
     metaList: ["a", null, 1], // An array of mixed values
-    tags: setOfValues(["A", "B", "C"]), // A set of unique string values
+    tags: new Set(["A", "B", "C"]), // A set of unique string values
     age: 40,
   })
   // The put function can overwrite existing entries in the DB entirely.
@@ -359,7 +308,7 @@ const user = await db("users-table")
   // Can receive a boolean which if set to true returns the raw response instead
   // of the data item only
   // You cannot pass in true and set the type at the same time. The typescript will complain about the parameter type.
-  .$execute(true); // If you pass true to this function it will set the return type to PutItemOutput
+  .$(true); // If you pass true to this function it will set the return type to PutItemOutput
 ```
 
 #### Usual usage of `put`
@@ -375,7 +324,7 @@ const user = await db("users-table")
     updatedAt: null,
     pending: true,
     metaList: ["a", null, 1],
-    tags: setOfValues(["A", "B", "C"]),
+    tags: new Set(["A", "B", "C"]),
     age: 40,
   })
   // You cannot pass in true and set the type at the same time. The typescript will complain about the parameter type.
@@ -413,7 +362,7 @@ const user = await db("users-table")
   // Can receive a boolean which if set to true returns the raw response instead
   // of the data item only
   // You cannot pass in true and set the type at the same time. The typescript will complain about the parameter type.
-  .$execute(true); // If you pass true to this function it will set the return type to GetItemOutput
+  .$(true); // If you pass true to this function it will set the return type to GetItemOutput
 ```
 
 #### Usual usage of `get`
@@ -428,6 +377,8 @@ const user = await db("users-table")
 ### Update
 
 #### Full usage of `update`
+
+<!-- TODO: update expressions update -->
 
 ```typescript
 // NOTE: At least one update function must exist on an update request
@@ -459,7 +410,7 @@ const user = await db("users-table")
   // If a set of strings is provided it will be added to the property on the
   // item or if missing a new property will be created
   // The add function can only be used on top-level attributes
-  .add("tags", setOfValues(["D", "E"])) // optional
+  .add("tags", new Set(["D", "E"])) // optional
 
   // With only one parameter the drop function will remove the property from
   // the item
@@ -471,7 +422,7 @@ const user = await db("users-table")
   .drop("tags", ["b", "c"]) // optional
   // If an set is provided it will be considered as a set and deleted from the
   // string set property
-  .drop("tags", setOfValues("a")) // optional
+  .drop("tags", new Set("a")) // optional
 
   // Increment the value of the property by the value provided
   // The function may receive an optional third argument which defines whether
@@ -512,7 +463,7 @@ const user = await db("users-table")
   // Can receive a boolean which if set to true returns the raw response instead
   // of the data item only
   // You cannot pass in true and set the type at the same time. The typescript will complain about the parameter type.
-  .$execute(true); // If you pass true to this function it will set the return type to UpdateItemOutput
+  .$(true); // If you pass true to this function it will set the return type to UpdateItemOutput
 ```
 
 #### Usual usage of `update`
@@ -555,7 +506,7 @@ await db("users-table")
   // Can receive a boolean which if set to true returns the raw response instead
   // of the data item only
   // You cannot pass in true and set the type at the same time. The typescript will complain about the parameter type.
-  .$execute(true); // If you pass true to this function it will set the return type to DeleteItemOutput
+  .$(true); // If you pass true to this function it will set the return type to DeleteItemOutput
 ```
 
 #### Usual usage of `delete`
@@ -575,8 +526,6 @@ await db("users-table")
 const users = await db("users-table")
   // Pass in the partition key property name and the value
   .query("id", "613243ec-04db-450b-b654-108231637ca5")
-  // or Alternatively pass in the partition key (this method may be deprecated)
-  .query({ id: "613243ec-04db-450b-b654-108231637ca5" })
   // Receives a Condition Expression built with functions provided by the library
   // This is applied to the sort key for
   .having(/* Key Condition Expression */) // optional
@@ -617,7 +566,7 @@ const users = await db("users-table")
   // Can receive a boolean for the first property which if set to true returns the raw response instead of the data item only
   // Can receive a boolean for the second property which if set to true disables recursion and returns the last evaluated key
   // You cannot pass in true to the first param and set the type at the same time. The typescript will complain about the parameter type.
-  .$execute(true, true); // If you pass true to the first param to this function it will set the return type to QueryOutput
+  .$(true, true); // If you pass true to the first param to this function it will set the return type to QueryOutput
 ```
 
 #### Usual usage of `query`
@@ -680,7 +629,7 @@ const users = await db("users-table")
   // Can receive a boolean for the first property which if set to true returns the raw response instead of the data item only
   // Can receive a boolean for the second property which if set to true disables recursion and returns the last evaluated key
   // You cannot pass in true to the first param and set the type at the same time. The typescript will complain about the parameter type.
-  .$execute(true, true); // If you pass true to this function it will set the return type to ScanOutput
+  .$(true, true); // If you pass true to this function it will set the return type to ScanOutput
 ```
 
 #### Usual usage of `scan`
@@ -717,7 +666,7 @@ const users = await db("users-table")
       updatedAt: null,
       pending: true,
       metaList: ["a", null, 1], // An array of mixed values
-      tags: setOfValues(["A", "B", "C"]), // A set of unique string values
+      tags: new Set(["A", "B", "C"]), // A set of unique string values
       age: 40,
     },
     {
@@ -729,7 +678,7 @@ const users = await db("users-table")
       updatedAt: null,
       pending: true,
       metaList: ["b", null, 2], // An array of mixed values
-      tags: setOfValues(["D", "E", "F"]), // A set of unique string values
+      tags: new Set(["D", "E", "F"]), // A set of unique string values
       age: 35,
     },
   ])
@@ -747,7 +696,7 @@ const users = await db("users-table")
   // Can receive a boolean which if set to true returns the raw response instead
   // of the data item only
   // You cannot pass in true and set the type at the same time. The typescript will complain about the parameter type.
-  .$execute(true); // If you pass true to this function it will set the return type to BatchWriteItemOutput
+  .$(true); // If you pass true to this function it will set the return type to BatchWriteItemOutput
 ```
 
 #### Usual usage of `batchPut`
@@ -764,7 +713,7 @@ const users = await db("users-table")
       updatedAt: null,
       pending: true,
       metaList: ["a", null, 1], // An array of mixed values
-      tags: setOfValues(["A", "B", "C"]), // A set of unique string values
+      tags: new Set(["A", "B", "C"]), // A set of unique string values
       age: 40,
     },
     {
@@ -776,7 +725,7 @@ const users = await db("users-table")
       updatedAt: null,
       pending: true,
       metaList: ["b", null, 2], // An array of mixed values
-      tags: setOfValues(["D", "E", "F"]), // A set of unique string values
+      tags: new Set(["D", "E", "F"]), // A set of unique string values
       age: 35,
     },
   ])
@@ -819,7 +768,7 @@ const users = await db("users-table")
   // Can receive a boolean which if set to true returns the raw response instead
   // of the data item only
   // You cannot pass in true and set the type at the same time. The typescript will complain about the parameter type.
-  .$execute(true); // If you pass true to this function it will set the return type to BatchGetItemOutput
+  .$(true); // If you pass true to this function it will set the return type to BatchGetItemOutput
 ```
 
 #### Usual usage of `batchGet`
@@ -859,7 +808,7 @@ await db("users-table")
   // Can receive a boolean which if set to true returns the raw response instead
   // of the data item only
   // You cannot pass in true and set the type at the same time. The typescript will complain about the parameter type.
-  .$execute(true); // If you pass true to this function it will set the return type to BatchWriteItemOutput
+  .$(true); // If you pass true to this function it will set the return type to BatchWriteItemOutput
 ```
 
 #### Usual usage of `batchDelete`
@@ -883,7 +832,7 @@ Dynatron.
 
 ### `Checker` class
 
-The `Checker` is a special non-executable class (doesn't have the `$execute` and
+The `Checker` is a special non-executable class (doesn't have the `$` and
 the `$` functions) and can only used as an item in the input array for the
 `transactWrite` function.
 
@@ -927,7 +876,7 @@ const result = await db("") // The table name passed in here is not important an
       .returnValues(),
   ])
   .returnConsumedCapacity()
-  .$execute(); // This function will set the return type to TransactWriteItemsOutput
+  .$(); // This function will set the return type to TransactWriteItemsOutput
 ```
 
 #### Usual usage of `transactWrite`
@@ -973,7 +922,7 @@ const result = await db("") // The table name passed in here is not important an
   // Can receive a boolean which if set to true returns the raw response instead
   // of the data item only
   // You cannot pass in true and set the type at the same time. The typescript will complain about the parameter type.
-  .$execute(true); // If you pass true to this function it will set the return type to TransactGetItemsOutput
+  .$(true); // If you pass true to this function it will set the return type to TransactGetItemsOutput
 ```
 
 #### Usual usage of `transactGet`

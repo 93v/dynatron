@@ -14,6 +14,10 @@ export class Request {
     protected tableName: string,
   ) {}
 
+  /**
+   * Determines the level of detail about provisioned throughput consumption that is returned in the response.
+   * @param returnConsumedCapacity "INDEXES" | "TOTAL" | "NONE"
+   */
   returnConsumedCapacity = (
     returnConsumedCapacity: ReturnConsumedCapacity = "TOTAL",
   ) => {
@@ -21,6 +25,10 @@ export class Request {
     return this;
   };
 
+  /**
+   * Modifies the requests timeouts latencies by the provided ratio.
+   * @param patienceRatio number
+   */
   relaxLatencies = (patienceRatio = 1) => {
     if (patienceRatio <= 0) {
       throw new Error("The ratio must be positive");

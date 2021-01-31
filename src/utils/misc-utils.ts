@@ -1,5 +1,6 @@
 import { loadSharedConfigFiles } from "@aws-sdk/shared-ini-file-loader";
 import { Options } from "async-retry";
+import { Credentials } from "@aws-sdk/types";
 
 import { NativeValue } from "../dynatron-class";
 
@@ -51,8 +52,23 @@ export const validateKey = (key: NativeValue) => {
   }
 };
 
-export const loadProfileCredentials = async (profile: string) => {
-  return (await loadSharedConfigFiles()).credentialsFile[profile];
+export const loadProfileCredentials = async (
+  profileName: string,
+): Promise<Credentials | undefined> => {
+  const profile = (await loadSharedConfigFiles()).credentialsFile[profileName];
+  if (profile == undefined) {
+    return;
+  }
+  return {
+    accessKeyId: profile.aws_access_key_id ?? "",
+    secretAccessKey: profile.aws_secret_access_key ?? "",
+    ...(profile.aws_session_token && {
+      sessionToken: profile.aws_session_token,
+    }),
+    ...(profile.aws_expiration && {
+      expiration: new Date(profile.aws_expiration),
+    }),
+  };
 };
 
 export const createShortCircuit = (parameters: {

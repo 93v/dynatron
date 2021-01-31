@@ -24,6 +24,10 @@ export class TableList extends TableRequest {
     super();
   }
 
+  /**
+   * The maximum number of table names to return.
+   * @param limit number
+   */
   limit = (limit: number) => {
     if (limit <= 0 || !Number.isInteger(limit) || limit > 100) {
       throw new Error(
@@ -35,6 +39,10 @@ export class TableList extends TableRequest {
     return this;
   };
 
+  /**
+   * The name of the first table that this operation will evaluate.
+   * @param exclusiveStartTableName string
+   */
   start = (exclusiveStartTableName?: string) => {
     if (exclusiveStartTableName != undefined) {
       this.#ExclusiveStartTableName = exclusiveStartTableName;
@@ -51,6 +59,9 @@ export class TableList extends TableRequest {
     };
   }
 
+  /**
+   * Execute the List Tables request
+   */
   $ = async () => {
     const requestInput = this[BUILD]();
 
@@ -100,6 +111,7 @@ export class TableList extends TableRequest {
           if (isRetryableError(error)) {
             throw error;
           }
+          operationCompleted = true;
           bail(error);
         } finally {
           shortCircuit.halt();

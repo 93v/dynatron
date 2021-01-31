@@ -162,6 +162,10 @@ export class Update extends Check {
     };
   }
 
+  /**
+   * Execute the Update request
+   * @param returnRawResponse boolean
+   */
   $ = async <T = NativeValue | undefined, U extends boolean = false>(
     returnRawResponse?: U,
   ): Promise<U extends true ? UpdateItemOutput : T | undefined> => {

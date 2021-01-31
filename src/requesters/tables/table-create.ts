@@ -28,6 +28,9 @@ export class TableCreate extends TableRequest {
     return { ...this.parameters };
   }
 
+  /**
+   * Execute the Create Table request
+   */
   $ = async () => {
     const requestInput = this[BUILD]();
     return AsyncRetry(async (bail, attempt): Promise<

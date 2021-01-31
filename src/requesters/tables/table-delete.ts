@@ -28,6 +28,9 @@ export class TableDelete extends TableRequest {
     return { TableName: this.tableName };
   }
 
+  /**
+   * Execute the Delete Table request
+   */
   $ = async () => {
     const requestInput = this[BUILD]();
     return AsyncRetry(async (bail, attempt): Promise<

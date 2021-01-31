@@ -28,6 +28,9 @@ export class TableTTLDescribe extends TableRequest {
     return { TableName: this.tableName };
   }
 
+  /**
+   * Execute the Describe Table TTL request
+   */
   $ = async () => {
     const requestInput = this[BUILD]();
     return AsyncRetry(async (bail, attempt): Promise<

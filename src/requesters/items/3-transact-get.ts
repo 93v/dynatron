@@ -30,6 +30,10 @@ export class TransactGet extends Request {
     super(databaseClient, tableName);
   }
 
+  /**
+   * Execute the TransactGet request
+   * @param returnRawResponse boolean
+   */
   $ = async <T = NativeValue[] | undefined, U extends boolean = false>(
     returnRawResponse?: U,
   ): Promise<U extends true ? TransactGetItemsOutput : T | undefined> => {

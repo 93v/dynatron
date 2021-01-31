@@ -28,6 +28,9 @@ export class TableTTLUpdate extends TableRequest {
     return { ...this.parameters };
   }
 
+  /**
+   * Execute the Update Table TTL request
+   */
   $ = async () => {
     const requestInput = this[BUILD]();
     return AsyncRetry(async (bail, attempt): Promise<

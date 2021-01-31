@@ -32,11 +32,10 @@ describe("Table List", () => {
   });
 
   test("should return a list", async () => {
-    const scope = nock("https://localhost:8000")
-      .post("/")
-      .reply(200, {
-        LastEvaluatedTableName: "hello",
-      })
+    const scope = nock("https://localhost:8000").post("/").reply(200, {
+      LastEvaluatedTableName: "hello",
+    });
+    nock("https://localhost:8000")
       .post("/")
       .reply(200, {
         TableNames: ["table1", "table2"],

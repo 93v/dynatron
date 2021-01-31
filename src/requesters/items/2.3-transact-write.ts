@@ -46,6 +46,9 @@ export class TransactWrite extends Amend {
     };
   }
 
+  /**
+   * Execute the TransactWrite request
+   */
   $ = async () => {
     const {
       ClientRequestToken,

@@ -27,6 +27,12 @@ export class Scan extends ListFetch {
   #TotalSegments?: number = this.#INITIAL_MAX_TOTAL_SEGMENTS;
   #Segment?: number;
 
+  /**
+   * For a parallel Scan request, TotalSegments represents the total number of segments into which the Scan operation will be divided. The value of TotalSegments corresponds to the number of application workers that will perform the parallel scan. For example, if you want to use four application threads to scan a table or an index, specify a TotalSegments value of 4.
+   *
+   * The value for TotalSegments must be greater than or equal to 1, and less than or equal to 1000000. If you specify a TotalSegments value of 1, the Scan operation will be sequential rather than parallel.
+   * @param totalSegments number
+   */
   totalSegments = (
     totalSegments: number = this.#INITIAL_MAX_TOTAL_SEGMENTS,
   ) => {
@@ -34,11 +40,24 @@ export class Scan extends ListFetch {
     return this;
   };
 
+  /**
+   * For a parallel Scan request, Segment identifies an individual segment to be scanned by an application worker.
+   *
+   * Segment IDs are zero-based, so the first segment is always 0. For example, if you want to use four application threads to scan a table or an index, then the first thread specifies a Segment value of 0, the second thread specifies 1, and so on.
+   *
+   * The value of LastEvaluatedKey returned from a parallel Scan request must be used as ExclusiveStartKey with the same segment ID in a subsequent Scan operation.
+   *
+   * The value for Segment must be greater than or equal to 0, and less than the value provided for TotalSegments.
+   * @param segment number
+   */
   segment = (segment: number) => {
     this.#Segment = segment;
     return this;
   };
 
+  /**
+   * Deletes the TotalSegments property
+   */
   disableSegments = () => {
     this.#TotalSegments = undefined;
     return this;
@@ -116,6 +135,7 @@ export class Scan extends ListFetch {
           if (isRetryableError(error)) {
             throw error;
           }
+          operationCompleted = true;
           bail(error);
         } finally {
           shortCircuit.halt();
@@ -125,6 +145,11 @@ export class Scan extends ListFetch {
     }, RETRY_OPTIONS);
   };
 
+  /**
+   * Execute the Scan request
+   * @param returnRawResponse boolean
+   * @param disableRecursion boolean
+   */
   $ = async <T = NativeValue[] | undefined, U extends boolean = false>(
     returnRawResponse?: U,
     disableRecursion = false,
