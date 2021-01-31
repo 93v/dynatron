@@ -82,6 +82,19 @@ export class Scan extends ListFetch {
         requestInput.TotalSegments - 1,
       );
     }
+    // When both the Limit and FilterExpressions are provided we calculate
+    // how complex is the FilterExpression
+    // Initial complexity is 0 which sets the limit to the provided value
+    let filterExpressionComplexity = 0;
+    if (requestInput.Limit && requestInput.FilterExpression) {
+      filterExpressionComplexity =
+        (requestInput.FilterExpression.match(/AND|OR/g) || []).length + 1;
+    }
+    // Then the complexity is used with the following base number to request
+    // for more elements when the filter is more complex for a faster resolution
+    const FILTER_EXPRESSION_LIMIT_POWER_BASE = 5;
+
+    let keyAttributes: string[] = [];
     const response: ScanOutput = {};
     return AsyncRetry(async (bail, attempt) => {
       while (!operationCompleted) {
@@ -92,13 +105,24 @@ export class Scan extends ListFetch {
         try {
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
           const { $metadata, ...output } = await Promise.race([
-            this.databaseClient.send(new ScanCommand(requestInput)),
+            this.databaseClient.send(
+              new ScanCommand({
+                ...requestInput,
+                ...(requestInput.Limit && {
+                  Limit:
+                    requestInput.Limit *
+                    FILTER_EXPRESSION_LIMIT_POWER_BASE **
+                      filterExpressionComplexity,
+                }),
+              }),
+            ),
             shortCircuit.launch(),
           ]);
           if (output.LastEvaluatedKey == undefined || disableRecursion) {
             operationCompleted = true;
           } else {
             requestInput.ExclusiveStartKey = output.LastEvaluatedKey;
+            keyAttributes = Object.keys(output.LastEvaluatedKey);
           }
           if (output.Items) {
             response.Items = [...(response.Items ?? []), ...output.Items];
@@ -126,6 +150,15 @@ export class Scan extends ListFetch {
           ) {
             response.Items = response.Items.slice(0, requestInput.Limit);
             response.Count = response.Items.length;
+            const lastEvaluatedKey = {
+              ...response.Items[response.Items.length - 1],
+            };
+            Object.keys(lastEvaluatedKey).forEach((key) => {
+              if (!keyAttributes.includes(key)) {
+                delete lastEvaluatedKey[key];
+              }
+            });
+            response.LastEvaluatedKey = lastEvaluatedKey;
             operationCompleted = true;
           }
           if (disableRecursion && output.LastEvaluatedKey != undefined) {
@@ -164,6 +197,9 @@ export class Scan extends ListFetch {
 
     let initialLimit: number | undefined;
 
+    // When providing the start it is very easy to request for a start key out
+    // of the specified segment. When the recursion is enabled which is the
+    // default behavior setting the start key will disabled segments
     if (requestInput.ExclusiveStartKey && !disableRecursion) {
       delete requestInput.TotalSegments;
       delete requestInput.Segment;
