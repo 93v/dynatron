@@ -185,26 +185,20 @@ export class Dynatron {
       /**
        * The operation deletes a table and all of its items.
        */
-      delete: () =>
-        new TableDelete(
-          Dynatron.DynamoDBClients[this.instanceId],
-          this.tableName,
-        ),
+      delete: (tableName: string) =>
+        new TableDelete(Dynatron.DynamoDBClients[this.instanceId], tableName),
       /**
        * Returns information about the table, including the current status of the table, when it was created, the primary key schema, and any indexes on the table.
        */
-      describe: () =>
-        new TableDescribe(
-          Dynatron.DynamoDBClients[this.instanceId],
-          this.tableName,
-        ),
+      describe: (tableName: string) =>
+        new TableDescribe(Dynatron.DynamoDBClients[this.instanceId], tableName),
       /**
        * Gives a description of the Time to Live (TTL) status on the specified table.
        */
-      describeTTL: () =>
+      describeTTL: (tableName: string) =>
         new TableTTLDescribe(
           Dynatron.DynamoDBClients[this.instanceId],
-          this.tableName,
+          tableName,
         ),
       /**
        * Returns an array of table names associated with the current account and endpoint.

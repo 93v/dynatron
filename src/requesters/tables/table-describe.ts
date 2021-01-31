@@ -1,6 +1,5 @@
 import {
   DescribeTableCommand,
-  DescribeTableCommandOutput,
   DescribeTableInput,
   DynamoDBClient,
 } from "@aws-sdk/client-dynamodb";
@@ -33,9 +32,7 @@ export class TableDescribe extends TableRequest {
    */
   $ = async () => {
     const requestInput = this[BUILD]();
-    return AsyncRetry(async (bail, attempt): Promise<
-      DescribeTableCommandOutput["Table"] | void
-    > => {
+    return AsyncRetry(async (bail, attempt) => {
       const shortCircuit = createShortCircuit({
         duration: attempt * SHORT_MAX_LATENCY * this.patienceRatio,
         error: new Error(TAKING_TOO_LONG_EXCEPTION),
@@ -54,6 +51,7 @@ export class TableDescribe extends TableRequest {
       } finally {
         shortCircuit.halt();
       }
+      return;
     }, RETRY_OPTIONS);
   };
 }

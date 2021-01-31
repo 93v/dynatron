@@ -378,8 +378,6 @@ const user = await db("users-table")
 
 #### Full usage of `update`
 
-<!-- TODO: update expressions update -->
-
 ```typescript
 // NOTE: At least one update function must exist on an update request
 const user = await db("users-table")
@@ -398,31 +396,18 @@ const user = await db("users-table")
 
   // VERY IMPORTANT TO REMEMBER THAT WHEN USING THE add FUNCTION IF THE ENTRY
   // WITH THE PROVIDED KEY DOES NOT EXIST IN THE DB IT WILL BE CREATED
-  // If a number is provided and the value in the DB is a number their sum will
-  // be stored.
-  // The add function can only be used on top-level attributes
-  .add("age", 2) // optional
-  // If an array is provided the attribute will be updated as a set of the array
-  // All values in the array should be of the same type without duplicates
-  // The add function can only be used on top-level attributes
-  .add("hobbies", ["h", "i", "j"]) // optional - either a string array
-  .add("hobbies", [0, 1, 6]) // optional - or a numeric array
-  // If a set of strings is provided it will be added to the property on the
-  // item or if missing a new property will be created
-  // The add function can only be used on top-level attributes
+  // If a set of strings or numbers is provided it will be added to the property
+  // on the item or if missing a new property will be created
   .add("tags", new Set(["D", "E"])) // optional
+  // If a set of strings or numbers is provided it will be deleted from the
+  // property on the item
+  .delete("tags", new Set(["D", "E"])) // optional
 
   // With only one parameter the drop function will remove the property from
   // the item
   .drop("firstName") // optional
   // It can also remove items from a list property
   .drop("metaList[1]") // optional
-  // If an array is provided it will be considered as a set and deleted from the
-  // string set property
-  .drop("tags", ["b", "c"]) // optional
-  // If an set is provided it will be considered as a set and deleted from the
-  // string set property
-  .drop("tags", new Set("a")) // optional
 
   // Increment the value of the property by the value provided
   // The function may receive an optional third argument which defines whether
@@ -437,12 +422,8 @@ const user = await db("users-table")
   // negative of the value
   .decrement("age", 2, true) // optional
 
-  // Append (add to the end) the value to the property
-  .append("metaList", "x") // optional
   // Append (add to the end) the array of values to the property
   .append("metaList", ["x", null, 10]) // optional
-  // Prepend (add to the beginning) the value to the property
-  .prepend("metaList", "x") // optional
   // Prepend (add to the beginning) the array of values to the property
   .prepend("metaList", ["x", null, 10]) // optional
   // Returns the consumed capacity in the raw response

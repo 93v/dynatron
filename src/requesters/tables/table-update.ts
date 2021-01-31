@@ -1,7 +1,6 @@
 import {
   DynamoDBClient,
   UpdateTableCommand,
-  UpdateTableCommandOutput,
   UpdateTableInput,
 } from "@aws-sdk/client-dynamodb";
 import AsyncRetry from "async-retry";
@@ -33,9 +32,7 @@ export class TableUpdate extends TableRequest {
    */
   $ = async () => {
     const requestInput = this[BUILD]();
-    return AsyncRetry(async (bail, attempt): Promise<
-      UpdateTableCommandOutput["TableDescription"] | void
-    > => {
+    return AsyncRetry(async (bail, attempt) => {
       const shortCircuit = createShortCircuit({
         duration: attempt * LONG_MAX_LATENCY * this.patienceRatio,
         error: new Error(TAKING_TOO_LONG_EXCEPTION),
@@ -54,6 +51,7 @@ export class TableUpdate extends TableRequest {
       } finally {
         shortCircuit.halt();
       }
+      return;
     }, RETRY_OPTIONS);
   };
 }
