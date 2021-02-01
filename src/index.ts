@@ -1,9 +1,4 @@
-export {
-  DynatronConstructorParams,
-  DynatronDocumentClientParams,
-} from "../types/request";
-export { Dynatron } from "./Dynatron";
-export { setOfValues, preStringify } from "./utils/misc-utils";
+export { Dynatron } from "./dynatron-class";
 
 export {
   and,
@@ -29,4 +24,6 @@ export {
   notEquals,
   or,
   size,
-} from "./utils/condition-expression-utils";
+} from "./condition-expression-builders";
+
+export { loadProfileCredentials } from "./utils/misc-utils";
