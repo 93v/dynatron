@@ -9,7 +9,6 @@
     "test": "jest --forceExit",
     "test:watch": "jest --watchAll",
     "build": "rm -rf ./dist && webpack",
-    "build:tsc": "rm -rf ./dist && tsc",
     "watch": "rm -rf ./dist && webpack -w",
     "start": "npm link && nodemon",
     "semantic-release": "semantic-release"
