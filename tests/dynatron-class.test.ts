@@ -134,16 +134,16 @@ describe("Dynatron instance", () => {
     ).toBeInstanceOf(TableCreate);
   });
   test("should be an instance of TableDelete", () => {
-    expect(dynatron.Tables.delete()).toBeInstanceOf(TableDelete);
+    expect(dynatron.Tables.delete("")).toBeInstanceOf(TableDelete);
   });
   test("should be an instance of TableDescribe", () => {
-    expect(dynatron.Tables.describe()).toBeInstanceOf(TableDescribe);
+    expect(dynatron.Tables.describe("")).toBeInstanceOf(TableDescribe);
   });
   test("should be an instance of TableList", () => {
     expect(dynatron.Tables.list()).toBeInstanceOf(TableList);
   });
   test("should be an instance of TableTTLDescribe", () => {
-    expect(dynatron.Tables.describeTTL()).toBeInstanceOf(TableTTLDescribe);
+    expect(dynatron.Tables.describeTTL("")).toBeInstanceOf(TableTTLDescribe);
   });
   test("should be an instance of TableTTLUpdate", () => {
     expect(
