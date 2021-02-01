@@ -7,7 +7,7 @@ import {
 import { marshall, marshallOptions } from "@aws-sdk/util-dynamodb";
 
 import { AndCondition, Condition } from "../../types/conditions";
-import { NativeValue } from "../dynatron-class";
+import { NativeValue } from "../dynatron";
 import { UpdateType } from "../requesters/items/2.1.3-update";
 import {
   marshallConditionExpression,

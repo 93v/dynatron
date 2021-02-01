@@ -7,7 +7,7 @@ import {
 import { unmarshall } from "@aws-sdk/util-dynamodb";
 import AsyncRetry from "async-retry";
 
-import { NativeValue } from "../../dynatron-class";
+import { NativeValue } from "../../dynatron";
 import {
   BUILD,
   createShortCircuit,

@@ -2,7 +2,7 @@ import { loadSharedConfigFiles } from "@aws-sdk/shared-ini-file-loader";
 import { Options } from "async-retry";
 import { Credentials } from "@aws-sdk/types";
 
-import { NativeValue } from "../dynatron-class";
+import { NativeValue } from "../dynatron";
 
 export const BUILD: unique symbol = Symbol("Build._build");
 
@@ -85,7 +85,7 @@ export const createShortCircuit = (parameters: {
   const launch = async (): Promise<never> => {
     launched = true;
     return new Promise((_, reject) => {
-      timeoutReference = setTimeout(() => {
+      timeoutReference = global.setTimeout(() => {
         reject(parameters.error);
       }, parameters.duration);
     });
