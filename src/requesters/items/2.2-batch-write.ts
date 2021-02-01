@@ -31,7 +31,11 @@ export class BatchWrite extends Amend {
     private items?: NativeValue[],
   ) {
     super(databaseClient, tableName);
-    keys && keys.forEach((key) => validateKey(key));
+    if (keys) {
+      for (const key of keys) {
+        validateKey(key);
+      }
+    }
   }
 
   [BUILD]() {

@@ -95,7 +95,7 @@ describe("Is Retryable Error", () => {
 
 describe("Load Profile Credentials", () => {
   test("should load", async () => {
-    const profile = await loadProfileCredentials("MISSING PROFILE");
+    const profile = loadProfileCredentials("MISSING PROFILE");
     expect(profile).toBeUndefined();
   });
 });

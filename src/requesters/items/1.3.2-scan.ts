@@ -153,11 +153,11 @@ export class Scan extends ListFetch {
             const lastEvaluatedKey = {
               ...response.Items[response.Items.length - 1],
             };
-            Object.keys(lastEvaluatedKey).forEach((key) => {
+            for (const key of Object.keys(lastEvaluatedKey)) {
               if (!keyAttributes.includes(key)) {
                 delete lastEvaluatedKey[key];
               }
-            });
+            }
             response.LastEvaluatedKey = lastEvaluatedKey;
             operationCompleted = true;
           }

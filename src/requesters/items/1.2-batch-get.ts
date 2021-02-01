@@ -29,7 +29,9 @@ export class BatchGet extends Fetch {
     private keys: NativeValue[],
   ) {
     super(databaseClient, tableName);
-    keys.forEach((key) => validateKey(key));
+    for (const key of keys) {
+      validateKey(key);
+    }
   }
 
   [BUILD]() {

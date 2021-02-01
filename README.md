@@ -221,8 +221,8 @@ in the table name. In serverless applications you can pass in env variables and
 do the configuration based on them.
 
 ```typescript
-export const db = async (tableName: string) => {
-  const clientConfiguration: DynamoDBClientConfig = {};
+export const db = (tableName: string) => {
+  let clientConfiguration: DynamoDBClientConfig = {};
 
   if (process.env.IS_OFFLINE) {
     clientConfiguration = {
@@ -235,12 +235,11 @@ export const db = async (tableName: string) => {
     };
   } else if (process.env.IS_DIRECT) {
     const profile: string | undefined = undefined;
-    // const profile: string | undefined = "myia-serverless-api-dev";
 
     clientConfiguration = {
       region: "eu-central-1",
       credentials: profile
-        ? await loadProfileCredentials(profile)
+        ? loadProfileCredentials(profile)
         : {
             accessKeyId: "AKISIWVFZTIYONFVTXTQ",
             secretAccessKey: "LYGqgVXDfOT8EfdSAj189TLfC79lge6HNJnagjNHB",

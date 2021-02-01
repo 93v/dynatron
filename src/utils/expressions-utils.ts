@@ -46,6 +46,7 @@ export const parseAttributePath = (attributePath: string) => {
     | { type: "name"; name: string }
     | { type: "index"; index: number }
   )[] = [];
+  // eslint-disable-next-line unicorn/no-array-for-each
   [...path].forEach((char, index, chars) => {
     if (mode === Mode.ESCAPED) {
       buffer += char;
