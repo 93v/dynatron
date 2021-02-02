@@ -9,7 +9,7 @@ import AsyncRetry from "async-retry";
 
 import { EqualsCondition, KeyCondition } from "../../../types/conditions";
 import { and } from "../../condition-expression-builders";
-import { NativeValue } from "../../dynatron-class";
+import { NativeValue } from "../../dynatron";
 import {
   BUILD,
   createShortCircuit,
@@ -172,11 +172,11 @@ export class Query extends ListFetch {
             const lastEvaluatedKey = {
               ...aggregatedOutput.Items[aggregatedOutput.Items.length - 1],
             };
-            Object.keys(lastEvaluatedKey).forEach((key) => {
+            for (const key of Object.keys(lastEvaluatedKey)) {
               if (!keyAttributes.includes(key)) {
                 delete lastEvaluatedKey[key];
               }
-            });
+            }
             aggregatedOutput.LastEvaluatedKey = lastEvaluatedKey;
             operationCompleted = true;
           }

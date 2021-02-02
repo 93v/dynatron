@@ -2,7 +2,7 @@ import { DynamoDBClient, ReturnValue } from "@aws-sdk/client-dynamodb";
 
 import { Condition } from "../../../types/conditions";
 import { isConditionEmptyDeep } from "../../condition-expression-builders";
-import { NativeValue } from "../../dynatron-class";
+import { NativeValue } from "../../dynatron";
 import { BUILD, validateKey } from "../../utils/misc-utils";
 import { Amend } from "./2-amend";
 

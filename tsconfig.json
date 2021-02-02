@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "ES2019",
     "module": "commonjs",
-    "lib": ["ES2020", "ESNext"],
+    "lib": ["ES2020", "ESNext", "DOM"],
     "declaration": true,
     "sourceMap": true,
     "outDir": "./dist",

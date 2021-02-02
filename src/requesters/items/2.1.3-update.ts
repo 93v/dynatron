@@ -6,7 +6,7 @@ import {
 import { NativeAttributeValue, unmarshall } from "@aws-sdk/util-dynamodb";
 import AsyncRetry from "async-retry";
 
-import { NativeValue } from "../../dynatron-class";
+import { NativeValue } from "../../dynatron";
 import {
   BUILD,
   createShortCircuit,
@@ -73,14 +73,14 @@ export class Update extends Check {
   #UpdateExpressions: UpdateType[] = [];
 
   assign(item: NativeValue, ifDoesNotExist = false) {
-    Object.entries(item).forEach(([attributePath, value]) => {
+    for (const [attributePath, value] of Object.entries(item)) {
       this.#UpdateExpressions.push({
         kind: "set",
         attributePath,
         value,
         ifDoesNotExist,
       } as UpdateSet);
-    });
+    }
     return this;
   }
 

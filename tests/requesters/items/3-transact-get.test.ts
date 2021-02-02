@@ -1,7 +1,7 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import nock from "nock";
 
-import { Dynatron } from "../../../src/dynatron-class";
+import { Dynatron } from "../../../src/dynatron";
 import { Request } from "../../../src/requesters/items/0-request";
 import { TransactGet } from "../../../src/requesters/items/3-transact-get";
 import { BUILD } from "../../../src/utils/misc-utils";

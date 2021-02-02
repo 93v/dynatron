@@ -1,6 +1,7 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+
 import { eq } from "../../../src/condition-expression-builders";
-import { Dynatron } from "../../../src/dynatron-class";
+import { Dynatron } from "../../../src/dynatron";
 import { Amend } from "../../../src/requesters/items/2-amend";
 import { TransactWrite } from "../../../src/requesters/items/2.3-transact-write";
 import { BUILD } from "../../../src/utils/misc-utils";

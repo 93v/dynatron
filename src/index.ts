@@ -1,4 +1,8 @@
-export { Dynatron } from "./dynatron-class";
+export { DynamoDBClientConfig } from "@aws-sdk/client-dynamodb";
+
+export { loadProfileCredentials } from "./utils/misc-utils";
+
+export { Dynatron } from "./dynatron";
 
 export {
   and,
@@ -25,5 +29,3 @@ export {
   or,
   size,
 } from "./condition-expression-builders";
-
-export { loadProfileCredentials } from "./utils/misc-utils";

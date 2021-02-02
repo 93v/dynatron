@@ -2,7 +2,7 @@ import { NativeAttributeValue } from "@aws-sdk/util-dynamodb";
 
 import { Condition } from "../../types/conditions";
 import { and } from "../condition-expression-builders";
-import { NativeValue } from "../dynatron-class";
+import { NativeValue } from "../dynatron";
 import { UpdateType } from "../requesters/items/2.1.3-update";
 import { assertNever } from "./misc-utils";
 import { nextAlpha } from "./next-alpha-char-generator";
@@ -46,6 +46,7 @@ export const parseAttributePath = (attributePath: string) => {
     | { type: "name"; name: string }
     | { type: "index"; index: number }
   )[] = [];
+  // eslint-disable-next-line unicorn/no-array-for-each
   [...path].forEach((char, index, chars) => {
     if (mode === Mode.ESCAPED) {
       buffer += char;

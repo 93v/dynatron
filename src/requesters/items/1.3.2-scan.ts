@@ -7,7 +7,7 @@ import {
 import { unmarshall } from "@aws-sdk/util-dynamodb";
 import AsyncRetry from "async-retry";
 
-import { NativeValue } from "../../dynatron-class";
+import { NativeValue } from "../../dynatron";
 import {
   BUILD,
   createShortCircuit,
@@ -153,11 +153,11 @@ export class Scan extends ListFetch {
             const lastEvaluatedKey = {
               ...response.Items[response.Items.length - 1],
             };
-            Object.keys(lastEvaluatedKey).forEach((key) => {
+            for (const key of Object.keys(lastEvaluatedKey)) {
               if (!keyAttributes.includes(key)) {
                 delete lastEvaluatedKey[key];
               }
-            });
+            }
             response.LastEvaluatedKey = lastEvaluatedKey;
             operationCompleted = true;
           }
