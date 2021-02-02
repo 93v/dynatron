@@ -28,7 +28,7 @@ describe("Item Update", () => {
     );
     expect(
       instance
-        .assign({ value: 7 })
+        .assign({ value: 7, notDefined: undefined })
         .increment("value1", 7)
         .increment("value2", 7, false)
         .decrement("value3", 7)
