@@ -8,7 +8,7 @@ import {
 import { unmarshall } from "@aws-sdk/util-dynamodb";
 import AsyncRetry from "async-retry";
 
-import { NativeValue } from "../../dynatron-class";
+import { NativeValue } from "../../dynatron";
 import {
   BUILD,
   createShortCircuit,
@@ -31,7 +31,11 @@ export class BatchWrite extends Amend {
     private items?: NativeValue[],
   ) {
     super(databaseClient, tableName);
-    keys && keys.forEach((key) => validateKey(key));
+    if (keys) {
+      for (const key of keys) {
+        validateKey(key);
+      }
+    }
   }
 
   [BUILD]() {

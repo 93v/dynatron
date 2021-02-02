@@ -7,7 +7,7 @@ import {
 import { unmarshall } from "@aws-sdk/util-dynamodb";
 import AsyncRetry from "async-retry";
 
-import { NativeValue } from "../../dynatron-class";
+import { NativeValue } from "../../dynatron";
 import {
   BUILD,
   createShortCircuit,
@@ -29,7 +29,9 @@ export class BatchGet extends Fetch {
     private keys: NativeValue[],
   ) {
     super(databaseClient, tableName);
-    keys.forEach((key) => validateKey(key));
+    for (const key of keys) {
+      validateKey(key);
+    }
   }
 
   [BUILD]() {

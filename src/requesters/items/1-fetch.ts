@@ -28,7 +28,7 @@ export class Fetch extends Request {
       return this;
     }
 
-    attributePaths.forEach((attributePath) => {
+    for (let attributePath of attributePaths) {
       if (typeof attributePath === "string") {
         attributePath = [attributePath];
       }
@@ -38,7 +38,7 @@ export class Fetch extends Request {
           ...(attributePath ?? []),
         ]),
       ];
-    });
+    }
     return this;
   };
 

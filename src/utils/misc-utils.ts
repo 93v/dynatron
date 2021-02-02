@@ -1,8 +1,11 @@
-import { loadSharedConfigFiles } from "@aws-sdk/shared-ini-file-loader";
-import { Options } from "async-retry";
 import { Credentials } from "@aws-sdk/types";
+import { Options } from "async-retry";
+import { readFileSync } from "fs";
+import { parse } from "ini";
+import { homedir } from "os";
+import path from "path";
 
-import { NativeValue } from "../dynatron-class";
+import { NativeValue } from "../dynatron";
 
 export const BUILD: unique symbol = Symbol("Build._build");
 
@@ -52,13 +55,35 @@ export const validateKey = (key: NativeValue) => {
   }
 };
 
-export const loadProfileCredentials = async (
+const getHomeDirectory = (): string => {
+  const {
+    HOME,
+    USERPROFILE,
+    HOMEPATH,
+    HOMEDRIVE = `C:${path.sep}`,
+  } = process.env;
+
+  if (HOME) return HOME;
+  if (USERPROFILE) return USERPROFILE;
+  if (HOMEPATH) return `${HOMEDRIVE}${HOMEPATH}`;
+
+  return homedir();
+};
+
+export const loadProfileCredentials = (
   profileName: string,
-): Promise<Credentials | undefined> => {
-  const profile = (await loadSharedConfigFiles()).credentialsFile[profileName];
+): Credentials | undefined => {
+  const credentialsFile = readFileSync(
+    path.join(getHomeDirectory(), ".aws", "credentials"),
+    "utf-8",
+  );
+
+  const profile = parse(credentialsFile)[profileName];
+
   if (profile == undefined) {
     return;
   }
+
   return {
     accessKeyId: profile.aws_access_key_id ?? "",
     secretAccessKey: profile.aws_secret_access_key ?? "",
@@ -85,7 +110,7 @@ export const createShortCircuit = (parameters: {
   const launch = async (): Promise<never> => {
     launched = true;
     return new Promise((_, reject) => {
-      timeoutReference = setTimeout(() => {
+      timeoutReference = global.setTimeout(() => {
         reject(parameters.error);
       }, parameters.duration);
     });
