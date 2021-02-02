@@ -74,12 +74,14 @@ export class Update extends Check {
 
   assign(item: NativeValue, ifDoesNotExist = false) {
     for (const [attributePath, value] of Object.entries(item)) {
-      this.#UpdateExpressions.push({
-        kind: "set",
-        attributePath,
-        value,
-        ifDoesNotExist,
-      } as UpdateSet);
+      if (value !== undefined) {
+        this.#UpdateExpressions.push({
+          kind: "set",
+          attributePath,
+          value,
+          ifDoesNotExist,
+        } as UpdateSet);
+      }
     }
     return this;
   }
