@@ -29,15 +29,5 @@ module.exports = {
     path: path.resolve(__dirname, "dist"),
   },
   target: "node",
-  optimization: {
-    minimize: true,
-    minimizer: [
-      new TerserPlugin({
-        terserOptions: {
-          keep_classnames: true,
-        },
-      }),
-    ],
-  },
   // externals: [nodeExternals()],
 };
