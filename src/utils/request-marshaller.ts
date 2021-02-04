@@ -69,7 +69,10 @@ export type MarshalledRequestParameters = {
   ExpressionAttributeValues?: Record<string, AttributeValue>;
 };
 
-const MARSHALL_OPTIONS: marshallOptions = { removeUndefinedValues: true };
+const MARSHALL_OPTIONS: marshallOptions = {
+  convertClassInstanceToMap: true,
+  removeUndefinedValues: true,
+};
 
 const cleanupEmptyExpressions = (
   requestParameters: NativeRequestParameters,
