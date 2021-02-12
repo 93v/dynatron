@@ -154,19 +154,26 @@ const serializeUpdateExpression = (
         },
       };
     case "append":
-    case "prepend":
+    case "prepend": {
+      const fullExpressionString = update.createIfAttributePathDoesNotExist
+        ? `if_not_exists(${expressionString}, :empty_list)`
+        : expressionString;
       return {
         Type: "SET",
         expressionString: `${expressionString}=list_append(${
-          update.kind === "append" ? expressionString : attributeValue.name
+          update.kind === "append" ? fullExpressionString : attributeValue.name
         },${
-          update.kind === "append" ? attributeValue.name : expressionString
+          update.kind === "append" ? attributeValue.name : fullExpressionString
         })`,
         expressionAttributeNames: expressionAttributeNames,
         expressionAttributeValues: {
           [attributeValue.name]: attributeValue.value,
+          ...(update.createIfAttributePathDoesNotExist && {
+            ":empty_list": [],
+          }),
         },
       };
+    }
     case "increment":
       return {
         Type: "SET",

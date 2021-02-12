@@ -38,6 +38,7 @@ export const attributeExists = (
   kind: "attribute_exists",
   attributePath,
 });
+export const exists = attributeExists;
 
 export const attributeNotExists = (
   attributePath: string,
@@ -45,10 +46,11 @@ export const attributeNotExists = (
   kind: "attribute_not_exists",
   attributePath,
 });
+export const notExists = attributeNotExists;
 
 export const attributeType = (
   attributePath: string,
-  type: AttributeType,
+  typeName: AttributeType,
 ): AttributeTypeCondition => {
   const shortAttributeTypes: Record<AttributeType, string> = {
     binary: "B",
@@ -66,9 +68,10 @@ export const attributeType = (
   return {
     kind: "attribute_type",
     attributePath,
-    value: shortAttributeTypes[type],
+    value: shortAttributeTypes[typeName],
   };
 };
+export const type = attributeType;
 
 export const beginsWith = (
   attributePath: string,

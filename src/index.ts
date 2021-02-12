@@ -14,6 +14,7 @@ export {
   contains,
   eq,
   equals,
+  exists,
   greaterThan,
   greaterThanOrEquals,
   gt,
@@ -26,6 +27,8 @@ export {
   ne,
   not,
   notEquals,
+  notExists,
   or,
   size,
+  type,
 } from "./condition-expression-builders";

@@ -28,6 +28,7 @@ export type UpdateAppend = {
   kind: "append";
   attributePath: string;
   value: NativeAttributeValue | NativeAttributeValue[];
+  createIfAttributePathDoesNotExist: boolean;
 };
 
 export type UpdateDelete = {
@@ -46,6 +47,7 @@ export type UpdatePrepend = {
   kind: "prepend";
   attributePath: string;
   value: NativeAttributeValue | NativeAttributeValue[];
+  createIfAttributePathDoesNotExist: boolean;
 };
 
 export type UpdateRemove = {
@@ -72,13 +74,19 @@ export type UpdateType =
 export class Update extends Check {
   #UpdateExpressions: UpdateType[] = [];
 
-  assign(item: NativeValue, ifDoesNotExist = false) {
-    for (const [attributePath, value] of Object.entries(item)) {
-      if (value !== undefined) {
+  /**
+   * Assign value to an Item
+   * @param value NativeValue
+   * @param ifDoesNotExist boolean
+   * @returns Update
+   */
+  assign(value: NativeValue, ifDoesNotExist = false) {
+    for (const [attributePath, attributeValue] of Object.entries(value)) {
+      if (attributeValue !== undefined) {
         this.#UpdateExpressions.push({
           kind: "set",
           attributePath,
-          value,
+          value: attributeValue,
           ifDoesNotExist,
         } as UpdateSet);
       }
@@ -86,6 +94,13 @@ export class Update extends Check {
     return this;
   }
 
+  /**
+   * Increment a numeric value
+   * @param attributePath string
+   * @param value number
+   * @param createIfAttributePathDoesNotExist boolean
+   * @returns Update
+   */
   increment(
     attributePath: string,
     value: number,
@@ -99,6 +114,13 @@ export class Update extends Check {
     return this;
   }
 
+  /**
+   * Decrement a numeric value
+   * @param attributePath string
+   * @param value number
+   * @param createIfAttributePathDoesNotExist boolean
+   * @returns Update
+   */
   decrement(
     attributePath: string,
     value: number,
@@ -111,42 +133,83 @@ export class Update extends Check {
     );
   }
 
-  append(attributePath: string, value: NativeAttributeValue[]) {
+  /**
+   * Append values to an Array
+   * @param attributePath string
+   * @param values NativeAttributeValue[]
+   * @param createIfAttributePathDoesNotExist boolean
+   * @returns Update
+   */
+  append(
+    attributePath: string,
+    values: NativeAttributeValue[],
+    createIfAttributePathDoesNotExist = true,
+  ) {
     this.#UpdateExpressions.push({
       kind: "append",
       attributePath,
-      value,
+      value: values,
+      createIfAttributePathDoesNotExist,
     });
     return this;
   }
 
-  prepend(attributePath: string, value: NativeAttributeValue[]) {
+  /**
+   * Prepend values to an Array
+   * @param attributePath string
+   * @param values NativeAttributeValue[]
+   * @param createIfAttributePathDoesNotExist boolean
+   * @returns Update
+   */
+  prepend(
+    attributePath: string,
+    values: NativeAttributeValue[],
+    createIfAttributePathDoesNotExist = true,
+  ) {
     this.#UpdateExpressions.push({
       kind: "prepend",
       attributePath,
-      value,
+      value: values,
+      createIfAttributePathDoesNotExist,
     });
     return this;
   }
 
-  add(attributePath: string, value: Set<string | number>) {
+  /**
+   * Add items to a Set
+   * @param attributePath string
+   * @param values Set
+   * @returns Update
+   */
+  add(attributePath: string, values: Set<string | number>) {
     this.#UpdateExpressions.push({
       kind: "add",
       attributePath,
-      value,
+      value: values,
     });
     return this;
   }
 
-  delete(attributePath: string, value: Set<string | number>) {
+  /**
+   * Remove items from a Set
+   * @param attributePath string
+   * @param values Set
+   * @returns Update
+   */
+  delete(attributePath: string, values: Set<string | number>) {
     this.#UpdateExpressions.push({
       kind: "delete",
       attributePath,
-      value,
+      value: values,
     });
     return this;
   }
 
+  /**
+   * Remove a property from an item
+   * @param attributePath string
+   * @returns Update
+   */
   drop(attributePath: string) {
     this.#UpdateExpressions.push({
       kind: "remove",

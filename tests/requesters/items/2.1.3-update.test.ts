@@ -36,6 +36,8 @@ describe("Item Update", () => {
         .add("value5", new Set([7]))
         .append("value6", [7])
         .prepend("value7", [7])
+        .append("value61", [7], false)
+        .prepend("value71", [7], false)
         .delete("value8", new Set([7]))
         .drop("value9"),
     ).toBeInstanceOf(Update);
@@ -54,8 +56,30 @@ describe("Item Update", () => {
         { attributePath: "value3", kind: "add", value: -7 },
         { attributePath: "value4", kind: "increment", value: -7 },
         { attributePath: "value5", kind: "add", value: new Set([7]) },
-        { attributePath: "value6", kind: "append", value: [7] },
-        { attributePath: "value7", kind: "prepend", value: [7] },
+        {
+          attributePath: "value6",
+          kind: "append",
+          value: [7],
+          createIfAttributePathDoesNotExist: true,
+        },
+        {
+          attributePath: "value7",
+          kind: "prepend",
+          value: [7],
+          createIfAttributePathDoesNotExist: true,
+        },
+        {
+          attributePath: "value61",
+          kind: "append",
+          value: [7],
+          createIfAttributePathDoesNotExist: false,
+        },
+        {
+          attributePath: "value71",
+          kind: "prepend",
+          value: [7],
+          createIfAttributePathDoesNotExist: false,
+        },
         { attributePath: "value8", kind: "delete", value: new Set([7]) },
         { attributePath: "value9", kind: "remove" },
       ],

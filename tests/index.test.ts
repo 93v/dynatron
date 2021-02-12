@@ -1,5 +1,4 @@
 import {
-  Dynatron,
   and,
   attributeExists,
   attributeNotExists,
@@ -7,8 +6,10 @@ import {
   beginsWith,
   between,
   contains,
+  Dynatron,
   eq,
   equals,
+  exists,
   greaterThan,
   greaterThanOrEquals,
   gt,
@@ -16,14 +17,16 @@ import {
   isIn,
   lessThan,
   lessThanOrEquals,
+  loadProfileCredentials,
   lt,
   lte,
   ne,
   not,
   notEquals,
+  notExists,
   or,
   size,
-  loadProfileCredentials,
+  type,
 } from "../src";
 
 describe("Check exports", () => {
@@ -37,11 +40,20 @@ describe("Check exports", () => {
   test("should export attributeExists", () => {
     expect(attributeExists).toBeDefined();
   });
+  test("should export attributeExists", () => {
+    expect(exists).toBeDefined();
+  });
   test("should export attributeNotExists", () => {
     expect(attributeNotExists).toBeDefined();
   });
+  test("should export attributeNotExists", () => {
+    expect(notExists).toBeDefined();
+  });
   test("should export attributeType", () => {
     expect(attributeType).toBeDefined();
+  });
+  test("should export attributeType", () => {
+    expect(type).toBeDefined();
   });
   test("should export beginsWith", () => {
     expect(beginsWith).toBeDefined();

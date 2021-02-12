@@ -19,11 +19,31 @@ export class Check extends Amend {
     key && validateKey(key);
   }
 
+  /**
+   * Use ReturnValues if you want to get the item attributes as they appear before or after they are updated. For UpdateItem, the valid values are:
+   *
+   * NONE - If ReturnValues is not specified, or if its value is NONE, then nothing is returned. (This setting is the default for ReturnValues.)
+   * ALL_OLD - Returns all of the attributes of the item, as they appeared before the UpdateItem operation.
+   * UPDATED_OLD - Returns only the updated attributes, as they appeared before the UpdateItem operation.
+   * ALL_NEW - Returns all of the attributes of the item, as they appear after the UpdateItem operation.
+   * UPDATED_NEW - Returns only the updated attributes, as they appear after the UpdateItem operation.
+   *
+   * There is no additional cost associated with requesting a return value aside from the small network and processing overhead of receiving a larger response. No read capacity units are consumed.
+   *
+   * The values returned are strongly consistent.
+   * @param returnValues NONE | ALL_OLD | UPDATED_OLD | ALL_NEW | UPDATED_NEW
+   * @returns Check
+   */
   returnValues = (returnValues: ReturnValue = "ALL_OLD") => {
     this.#ReturnValues = returnValues;
     return this;
   };
 
+  /**
+   * Sets conditions to check during execution
+   * @param conditions (Condition | Condition[] | undefined)[]
+   * @returns Check
+   */
   if = (...conditions: (Condition | Condition[] | undefined)[]) => {
     if (isConditionEmptyDeep(conditions)) {
       return this;

@@ -75,10 +75,13 @@ not(condition);
 
 ```typescript
 // Check if the attribute exists on the item
+exists("tags");
 attributeExists("tags");
 // Check if the attribute does not exist on the item
+notExists("tags");
 attributeNotExists("tags");
 // Check if the attribute type matches to the provided value
+type("tags", AttributeType);
 attributeType("tags", AttributeType);
 
 // where

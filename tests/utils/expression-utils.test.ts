@@ -385,8 +385,18 @@ describe("Update expression marshaller", () => {
     nextAlpha.reset();
     expect(
       marshallUpdateExpression([
-        { kind: "prepend", attributePath: "id", value: 5 },
-        { kind: "append", attributePath: "id", value: 5 },
+        {
+          kind: "prepend",
+          attributePath: "id",
+          value: 5,
+          createIfAttributePathDoesNotExist: false,
+        },
+        {
+          kind: "append",
+          attributePath: "id",
+          value: 5,
+          createIfAttributePathDoesNotExist: false,
+        },
       ]),
     ).toEqual({
       expressionString: "SET #a=list_append(:b,#a), #c=list_append(#c,:d)",
