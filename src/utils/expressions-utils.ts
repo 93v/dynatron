@@ -411,17 +411,20 @@ export const marshallProjectionExpression = (
 export const marshallUpdateExpression = (
   updates: UpdateType[],
   prefix = "",
+  excludeKey?: NativeValue,
 ) => {
   const updateMap: {
     [group in NativeUpdateType]?: NativeExpressionModel[];
   } = {};
 
   for (const update of updates) {
-    const { Type, ...updateExpression } = serializeUpdateExpression(
-      update,
-      prefix,
-    );
-    updateMap[Type] = [...(updateMap[Type] ?? []), updateExpression];
+    if (!Object.keys(excludeKey || {}).includes(update.attributePath)) {
+      const { Type, ...updateExpression } = serializeUpdateExpression(
+        update,
+        prefix,
+      );
+      updateMap[Type] = [...(updateMap[Type] ?? []), updateExpression];
+    }
   }
 
   const updateObject: NativeExpressionModel = {
