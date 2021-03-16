@@ -250,6 +250,7 @@ export const marshallRequestParameters = <T>(
     const marshalledUpdateExpression = marshallUpdateExpression(
       requestParameters._UpdateExpressions,
       "u_",
+      requestParameters._Key,
     );
 
     marshalledParameters.UpdateExpression =

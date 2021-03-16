@@ -440,4 +440,32 @@ describe("Update expression marshaller", () => {
       expressionAttributeValues: { ":b": 5 },
     });
   });
+
+  test("should return a simple object without specified key", () => {
+    nextAlpha.reset();
+    expect(
+      marshallUpdateExpression(
+        [
+          {
+            kind: "set",
+            attributePath: "id",
+            value: 5,
+            ifDoesNotExist: false,
+          },
+          {
+            kind: "set",
+            attributePath: "notId",
+            value: 10,
+            ifDoesNotExist: false,
+          },
+        ],
+        undefined,
+        { id: 5 },
+      ),
+    ).toEqual({
+      expressionString: "SET #a=:b",
+      expressionAttributeNames: { "#a": "notId" },
+      expressionAttributeValues: { ":b": 10 },
+    });
+  });
 });
