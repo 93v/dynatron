@@ -1,4 +1,4 @@
-# ⚡️ Dynatron v4
+# ⚡️ Dynatron v5
 
 ![David](https://img.shields.io/david/93v/dynatron.svg)
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/93v/dynatron.svg)
