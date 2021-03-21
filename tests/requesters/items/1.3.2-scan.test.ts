@@ -1,5 +1,6 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import nock from "nock";
+import { beginsWith } from "../../../src/condition-expression-builders";
 
 import { ListFetch } from "../../../src/requesters/items/1.3-list-fetch";
 import { Scan } from "../../../src/requesters/items/1.3.2-scan";
@@ -128,7 +129,9 @@ describe("Scan", () => {
       "tableName",
     );
     instance.totalSegments(1);
-    expect(await instance.limit(1).$()).toEqual([{ id: "uuid1" }]);
+    expect(await instance.limit(1).where(beginsWith("name", "A")).$()).toEqual([
+      { id: "uuid1" },
+    ]);
     scope.persist(false);
     nock.cleanAll();
   });

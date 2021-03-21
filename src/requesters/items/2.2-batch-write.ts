@@ -96,6 +96,7 @@ export class BatchWrite extends Amend {
             throw error;
           }
           operationCompleted = true;
+          error.$input = requestInput;
           bail(error);
         } finally {
           shortCircuit.halt();

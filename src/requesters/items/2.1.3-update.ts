@@ -103,7 +103,7 @@ export class Update extends Check {
    */
   increment(
     attributePath: string,
-    value: number,
+    value = 1,
     createIfAttributePathDoesNotExist = true,
   ) {
     this.#UpdateExpressions.push({
@@ -123,7 +123,7 @@ export class Update extends Check {
    */
   decrement(
     attributePath: string,
-    value: number,
+    value = 1,
     createIfAttributePathDoesNotExist = true,
   ) {
     return this.increment(
@@ -219,10 +219,13 @@ export class Update extends Check {
   }
 
   [BUILD]() {
+    const keyAttributes = Object.keys(this.key || {});
     return {
       ...super[BUILD](),
       ...(this.#UpdateExpressions.length > 0 && {
-        _UpdateExpressions: this.#UpdateExpressions,
+        _UpdateExpressions: this.#UpdateExpressions.filter(
+          (expression) => !keyAttributes.includes(expression.attributePath),
+        ),
       }),
     };
   }
@@ -256,6 +259,7 @@ export class Update extends Check {
         if (isRetryableError(error)) {
           throw error;
         }
+        error.$input = requestInput;
         bail(error);
       } finally {
         shortCircuit.halt();

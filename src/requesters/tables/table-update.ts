@@ -47,6 +47,7 @@ export class TableUpdate extends TableRequest {
         if (isRetryableError(error)) {
           throw error;
         }
+        error.$input = requestInput;
         bail(error);
       } finally {
         shortCircuit.halt();

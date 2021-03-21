@@ -81,6 +81,7 @@ export class TransactGet extends Request {
         if (isRetryableError(error)) {
           throw error;
         }
+        error.$input = requestInput;
         bail(error);
       } finally {
         shortCircuit.halt();

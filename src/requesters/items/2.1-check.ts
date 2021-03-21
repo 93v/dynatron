@@ -13,7 +13,7 @@ export class Check extends Amend {
   constructor(
     databaseClient: DynamoDBClient,
     tableName: string,
-    private key?: NativeValue,
+    protected key?: NativeValue,
   ) {
     super(databaseClient, tableName);
     key && validateKey(key);

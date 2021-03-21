@@ -404,6 +404,30 @@ describe("Update expression marshaller", () => {
       expressionAttributeValues: { ":b": 5, ":d": 5 },
     });
   });
+  test("should return a simple object", () => {
+    nextAlpha.reset();
+    expect(
+      marshallUpdateExpression([
+        {
+          kind: "prepend",
+          attributePath: "id",
+          value: 5,
+          createIfAttributePathDoesNotExist: true,
+        },
+        {
+          kind: "append",
+          attributePath: "id",
+          value: 5,
+          createIfAttributePathDoesNotExist: true,
+        },
+      ]),
+    ).toEqual({
+      expressionString:
+        "SET #a=list_append(:b,if_not_exists(#a, :empty_list)), #c=list_append(if_not_exists(#c, :empty_list),:d)",
+      expressionAttributeNames: { "#a": "id", "#c": "id" },
+      expressionAttributeValues: { ":b": 5, ":d": 5, ":empty_list": [] },
+    });
+  });
 
   test("should return a simple object", () => {
     nextAlpha.reset();

@@ -113,20 +113,18 @@ export class Query extends ListFetch {
           duration: attempt * LONG_MAX_LATENCY * this.patienceRatio,
           error: new Error(TAKING_TOO_LONG_EXCEPTION),
         });
+        const input = {
+          ...requestInput,
+          ...(requestInput.Limit && {
+            Limit:
+              requestInput.Limit *
+              FILTER_EXPRESSION_LIMIT_POWER_BASE ** filterExpressionComplexity,
+          }),
+        };
         try {
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
           const { $metadata, ...output } = await Promise.race([
-            this.databaseClient.send(
-              new QueryCommand({
-                ...requestInput,
-                ...(requestInput.Limit && {
-                  Limit:
-                    requestInput.Limit *
-                    FILTER_EXPRESSION_LIMIT_POWER_BASE **
-                      filterExpressionComplexity,
-                }),
-              }),
-            ),
+            this.databaseClient.send(new QueryCommand(input)),
             shortCircuit.launch(),
           ]);
 
@@ -188,6 +186,7 @@ export class Query extends ListFetch {
             throw error;
           }
           operationCompleted = true;
+          error.$input = input;
           bail(error);
         } finally {
           shortCircuit.halt();

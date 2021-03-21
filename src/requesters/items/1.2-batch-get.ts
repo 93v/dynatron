@@ -86,6 +86,7 @@ export class BatchGet extends Fetch {
             throw error;
           }
           operationCompleted = true;
+          error.$input = requestInput;
           bail(error);
         } finally {
           shortCircuit.halt();
