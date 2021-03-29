@@ -45,11 +45,11 @@
     "@commitlint/config-conventional": "^12.0.1",
     "@types/async-retry": "^1.4.2",
     "@types/ini": "^1.3.30",
-    "@types/jest": "^26.0.21",
-    "@types/node": "^14.14.35",
-    "@typescript-eslint/eslint-plugin": "^4.19.0",
-    "@typescript-eslint/parser": "^4.19.0",
-    "eslint": "^7.22.0",
+    "@types/jest": "^26.0.22",
+    "@types/node": "^14.14.37",
+    "@typescript-eslint/eslint-plugin": "^4.20.0",
+    "@typescript-eslint/parser": "^4.20.0",
+    "eslint": "^7.23.0",
     "eslint-config-prettier": "^8.1.0",
     "eslint-plugin-prettier": "^3.3.1",
     "eslint-plugin-unicorn": "^29.0.0",
@@ -61,11 +61,11 @@
     "semantic-release": "^17.4.2",
     "terser-webpack-plugin": "^5.1.1",
     "ts-jest": "^26.5.4",
-    "ts-loader": "^8.0.18",
+    "ts-loader": "^8.1.0",
     "ts-node": "^9.1.1",
     "typescript": "^4.2.3",
-    "webpack": "^5.27.2",
-    "webpack-cli": "^4.5.0",
+    "webpack": "^5.28.0",
+    "webpack-cli": "^4.6.0",
     "webpack-node-externals": "^2.5.2"
   },
   "files": [
@@ -73,9 +73,9 @@
     "types/**/*"
   ],
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.9.0",
-    "@aws-sdk/node-http-handler": "^3.6.1",
-    "@aws-sdk/util-dynamodb": "^3.9.0",
+    "@aws-sdk/client-dynamodb": "^3.10.0",
+    "@aws-sdk/node-http-handler": "^3.10.0",
+    "@aws-sdk/util-dynamodb": "^3.10.0",
     "async-retry": "^1.3.1",
     "ini": "^2.0.0"
   }
