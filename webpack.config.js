@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const path = require("path");
 const TerserPlugin = require("terser-webpack-plugin");
-// const nodeExternals = require("webpack-node-externals");
 
 module.exports = {
   entry: "./src/index.ts",
@@ -29,5 +28,4 @@ module.exports = {
     path: path.resolve(__dirname, "dist"),
   },
   target: "node",
-  // externals: [nodeExternals()],
 };

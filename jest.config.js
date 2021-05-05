@@ -3,6 +3,7 @@
 module.exports = {
   collectCoverage: true,
   collectCoverageFrom: ["src/**/*.ts", "src/**/*.js"],
+  coveragePathIgnorePatterns: ["/node_modules/", "/src/usage.ts"],
   coverageThreshold: {
     global: {
       branches: 91,
