@@ -31,6 +31,7 @@ export const isRetryableError = (error: Error) =>
     "InternalServerError",
     "NetworkingError",
     "Service Unavailable",
+    "Throughput exceeds",
   ].some((message) =>
     error.toString().toUpperCase().includes(message.toUpperCase()),
   ) ||
