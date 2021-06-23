@@ -33,10 +33,8 @@ import { LONG_MAX_LATENCY } from "./utils/misc-utils";
 export type NativeValue = Record<string, NativeAttributeValue>;
 
 export class Dynatron {
-  protected static readonly DynamoDBClients: Record<
-    string,
-    DynamoDBClient
-  > = {};
+  protected static readonly DynamoDBClients: Record<string, DynamoDBClient> =
+    {};
   constructor(
     private readonly tableName: string,
     private readonly clientConfiguration?: DynamoDBClientConfig & {

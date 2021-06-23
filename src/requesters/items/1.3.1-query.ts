@@ -192,9 +192,11 @@ export class Query extends ListFetch {
           shortCircuit.halt();
         }
       }
-      return (returnRawResponse
-        ? aggregatedOutput
-        : aggregatedOutput.Items?.map((item) => unmarshall(item))) as any;
+      return (
+        returnRawResponse
+          ? aggregatedOutput
+          : aggregatedOutput.Items?.map((item) => unmarshall(item))
+      ) as any;
     }, RETRY_OPTIONS);
   };
 }

@@ -72,11 +72,13 @@ export class TransactGet extends Request {
           shortCircuit.launch(),
         ]);
 
-        return (returnRawResponse
-          ? output
-          : output.Responses?.map(
-              (response) => response.Item && unmarshall(response.Item),
-            )) as any;
+        return (
+          returnRawResponse
+            ? output
+            : output.Responses?.map(
+                (response) => response.Item && unmarshall(response.Item),
+              )
+        ) as any;
       } catch (error) {
         if (isRetryableError(error)) {
           throw error;

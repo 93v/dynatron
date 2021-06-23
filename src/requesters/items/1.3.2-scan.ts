@@ -270,8 +270,10 @@ export class Scan extends ListFetch {
       aggregatedOutput.Items = aggregatedOutput.Items?.slice(0, initialLimit);
       aggregatedOutput.Count = aggregatedOutput.Items?.length ?? 0;
     }
-    return (returnRawResponse
-      ? aggregatedOutput
-      : aggregatedOutput.Items?.map((item) => unmarshall(item))) as any;
+    return (
+      returnRawResponse
+        ? aggregatedOutput
+        : aggregatedOutput.Items?.map((item) => unmarshall(item))
+    ) as any;
   };
 }
