@@ -1,15 +1,13 @@
 import {
   CreateTableInput,
   DynamoDBClient,
-  DynamoDBClientConfig,
   UpdateTableInput,
   UpdateTimeToLiveInput,
 } from "@aws-sdk/client-dynamodb";
-import { NodeHttpHandler } from "@aws-sdk/node-http-handler";
 import { NativeAttributeValue } from "@aws-sdk/util-dynamodb";
-import { Agent } from "https";
 
 import { equals } from "./condition-expression-builders";
+import { DynatronClient } from "./dynatron-client";
 import { Get } from "./requesters/items/1.1-get";
 import { BatchGet } from "./requesters/items/1.2-batch-get";
 import { Query } from "./requesters/items/1.3.1-query";
@@ -28,146 +26,118 @@ import { TableList } from "./requesters/tables/table-list";
 import { TableTTLDescribe } from "./requesters/tables/table-ttl-describe";
 import { TableTTLUpdate } from "./requesters/tables/table-ttl-update";
 import { TableUpdate } from "./requesters/tables/table-update";
-import { LONG_MAX_LATENCY } from "./utils/misc-utils";
 
 export type NativeValue = Record<string, NativeAttributeValue>;
 
 export class Dynatron {
   protected static readonly DynamoDBClients: Record<string, DynamoDBClient> =
     {};
-  constructor(
-    private readonly tableName: string,
-    private readonly clientConfiguration?: DynamoDBClientConfig & {
-      timeout?: number;
-    },
-    private instanceId = "default",
-  ) {
+  constructor(dynatronClient: DynatronClient, private instanceId = "default") {
     Dynatron.DynamoDBClients[this.instanceId] =
-      Dynatron.DynamoDBClients[this.instanceId] ??
-      this.initializeDatabaseClient(this.clientConfiguration);
+      Dynatron.DynamoDBClients[this.instanceId] ?? dynatronClient;
   }
 
-  private initializeDatabaseClient = (
-    connectionParameters?: DynamoDBClientConfig & { timeout?: number },
-  ) => {
-    const configuration: DynamoDBClientConfig = {
-      ...connectionParameters,
-      maxAttempts: 3,
+  /**
+   * Sets the table that operations will apply on.
+   * @param table String
+   */
+  tableName = (tableName: string) => {
+    return {
+      /**
+       * The operation deletes multiple items in the table.
+       * @param keys NativeValue[]
+       */
+      batchDelete: (keys: NativeValue[]) =>
+        new BatchWrite(
+          Dynatron.DynamoDBClients[this.instanceId],
+          tableName,
+          keys,
+        ),
+      /**
+       * The operation returns the attributes of one or more items from one or more tables.
+       * @param keys NativeValue[]
+       */
+      batchGet: (keys: NativeValue[]) =>
+        new BatchGet(
+          Dynatron.DynamoDBClients[this.instanceId],
+          tableName,
+          keys,
+        ),
+      /**
+       * The operation puts multiple items in the table.
+       * @param items NativeValue[]
+       */
+      batchPut: (items: NativeValue[]) =>
+        new BatchWrite(
+          Dynatron.DynamoDBClients[this.instanceId],
+          tableName,
+          undefined,
+          items,
+        ),
+      check: (key: NativeValue) =>
+        new Check(Dynatron.DynamoDBClients[this.instanceId], tableName, key),
+      /**
+       * Deletes a single item in a table by primary key.
+       * @param key NativeValue
+       */
+      delete: (key: NativeValue) =>
+        new Delete(Dynatron.DynamoDBClients[this.instanceId], tableName, key),
+      /**
+       * The operation returns a set of attributes for the item with the given primary key.
+       * @param key NativeValue
+       */
+      get: (key: NativeValue) =>
+        new Get(Dynatron.DynamoDBClients[this.instanceId], tableName, key),
+      /**
+       * Creates a new item, or replaces an old item with a new item.
+       * @param item NativeValue
+       */
+      put: (item: NativeValue) =>
+        new Put(Dynatron.DynamoDBClients[this.instanceId], tableName, item),
+      /**
+       * The operation finds items based on primary key values.
+       * @param attributePath string
+       * @param value NativeAttributeValue
+       */
+      query: (attributePath: string, value: NativeAttributeValue) =>
+        new Query(
+          Dynatron.DynamoDBClients[this.instanceId],
+          tableName,
+          equals(attributePath, value),
+        ),
+      /**
+       * The operation returns one or more items and item attributes by accessing every item in a table or a secondary index.
+       */
+      scan: () =>
+        new Scan(Dynatron.DynamoDBClients[this.instanceId], tableName),
+      /**
+       * Edits an existing item's attributes, or adds a new item to the table if it does not already exist.
+       * @param key NativeValue
+       */
+      update: (key: NativeValue) =>
+        new Update(Dynatron.DynamoDBClients[this.instanceId], tableName, key),
+      /**
+       * This is a synchronous operation that atomically retrieves multiple items from one or more tables (but not from indexes) in a single account and Region.
+       * @param items Get[]
+       */
+      transactGet: (items: Get[]) =>
+        new TransactGet(
+          Dynatron.DynamoDBClients[this.instanceId],
+          tableName,
+          items,
+        ),
+      /**
+       * This is a synchronous write operation that groups up to 25 action requests.
+       * @param items (Check | Put | Delete | Update)[]
+       */
+      transactWrite: (items: (Check | Put | Delete | Update)[]) =>
+        new TransactWrite(
+          Dynatron.DynamoDBClients[this.instanceId],
+          tableName,
+          items,
+        ),
     };
-
-    if (configuration.region !== "local") {
-      // Experiments have shown that this is the optimal number for sockets
-      const MAX_SOCKETS = 256;
-
-      configuration.requestHandler = new NodeHttpHandler({
-        httpsAgent: new Agent({
-          keepAlive: true,
-          rejectUnauthorized: true,
-          maxSockets: MAX_SOCKETS,
-          maxFreeSockets: MAX_SOCKETS / 8,
-          secureProtocol: "TLSv1_method",
-          ciphers: "ALL",
-        }),
-        socketTimeout: connectionParameters?.timeout ?? LONG_MAX_LATENCY + 1000,
-      });
-    }
-
-    return new DynamoDBClient(configuration);
   };
-
-  /**
-   * The operation deletes multiple items in the table.
-   * @param keys NativeValue[]
-   */
-  batchDelete = (keys: NativeValue[]) =>
-    new BatchWrite(
-      Dynatron.DynamoDBClients[this.instanceId],
-      this.tableName,
-      keys,
-    );
-  /**
-   * The operation returns the attributes of one or more items from one or more tables.
-   * @param keys NativeValue[]
-   */
-  batchGet = (keys: NativeValue[]) =>
-    new BatchGet(
-      Dynatron.DynamoDBClients[this.instanceId],
-      this.tableName,
-      keys,
-    );
-  /**
-   * The operation puts multiple items in the table.
-   * @param items NativeValue[]
-   */
-  batchPut = (items: NativeValue[]) =>
-    new BatchWrite(
-      Dynatron.DynamoDBClients[this.instanceId],
-      this.tableName,
-      undefined,
-      items,
-    );
-  check = (key: NativeValue) =>
-    new Check(Dynatron.DynamoDBClients[this.instanceId], this.tableName, key);
-  /**
-   * Deletes a single item in a table by primary key.
-   * @param key NativeValue
-   */
-  delete = (key: NativeValue) =>
-    new Delete(Dynatron.DynamoDBClients[this.instanceId], this.tableName, key);
-  /**
-   * The operation returns a set of attributes for the item with the given primary key.
-   * @param key NativeValue
-   */
-  get = (key: NativeValue) =>
-    new Get(Dynatron.DynamoDBClients[this.instanceId], this.tableName, key);
-  /**
-   * Creates a new item, or replaces an old item with a new item.
-   * @param item NativeValue
-   */
-  put = (item: NativeValue) =>
-    new Put(Dynatron.DynamoDBClients[this.instanceId], this.tableName, item);
-  /**
-   * The operation finds items based on primary key values.
-   * @param attributePath string
-   * @param value NativeAttributeValue
-   */
-  query = (attributePath: string, value: NativeAttributeValue) =>
-    new Query(
-      Dynatron.DynamoDBClients[this.instanceId],
-      this.tableName,
-      equals(attributePath, value),
-    );
-  /**
-   * The operation returns one or more items and item attributes by accessing every item in a table or a secondary index.
-   */
-  scan = () =>
-    new Scan(Dynatron.DynamoDBClients[this.instanceId], this.tableName);
-  /**
-   * Edits an existing item's attributes, or adds a new item to the table if it does not already exist.
-   * @param key NativeValue
-   */
-  update = (key: NativeValue) =>
-    new Update(Dynatron.DynamoDBClients[this.instanceId], this.tableName, key);
-  /**
-   * This is a synchronous operation that atomically retrieves multiple items from one or more tables (but not from indexes) in a single account and Region.
-   * @param items Get[]
-   */
-  transactGet = (items: Get[]) =>
-    new TransactGet(
-      Dynatron.DynamoDBClients[this.instanceId],
-      this.tableName,
-      items,
-    );
-  /**
-   * This is a synchronous write operation that groups up to 25 action requests.
-   * @param items (Check | Put | Delete | Update)[]
-   */
-  transactWrite = (items: (Check | Put | Delete | Update)[]) =>
-    new TransactWrite(
-      Dynatron.DynamoDBClients[this.instanceId],
-      this.tableName,
-      items,
-    );
 
   /**
    * Switch to Table mode to work with the database tables

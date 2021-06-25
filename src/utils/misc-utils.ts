@@ -16,6 +16,8 @@ export const RETRY_OPTIONS: Options = { minTimeout: 50, retries: 5 };
 const MILLISECONDS_IN_SECOND = 1000;
 export const SHORT_MAX_LATENCY = MILLISECONDS_IN_SECOND;
 export const LONG_MAX_LATENCY = 10 * SHORT_MAX_LATENCY;
+// Experiments have shown that this is the optimal number for sockets
+export const MAX_SOCKETS = 256;
 
 export const assertNever = (object: never): never => {
   throw new Error(`Unexpected value: ${JSON.stringify(object)}`);

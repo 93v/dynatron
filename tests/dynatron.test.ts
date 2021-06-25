@@ -1,4 +1,6 @@
 import { Dynatron } from "../src/dynatron";
+import { DynatronClient } from "../src/dynatron-client";
+import { OptimizedRequestHandler } from "../src/optimized-request-handler";
 import { Get } from "../src/requesters/items/1.1-get";
 import { BatchGet } from "../src/requesters/items/1.2-batch-get";
 import { Query } from "../src/requesters/items/1.3.1-query";
@@ -20,109 +22,105 @@ import { TableUpdate } from "../src/requesters/tables/table-update";
 
 describe("Database Client", () => {
   test("should return an instance of Dynatron", () => {
-    const dynatron = new Dynatron("", {});
-    expect(dynatron).toBeInstanceOf(Dynatron);
-  });
-
-  test("should return an instance of Dynatron", () => {
-    const dynatron = new Dynatron("", { timeout: 100 });
-    expect(dynatron).toBeInstanceOf(Dynatron);
-  });
-
-  test("should return an instance of Dynatron", () => {
-    const dynatron = new Dynatron("", { timeout: undefined });
-    expect(dynatron).toBeInstanceOf(Dynatron);
-  });
-
-  test("should return an instance of Dynatron", () => {
-    const dynatron = new Dynatron("", { region: "local" });
-    expect(dynatron).toBeInstanceOf(Dynatron);
-  });
-
-  test("should return an instance of Dynatron", () => {
-    const dynatron = new Dynatron("", { region: "local", timeout: 100 });
-    expect(dynatron).toBeInstanceOf(Dynatron);
-  });
-
-  test("should return an instance of Dynatron", () => {
     const dynatron = new Dynatron(
-      "other1",
-      {
-        region: "eu-central-1",
-        timeout: undefined,
-      },
-      "otherInstance1",
+      new DynatronClient({}, new OptimizedRequestHandler()),
     );
     expect(dynatron).toBeInstanceOf(Dynatron);
   });
 
   test("should return an instance of Dynatron", () => {
     const dynatron = new Dynatron(
-      "other1",
-      {
-        region: "eu-central-1",
-        timeout: 100,
-      },
-      "otherInstance2",
+      new DynatronClient({}, new OptimizedRequestHandler(100)),
     );
     expect(dynatron).toBeInstanceOf(Dynatron);
   });
 
   test("should return an instance of Dynatron", () => {
     const dynatron = new Dynatron(
-      "",
-      { region: "eu-central-1" },
+      new DynatronClient({ region: "local" }, new OptimizedRequestHandler()),
+    );
+    expect(dynatron).toBeInstanceOf(Dynatron);
+  });
+
+  test("should return an instance of Dynatron", () => {
+    const dynatron = new Dynatron(
+      new DynatronClient({ region: "local" }, new OptimizedRequestHandler(100)),
+    );
+    expect(dynatron).toBeInstanceOf(Dynatron);
+  });
+
+  test("should return an instance of Dynatron", () => {
+    const dynatron = new Dynatron(
+      new DynatronClient(
+        { region: "eu-central-1" },
+        new OptimizedRequestHandler(100),
+      ),
       "newInstance",
     );
     expect(dynatron).toBeInstanceOf(Dynatron);
   });
 
   test("should return an instance of Dynatron", () => {
-    const dynatron = new Dynatron("", { region: "local" }, "newInstance2");
+    const dynatron = new Dynatron(
+      new DynatronClient({ region: "eu-central-1" }),
+      "newInstance",
+    );
+    expect(dynatron).toBeInstanceOf(Dynatron);
+  });
+
+  test("should return an instance of Dynatron", () => {
+    const dynatron = new Dynatron(
+      new DynatronClient({ region: "local" }),
+      "newInstance2",
+    );
     expect(dynatron).toBeInstanceOf(Dynatron);
   });
 });
 
 describe("Dynatron instance", () => {
-  const dynatron = new Dynatron("");
+  const dynatron = new Dynatron(
+    new DynatronClient({}, new OptimizedRequestHandler()),
+  );
   test("should be an instance of Dynatron", async () => {
     expect(dynatron).toBeInstanceOf(Dynatron);
   });
   test("should be an instance of BatchWrite", () => {
-    expect(dynatron.batchDelete([])).toBeInstanceOf(BatchWrite);
+    expect(dynatron.tableName("").batchDelete([])).toBeInstanceOf(BatchWrite);
   });
   test("should be an instance of BatchGet", () => {
-    expect(dynatron.batchGet([])).toBeInstanceOf(BatchGet);
+    expect(dynatron.tableName("").batchGet([])).toBeInstanceOf(BatchGet);
   });
   test("should be an instance of BatchWrite", () => {
-    expect(dynatron.batchPut([])).toBeInstanceOf(BatchWrite);
+    expect(dynatron.tableName("").batchPut([])).toBeInstanceOf(BatchWrite);
   });
   test("should be an instance of Check", () => {
-    expect(dynatron.check({ id: "" })).toBeInstanceOf(Check);
+    expect(dynatron.tableName("").check({ id: "" })).toBeInstanceOf(Check);
   });
   test("should be an instance of Delete", () => {
-    expect(dynatron.delete({ id: "" })).toBeInstanceOf(Delete);
+    expect(dynatron.tableName("").delete({ id: "" })).toBeInstanceOf(Delete);
   });
   test("should be an instance of Get", () => {
-    expect(dynatron.get({ id: "1" })).toBeInstanceOf(Get);
+    expect(dynatron.tableName("").get({ id: "1" })).toBeInstanceOf(Get);
   });
   test("should be an instance of Put", () => {
-    expect(dynatron.put({})).toBeInstanceOf(Put);
+    expect(dynatron.tableName("").put({})).toBeInstanceOf(Put);
   });
   test("should be an instance of Query", () => {
-    expect(dynatron.query("id", "")).toBeInstanceOf(Query);
+    expect(dynatron.tableName("").query("id", "")).toBeInstanceOf(Query);
   });
   test("should be an instance of Scan", () => {
-    expect(dynatron.scan()).toBeInstanceOf(Scan);
+    expect(dynatron.tableName("").scan()).toBeInstanceOf(Scan);
   });
   test("should be an instance of Update", () => {
-    expect(dynatron.update({ id: "" })).toBeInstanceOf(Update);
+    expect(dynatron.tableName("").update({ id: "" })).toBeInstanceOf(Update);
   });
   test("should be an instance of TransactGet", () => {
-    expect(dynatron.transactGet([])).toBeInstanceOf(TransactGet);
+    expect(dynatron.tableName("").transactGet([])).toBeInstanceOf(TransactGet);
   });
   test("should be an instance of TransactWrite", () => {
-    expect(dynatron.transactWrite([])).toBeInstanceOf(TransactWrite);
+    expect(dynatron.tableName("").transactWrite([])).toBeInstanceOf(
+      TransactWrite,
+    );
   });
   test("should be an instance of TableCreator", () => {
     expect(

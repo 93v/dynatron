@@ -2,6 +2,7 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 
 import { eq } from "../../../src/condition-expression-builders";
 import { Dynatron } from "../../../src/dynatron";
+import { DynatronClient } from "../../../src/dynatron-client";
 import { Amend } from "../../../src/requesters/items/2-amend";
 import { TransactWrite } from "../../../src/requesters/items/2.3-transact-write";
 import { BUILD } from "../../../src/utils/misc-utils";
@@ -26,10 +27,21 @@ describe("Item TransactWrite", () => {
 
   test("should return an instance of TransactWrite", () => {
     const instance = new TransactWrite(databaseClient, "", [
-      new Dynatron("tableName1").put({ id: "uuid1" }).returnValues(),
-      new Dynatron("tableName2").check({ id: "uuid2" }).if(eq("value", 7)),
-      new Dynatron("tableName3").delete({ id: "uuid3" }),
-      new Dynatron("tableName4").update({ id: "uuid4" }).assign({ value: 8 }),
+      new Dynatron(new DynatronClient())
+        .tableName("tableName1")
+        .put({ id: "uuid1" })
+        .returnValues(),
+      new Dynatron(new DynatronClient())
+        .tableName("tableName2")
+        .check({ id: "uuid2" })
+        .if(eq("value", 7)),
+      new Dynatron(new DynatronClient())
+        .tableName("tableName3")
+        .delete({ id: "uuid3" }),
+      new Dynatron(new DynatronClient())
+        .tableName("tableName4")
+        .update({ id: "uuid4" })
+        .assign({ value: 8 }),
     ]);
     expect(
       instance
@@ -51,10 +63,21 @@ describe("Item TransactWrite", () => {
     };
 
     const instance = new TransactWrite(databaseClient, "", [
-      new Dynatron("tableName1").put({ id: "uuid1" }).returnValues(),
-      new Dynatron("tableName2").check({ id: "uuid2" }).if(eq("value", 7)),
-      new Dynatron("tableName3").delete({ id: "uuid3" }),
-      new Dynatron("tableName4").update({ id: "uuid4" }).assign({ value: 8 }),
+      new Dynatron(new DynatronClient())
+        .tableName("tableName1")
+        .put({ id: "uuid1" })
+        .returnValues(),
+      new Dynatron(new DynatronClient())
+        .tableName("tableName2")
+        .check({ id: "uuid2" })
+        .if(eq("value", 7)),
+      new Dynatron(new DynatronClient())
+        .tableName("tableName3")
+        .delete({ id: "uuid3" }),
+      new Dynatron(new DynatronClient())
+        .tableName("tableName4")
+        .update({ id: "uuid4" })
+        .assign({ value: 8 }),
     ]);
     expect(
       instance
