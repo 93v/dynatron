@@ -385,9 +385,9 @@ const serializeAttributePath = (attributePath: string, prefix: string) => {
 export const marshallProjectionExpression = (
   projectionExpressions: string[],
 ) => {
-  const serializedProjections = [
-    ...new Set(projectionExpressions),
-  ].map((projection) => serializeAttributePath(projection, "p_"));
+  const serializedProjections = [...new Set(projectionExpressions)].map(
+    (projection) => serializeAttributePath(projection, "p_"),
+  );
 
   const aggregatedProjections: {
     expressionStrings: string[];

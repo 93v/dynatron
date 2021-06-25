@@ -11,7 +11,7 @@ import {
   isIn,
   not,
   size,
-} from "../../src/condition-expression-builders";
+} from "../../src";
 import {
   marshallConditionExpression,
   marshallUpdateExpression,

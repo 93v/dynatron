@@ -57,9 +57,11 @@ export class Put extends Check {
           shortCircuit.launch(),
         ]);
 
-        return (returnRawResponse
-          ? output
-          : requestInput.Item && unmarshall(requestInput.Item)) as any;
+        return (
+          returnRawResponse
+            ? output
+            : requestInput.Item && unmarshall(requestInput.Item)
+        ) as any;
       } catch (error) {
         if (isRetryableError(error)) {
           throw error;

@@ -103,11 +103,8 @@ export class BatchGet extends Fetch {
   $ = async <T = NativeValue[] | undefined, U extends boolean = false>(
     returnRawResponse?: U,
   ): Promise<U extends true ? BatchGetItemOutput : T | undefined> => {
-    const {
-      ReturnConsumedCapacity,
-      TableName,
-      ...marshalledParameters
-    } = marshallRequestParameters(this[BUILD]());
+    const { ReturnConsumedCapacity, TableName, ...marshalledParameters } =
+      marshallRequestParameters(this[BUILD]());
 
     const requestInputs: BatchGetItemCommandInput[] = [];
 
@@ -153,10 +150,12 @@ export class BatchGet extends Fetch {
       }
     }
 
-    return (returnRawResponse
-      ? aggregatedOutput
-      : aggregatedOutput.Responses?.[TableName]?.map((item) =>
-          unmarshall(item),
-        ) ?? []) as any;
+    return (
+      returnRawResponse
+        ? aggregatedOutput
+        : aggregatedOutput.Responses?.[TableName]?.map((item) =>
+            unmarshall(item),
+          ) ?? []
+    ) as any;
   };
 }

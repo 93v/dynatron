@@ -41,9 +41,11 @@ export class Delete extends Check {
           shortCircuit.launch(),
         ]);
 
-        return (returnRawResponse
-          ? output
-          : output.Attributes && unmarshall(output.Attributes)) as any;
+        return (
+          returnRawResponse
+            ? output
+            : output.Attributes && unmarshall(output.Attributes)
+        ) as any;
       } catch (error) {
         if (isRetryableError(error)) {
           throw error;

@@ -59,9 +59,9 @@ export class Get extends Fetch {
           shortCircuit.launch(),
         ]);
 
-        return (returnRawResponse
-          ? output
-          : output.Item && unmarshall(output.Item)) as any;
+        return (
+          returnRawResponse ? output : output.Item && unmarshall(output.Item)
+        ) as any;
       } catch (error) {
         if (isRetryableError(error)) {
           throw error;

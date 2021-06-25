@@ -15,7 +15,7 @@ export class Request {
   ) {}
 
   /**
-   * Determines the level of detail about provisioned throughput consumption that is returned in the response.
+   * Determines the level of detail about provisioned throughput consumption in the response.
    * @param returnConsumedCapacity "INDEXES" | "TOTAL" | "NONE"
    */
   returnConsumedCapacity = (

@@ -1,6 +1,6 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 
-import { and, eq, or } from "../../../src/condition-expression-builders";
+import { and, eq, or } from "../../../src";
 import { Fetch } from "../../../src/requesters/items/1-fetch";
 import { ListFetch } from "../../../src/requesters/items/1.3-list-fetch";
 import { BUILD } from "../../../src/utils/misc-utils";

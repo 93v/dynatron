@@ -15,7 +15,7 @@ export const RETRY_OPTIONS: Options = { minTimeout: 50, retries: 5 };
 
 const MILLISECONDS_IN_SECOND = 1000;
 export const SHORT_MAX_LATENCY = MILLISECONDS_IN_SECOND;
-export const LONG_MAX_LATENCY = 10 * SHORT_MAX_LATENCY;
+export const LONG_MAX_LATENCY = 10 * MILLISECONDS_IN_SECOND;
 
 export const assertNever = (object: never): never => {
   throw new Error(`Unexpected value: ${JSON.stringify(object)}`);
