@@ -108,7 +108,7 @@ returns the number of elements in them.
 size("name");
 ```
 
-`size` is used with other comparison functions, without them it does make much sense.
+`size` is used with other comparison functions, without them, it does make much sense.
 
 ```typescript
 // The string value stored in the "name" attribute has more than 20 characters
@@ -816,7 +816,7 @@ Dynatron.
 ### `Checker` class
 
 The `Checker` is a special non-executable class (doesn't have the `$` and
-the `$` functions) and can only used as an item in the input array for the
+the `$` functions) and can only be used as an item in the input array for the
 `transactWrite` function.
 
 ### TransactWrite
@@ -998,7 +998,7 @@ const userProfileHistory = await db("users-table")
   .$<(User & VersionControlled & TableEntry)[]>();
 ```
 
-Now how do you update the version or add a new one. This is a multi step process
+Now how do you update the version or add a new one. This is a multi-step process
 involving reading the latest version and writing new items with transactions.
 
 The most complete approach would be the following:

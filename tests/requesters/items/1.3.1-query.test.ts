@@ -1,7 +1,7 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import nock from "nock";
 
-import { beginsWith, equals } from "../../../src/condition-expression-builders";
+import { beginsWith, equals } from "../../../src";
 import { ListFetch } from "../../../src/requesters/items/1.3-list-fetch";
 import { Query } from "../../../src/requesters/items/1.3.1-query";
 import { BUILD } from "../../../src/utils/misc-utils";
