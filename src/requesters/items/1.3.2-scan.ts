@@ -197,8 +197,8 @@ export class Scan extends ListFetch {
     let initialLimit: number | undefined;
 
     // When providing the start it is very easy to request for a start key out
-    // of the specified segment. When the recursion is enabled which is the
-    // default behavior setting the start key will disabled segments
+    // of the specified segment. When the recursion is enabled, which is the
+    // default behavior setting the start key will disable segments
     if (requestInput.ExclusiveStartKey && !disableRecursion) {
       delete requestInput.TotalSegments;
       delete requestInput.Segment;

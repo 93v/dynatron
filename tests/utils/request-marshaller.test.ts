@@ -1,5 +1,5 @@
 import { marshall } from "@aws-sdk/util-dynamodb";
-import { and, eq } from "../../src/condition-expression-builders";
+import { and, eq } from "../../src";
 import { nextAlpha } from "../../src/utils/next-alpha-char-generator";
 import { marshallRequestParameters } from "../../src/utils/request-marshaller";
 

@@ -1,6 +1,6 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 
-import { eq } from "../../../src/condition-expression-builders";
+import { eq } from "../../../src";
 import { Amend } from "../../../src/requesters/items/2-amend";
 import { Check } from "../../../src/requesters/items/2.1-check";
 import { BUILD } from "../../../src/utils/misc-utils";
