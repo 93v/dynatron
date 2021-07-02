@@ -7,6 +7,7 @@ import {
   between,
   contains,
   Dynatron,
+  DynatronClient,
   eq,
   equals,
   exists,
@@ -32,7 +33,7 @@ import {
 describe("Check exports", () => {
   test("should export Dynatron", () => {
     expect(Dynatron).toBeDefined();
-    expect(new Dynatron("")).toBeInstanceOf(Dynatron);
+    expect(new Dynatron(new DynatronClient())).toBeInstanceOf(Dynatron);
   });
   test("should export and", () => {
     expect(and).toBeDefined();
