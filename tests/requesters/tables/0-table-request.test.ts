@@ -1,4 +1,4 @@
-import { TableRequest } from "../../../src/requesters/tables/0-table-request";
+import { TableRequest } from "../../../src/requesters/_core/table-request";
 
 describe("Table Request", () => {
   test("should throw on negative latency", () => {

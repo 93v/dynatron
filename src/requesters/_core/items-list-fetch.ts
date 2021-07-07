@@ -2,7 +2,7 @@ import { Condition } from "../../../types/conditions";
 import { isConditionEmptyDeep } from "../../condition-expression-builders";
 import { NativeValue } from "../../dynatron";
 import { BUILD } from "../../utils/misc-utils";
-import { Fetch } from "./1-fetch";
+import { Fetch } from "./items-fetch";
 
 export class ListFetch extends Fetch {
   #ExclusiveStartKey?: NativeValue;

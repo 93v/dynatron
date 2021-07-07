@@ -17,7 +17,7 @@ import {
   TAKING_TOO_LONG_EXCEPTION,
 } from "../../utils/misc-utils";
 import { marshallRequestParameters } from "../../utils/request-marshaller";
-import { ListFetch } from "./1.3-list-fetch";
+import { ListFetch } from "../_core/items-list-fetch";
 
 const MIN_TOTAL_SEGMENTS = 1;
 const MAX_TOTAL_SEGMENTS = 1_000_000;

@@ -2,8 +2,8 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import nock from "nock";
 
 import { Dynatron } from "../../../src";
-import { Request } from "../../../src/requesters/items/0-request";
-import { TransactGet } from "../../../src/requesters/items/3-transact-get";
+import { Request } from "../../../src/requesters/_core/items-request";
+import { TransactGet } from "../../../src/requesters/transact/transact-get";
 import { BUILD } from "../../../src/utils/misc-utils";
 
 afterEach(() => {

@@ -1,8 +1,6 @@
-export { DynamoDBClientConfig } from "@aws-sdk/client-dynamodb";
+export type { DynatronClientConfig } from "./dynatron";
 
-export { loadProfileCredentials } from "./utils/misc-utils";
-
-export { Dynatron } from "./dynatron";
+export { Dynatron, DynatronClient } from "./dynatron";
 
 export {
   and,

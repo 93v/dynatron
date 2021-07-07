@@ -1,6 +1,6 @@
 import {
-  DescribeTableCommand,
-  DescribeTableInput,
+  CreateTableCommand,
+  CreateTableInput,
   DynamoDBClient,
 } from "@aws-sdk/client-dynamodb";
 import AsyncRetry from "async-retry";
@@ -9,40 +9,40 @@ import {
   BUILD,
   createShortCircuit,
   isRetryableError,
+  LONG_MAX_LATENCY,
   RETRY_OPTIONS,
-  SHORT_MAX_LATENCY,
   TAKING_TOO_LONG_EXCEPTION,
 } from "../../utils/misc-utils";
-import { TableRequest } from "./0-table-request";
+import { TableRequest } from "../_core/table-request";
 
-export class TableDescribe extends TableRequest {
+export class TableCreate extends TableRequest {
   constructor(
     protected readonly client: DynamoDBClient,
-    protected tableName: string,
+    protected parameters: CreateTableInput,
   ) {
     super();
   }
 
-  [BUILD](): DescribeTableInput {
-    return { TableName: this.tableName };
+  [BUILD](): CreateTableInput {
+    return { ...this.parameters };
   }
 
   /**
-   * Execute the Describe Table request
+   * Execute the Create Table request
    */
   $ = async () => {
     const requestInput = this[BUILD]();
     return AsyncRetry(async (bail, attempt) => {
       const shortCircuit = createShortCircuit({
-        duration: attempt * SHORT_MAX_LATENCY * this.patienceRatio,
+        duration: attempt * LONG_MAX_LATENCY * this.patienceRatio,
         error: new Error(TAKING_TOO_LONG_EXCEPTION),
       });
       try {
         const output = await Promise.race([
-          this.client.send(new DescribeTableCommand(requestInput)),
+          this.client.send(new CreateTableCommand(requestInput)),
           shortCircuit.launch(),
         ]);
-        return output.Table;
+        return output.TableDescription;
       } catch (error) {
         if (isRetryableError(error)) {
           throw error;

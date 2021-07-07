@@ -16,7 +16,7 @@ import {
   TAKING_TOO_LONG_EXCEPTION,
 } from "../../utils/misc-utils";
 import { marshallRequestParameters } from "../../utils/request-marshaller";
-import { Check } from "./2.1-check";
+import { Check } from "../_core/items-check";
 
 export type UpdateAdd = {
   kind: "add";

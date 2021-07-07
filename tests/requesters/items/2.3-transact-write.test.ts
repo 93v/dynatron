@@ -2,8 +2,8 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 
 import { eq } from "../../../src";
 import { Dynatron } from "../../../src";
-import { Amend } from "../../../src/requesters/items/2-amend";
-import { TransactWrite } from "../../../src/requesters/items/2.3-transact-write";
+import { Amend } from "../../../src/requesters/_core/items-amend";
+import { TransactWrite } from "../../../src/requesters/transact/transact-write";
 import { BUILD } from "../../../src/utils/misc-utils";
 
 const initialSend = DynamoDBClient.prototype.send;

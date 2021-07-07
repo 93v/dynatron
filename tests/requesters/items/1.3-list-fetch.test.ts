@@ -1,8 +1,8 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 
 import { and, eq, or } from "../../../src";
-import { Fetch } from "../../../src/requesters/items/1-fetch";
-import { ListFetch } from "../../../src/requesters/items/1.3-list-fetch";
+import { Fetch } from "../../../src/requesters/_core/items-fetch";
+import { ListFetch } from "../../../src/requesters/_core/items-list-fetch";
 import { BUILD } from "../../../src/utils/misc-utils";
 
 describe("ListFetch", () => {

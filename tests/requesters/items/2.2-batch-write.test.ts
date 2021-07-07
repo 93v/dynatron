@@ -1,6 +1,6 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { Amend } from "../../../src/requesters/items/2-amend";
-import { BatchWrite } from "../../../src/requesters/items/2.2-batch-write";
+import { Amend } from "../../../src/requesters/_core/items-amend";
+import { BatchWrite } from "../../../src/requesters/batch/batch-write";
 import { BUILD } from "../../../src/utils/misc-utils";
 
 const initialSend = DynamoDBClient.prototype.send;

@@ -4,7 +4,7 @@ import { Condition } from "../../../types/conditions";
 import { isConditionEmptyDeep } from "../../condition-expression-builders";
 import { NativeValue } from "../../dynatron";
 import { BUILD, validateKey } from "../../utils/misc-utils";
-import { Amend } from "./2-amend";
+import { Amend } from "./items-amend";
 
 export class Check extends Amend {
   #ConditionExpressions?: Condition[];

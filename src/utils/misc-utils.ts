@@ -1,9 +1,4 @@
-import { Credentials } from "@aws-sdk/types";
 import { Options } from "async-retry";
-import { readFileSync } from "fs";
-import { parse } from "ini";
-import { homedir } from "os";
-import path from "path";
 
 import { NativeValue } from "../dynatron";
 
@@ -54,47 +49,6 @@ export const validateKey = (key: NativeValue) => {
   if (keysLength > 2) {
     throw new Error(`At most 2 properties must be present in the key`);
   }
-};
-
-const getHomeDirectory = (): string => {
-  const {
-    HOME,
-    USERPROFILE,
-    HOMEPATH,
-    HOMEDRIVE = `C:${path.sep}`,
-  } = process.env;
-
-  if (HOME) return HOME;
-  if (USERPROFILE) return USERPROFILE;
-  if (HOMEPATH) return `${HOMEDRIVE}${HOMEPATH}`;
-
-  return homedir();
-};
-
-export const loadProfileCredentials = (
-  profileName: string,
-): Credentials | undefined => {
-  const credentialsFile = readFileSync(
-    path.join(getHomeDirectory(), ".aws", "credentials"),
-    "utf-8",
-  );
-
-  const profile = parse(credentialsFile)[profileName];
-
-  if (profile == undefined) {
-    return;
-  }
-
-  return {
-    accessKeyId: profile.aws_access_key_id ?? "",
-    secretAccessKey: profile.aws_secret_access_key ?? "",
-    ...(profile.aws_session_token && {
-      sessionToken: profile.aws_session_token,
-    }),
-    ...(profile.aws_expiration && {
-      expiration: new Date(profile.aws_expiration),
-    }),
-  };
 };
 
 export const createShortCircuit = (parameters: {

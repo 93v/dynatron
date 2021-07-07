@@ -1,8 +1,8 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import nock from "nock";
 
-import { Check } from "../../../src/requesters/items/2.1-check";
-import { Put } from "../../../src/requesters/items/2.1.2-put";
+import { Check } from "../../../src/requesters/_core/items-check";
+import { Put } from "../../../src/requesters/items/items-put";
 import { BUILD } from "../../../src/utils/misc-utils";
 
 afterEach(() => {

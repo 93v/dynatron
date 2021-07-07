@@ -11,7 +11,7 @@ export class Request {
 
   constructor(
     protected readonly databaseClient: DynamoDBClient,
-    protected tableName: string,
+    protected tableName?: string,
   ) {}
 
   /**

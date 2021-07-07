@@ -1,22 +1,22 @@
 import { Dynatron } from "../src";
-import { Get } from "../src/requesters/items/1.1-get";
-import { BatchGet } from "../src/requesters/items/1.2-batch-get";
-import { Query } from "../src/requesters/items/1.3.1-query";
-import { Scan } from "../src/requesters/items/1.3.2-scan";
-import { Check } from "../src/requesters/items/2.1-check";
-import { Delete } from "../src/requesters/items/2.1.1-delete";
-import { Put } from "../src/requesters/items/2.1.2-put";
-import { Update } from "../src/requesters/items/2.1.3-update";
-import { BatchWrite } from "../src/requesters/items/2.2-batch-write";
-import { TransactWrite } from "../src/requesters/items/2.3-transact-write";
-import { TransactGet } from "../src/requesters/items/3-transact-get";
-import { TableCreate } from "../src/requesters/tables/table-create";
-import { TableDelete } from "../src/requesters/tables/table-delete";
-import { TableDescribe } from "../src/requesters/tables/table-describe";
-import { TableList } from "../src/requesters/tables/table-list";
-import { TableTTLDescribe } from "../src/requesters/tables/table-ttl-describe";
-import { TableTTLUpdate } from "../src/requesters/tables/table-ttl-update";
-import { TableUpdate } from "../src/requesters/tables/table-update";
+import { Get } from "../src/requesters/items/items-get";
+import { BatchGet } from "../src/requesters/batch/batch-get";
+import { Query } from "../src/requesters/items/items-query";
+import { Scan } from "../src/requesters/items/items-scan";
+import { Check } from "../src/requesters/_core/items-check";
+import { Delete } from "../src/requesters/items/items-delete";
+import { Put } from "../src/requesters/items/items-put";
+import { Update } from "../src/requesters/items/items-update";
+import { BatchWrite } from "../src/requesters/batch/batch-write";
+import { TransactWrite } from "../src/requesters/transact/transact-write";
+import { TransactGet } from "../src/requesters/transact/transact-get";
+import { TableCreate } from "../src/requesters/manage-tables/table-create";
+import { TableDelete } from "../src/requesters/manage-tables/table-delete";
+import { TableDescribe } from "../src/requesters/manage-tables/table-describe";
+import { TableList } from "../src/requesters/manage-tables/table-list";
+import { TableTTLDescribe } from "../src/requesters/manage-tables/table-ttl-describe";
+import { TableTTLUpdate } from "../src/requesters/manage-tables/table-ttl-update";
+import { TableUpdate } from "../src/requesters/manage-tables/table-update";
 
 describe("Database Client", () => {
   test("should return an instance of Dynatron", () => {

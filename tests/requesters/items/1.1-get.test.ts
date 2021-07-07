@@ -1,8 +1,8 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import nock from "nock";
 
-import { Fetch } from "../../../src/requesters/items/1-fetch";
-import { Get } from "../../../src/requesters/items/1.1-get";
+import { Fetch } from "../../../src/requesters/_core/items-fetch";
+import { Get } from "../../../src/requesters/items/items-get";
 import { BUILD } from "../../../src/utils/misc-utils";
 
 afterEach(() => {

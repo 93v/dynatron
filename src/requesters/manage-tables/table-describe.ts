@@ -1,7 +1,7 @@
 import {
+  DescribeTableCommand,
+  DescribeTableInput,
   DynamoDBClient,
-  UpdateTimeToLiveCommand,
-  UpdateTimeToLiveInput,
 } from "@aws-sdk/client-dynamodb";
 import AsyncRetry from "async-retry";
 
@@ -13,22 +13,22 @@ import {
   SHORT_MAX_LATENCY,
   TAKING_TOO_LONG_EXCEPTION,
 } from "../../utils/misc-utils";
-import { TableRequest } from "./0-table-request";
+import { TableRequest } from "../_core/table-request";
 
-export class TableTTLUpdate extends TableRequest {
+export class TableDescribe extends TableRequest {
   constructor(
     protected readonly client: DynamoDBClient,
-    protected parameters: UpdateTimeToLiveInput,
+    protected tableName: string,
   ) {
     super();
   }
 
-  [BUILD](): UpdateTimeToLiveInput {
-    return { ...this.parameters };
+  [BUILD](): DescribeTableInput {
+    return { TableName: this.tableName };
   }
 
   /**
-   * Execute the Update Table TTL request
+   * Execute the Describe Table request
    */
   $ = async () => {
     const requestInput = this[BUILD]();
@@ -39,10 +39,10 @@ export class TableTTLUpdate extends TableRequest {
       });
       try {
         const output = await Promise.race([
-          this.client.send(new UpdateTimeToLiveCommand(requestInput)),
+          this.client.send(new DescribeTableCommand(requestInput)),
           shortCircuit.launch(),
         ]);
-        return output.TimeToLiveSpecification;
+        return output.Table;
       } catch (error) {
         if (isRetryableError(error)) {
           throw error;

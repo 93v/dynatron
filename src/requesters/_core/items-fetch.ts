@@ -1,5 +1,5 @@
 import { BUILD } from "../../utils/misc-utils";
-import { Request } from "./0-request";
+import { Request } from "./items-request";
 
 export class Fetch extends Request {
   #ConsistentRead?: boolean;

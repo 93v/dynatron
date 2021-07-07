@@ -1,7 +1,8 @@
 import {
-  DeleteItemCommand,
-  DeleteItemCommandInput,
-  DeleteItemOutput,
+  DynamoDBClient,
+  PutItemCommand,
+  PutItemCommandInput,
+  PutItemOutput,
 } from "@aws-sdk/client-dynamodb";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
 import AsyncRetry from "async-retry";
@@ -16,17 +17,32 @@ import {
   TAKING_TOO_LONG_EXCEPTION,
 } from "../../utils/misc-utils";
 import { marshallRequestParameters } from "../../utils/request-marshaller";
-import { Check } from "./2.1-check";
+import { Check } from "../_core/items-check";
 
-export class Delete extends Check {
+export class Put extends Check {
+  constructor(
+    databaseClient: DynamoDBClient,
+    tableName: string,
+    private item: NativeValue,
+  ) {
+    super(databaseClient, tableName);
+  }
+
+  [BUILD]() {
+    return {
+      ...super[BUILD](),
+      _Item: this.item,
+    };
+  }
+
   /**
-   * Execute the Delete request
+   * Execute the Put request
    * @param returnRawResponse boolean
    */
   $ = async <T = NativeValue | undefined, U extends boolean = false>(
     returnRawResponse?: U,
-  ): Promise<U extends true ? DeleteItemOutput : T | undefined> => {
-    const requestInput = marshallRequestParameters<DeleteItemCommandInput>(
+  ): Promise<U extends true ? PutItemOutput : T | undefined> => {
+    const requestInput = marshallRequestParameters<PutItemCommandInput>(
       this[BUILD](),
     );
     return AsyncRetry(async (bail, attempt) => {
@@ -37,14 +53,14 @@ export class Delete extends Check {
       try {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { $metadata, ...output } = await Promise.race([
-          this.databaseClient.send(new DeleteItemCommand(requestInput)),
+          this.databaseClient.send(new PutItemCommand(requestInput)),
           shortCircuit.launch(),
         ]);
 
         return (
           returnRawResponse
             ? output
-            : output.Attributes && unmarshall(output.Attributes)
+            : requestInput.Item && unmarshall(requestInput.Item)
         ) as any;
       } catch (error) {
         if (isRetryableError(error)) {

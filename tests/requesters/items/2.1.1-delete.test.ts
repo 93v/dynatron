@@ -1,8 +1,8 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import nock from "nock";
 
-import { Check } from "../../../src/requesters/items/2.1-check";
-import { Delete } from "../../../src/requesters/items/2.1.1-delete";
+import { Check } from "../../../src/requesters/_core/items-check";
+import { Delete } from "../../../src/requesters/items/items-delete";
 import { BUILD } from "../../../src/utils/misc-utils";
 
 afterEach(() => {

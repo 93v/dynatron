@@ -18,7 +18,7 @@ import {
   validateKey,
 } from "../../utils/misc-utils";
 import { marshallRequestParameters } from "../../utils/request-marshaller";
-import { Fetch } from "./1-fetch";
+import { Fetch } from "../_core/items-fetch";
 
 export class Get extends Fetch {
   constructor(

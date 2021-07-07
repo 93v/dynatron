@@ -1,8 +1,8 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import nock from "nock";
 
-import { TableRequest } from "../../../src/requesters/tables/0-table-request";
-import { TableUpdate } from "../../../src/requesters/tables/table-update";
+import { TableRequest } from "../../../src/requesters/_core/table-request";
+import { TableUpdate } from "../../../src/requesters/manage-tables/table-update";
 
 afterEach(() => {
   // nock.abortPendingRequests();

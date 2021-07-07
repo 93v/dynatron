@@ -3,7 +3,7 @@ import { NativeAttributeValue } from "@aws-sdk/util-dynamodb";
 import { Condition } from "../../types/conditions";
 import { and } from "../condition-expression-builders";
 import { NativeValue } from "../dynatron";
-import { UpdateType } from "../requesters/items/2.1.3-update";
+import { UpdateType } from "../requesters/items/items-update";
 import { assertNever } from "./misc-utils";
 import { nextAlpha } from "./next-alpha-char-generator";
 

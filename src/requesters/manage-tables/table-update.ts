@@ -1,7 +1,7 @@
 import {
-  CreateTableCommand,
-  CreateTableInput,
   DynamoDBClient,
+  UpdateTableCommand,
+  UpdateTableInput,
 } from "@aws-sdk/client-dynamodb";
 import AsyncRetry from "async-retry";
 
@@ -13,22 +13,22 @@ import {
   RETRY_OPTIONS,
   TAKING_TOO_LONG_EXCEPTION,
 } from "../../utils/misc-utils";
-import { TableRequest } from "./0-table-request";
+import { TableRequest } from "../_core/table-request";
 
-export class TableCreate extends TableRequest {
+export class TableUpdate extends TableRequest {
   constructor(
     protected readonly client: DynamoDBClient,
-    protected parameters: CreateTableInput,
+    protected parameters: UpdateTableInput,
   ) {
     super();
   }
 
-  [BUILD](): CreateTableInput {
+  [BUILD](): UpdateTableInput {
     return { ...this.parameters };
   }
 
   /**
-   * Execute the Create Table request
+   * Execute the Update Table request
    */
   $ = async () => {
     const requestInput = this[BUILD]();
@@ -39,7 +39,7 @@ export class TableCreate extends TableRequest {
       });
       try {
         const output = await Promise.race([
-          this.client.send(new CreateTableCommand(requestInput)),
+          this.client.send(new UpdateTableCommand(requestInput)),
           shortCircuit.launch(),
         ]);
         return output.TableDescription;

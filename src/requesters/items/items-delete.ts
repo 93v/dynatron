@@ -1,8 +1,7 @@
 import {
-  DynamoDBClient,
-  PutItemCommand,
-  PutItemCommandInput,
-  PutItemOutput,
+  DeleteItemCommand,
+  DeleteItemCommandInput,
+  DeleteItemOutput,
 } from "@aws-sdk/client-dynamodb";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
 import AsyncRetry from "async-retry";
@@ -17,32 +16,17 @@ import {
   TAKING_TOO_LONG_EXCEPTION,
 } from "../../utils/misc-utils";
 import { marshallRequestParameters } from "../../utils/request-marshaller";
-import { Check } from "./2.1-check";
+import { Check } from "../_core/items-check";
 
-export class Put extends Check {
-  constructor(
-    databaseClient: DynamoDBClient,
-    tableName: string,
-    private item: NativeValue,
-  ) {
-    super(databaseClient, tableName);
-  }
-
-  [BUILD]() {
-    return {
-      ...super[BUILD](),
-      _Item: this.item,
-    };
-  }
-
+export class Delete extends Check {
   /**
-   * Execute the Put request
+   * Execute the Delete request
    * @param returnRawResponse boolean
    */
   $ = async <T = NativeValue | undefined, U extends boolean = false>(
     returnRawResponse?: U,
-  ): Promise<U extends true ? PutItemOutput : T | undefined> => {
-    const requestInput = marshallRequestParameters<PutItemCommandInput>(
+  ): Promise<U extends true ? DeleteItemOutput : T | undefined> => {
+    const requestInput = marshallRequestParameters<DeleteItemCommandInput>(
       this[BUILD](),
     );
     return AsyncRetry(async (bail, attempt) => {
@@ -53,14 +37,14 @@ export class Put extends Check {
       try {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { $metadata, ...output } = await Promise.race([
-          this.databaseClient.send(new PutItemCommand(requestInput)),
+          this.databaseClient.send(new DeleteItemCommand(requestInput)),
           shortCircuit.launch(),
         ]);
 
         return (
           returnRawResponse
             ? output
-            : requestInput.Item && unmarshall(requestInput.Item)
+            : output.Attributes && unmarshall(output.Attributes)
         ) as any;
       } catch (error) {
         if (isRetryableError(error)) {

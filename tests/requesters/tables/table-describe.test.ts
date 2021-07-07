@@ -1,8 +1,8 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import nock from "nock";
 
-import { TableRequest } from "../../../src/requesters/tables/0-table-request";
-import { TableDescribe } from "../../../src/requesters/tables/table-describe";
+import { TableRequest } from "../../../src/requesters/_core/table-request";
+import { TableDescribe } from "../../../src/requesters/manage-tables/table-describe";
 import { BUILD } from "../../../src/utils/misc-utils";
 
 afterEach(() => {

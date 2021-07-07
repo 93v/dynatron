@@ -1,6 +1,6 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { Fetch } from "../../../src/requesters/items/1-fetch";
-import { BatchGet } from "../../../src/requesters/items/1.2-batch-get";
+import { Fetch } from "../../../src/requesters/_core/items-fetch";
+import { BatchGet } from "../../../src/requesters/batch/batch-get";
 import { BUILD } from "../../../src/utils/misc-utils";
 
 const initialSend = DynamoDBClient.prototype.send;

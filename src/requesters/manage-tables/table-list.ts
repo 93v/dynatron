@@ -14,7 +14,7 @@ import {
   RETRY_OPTIONS,
   TAKING_TOO_LONG_EXCEPTION,
 } from "../../utils/misc-utils";
-import { TableRequest } from "./0-table-request";
+import { TableRequest } from "../_core/table-request";
 
 export class TableList extends TableRequest {
   #Limit?: number;

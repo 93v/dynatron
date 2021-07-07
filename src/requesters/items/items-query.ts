@@ -19,7 +19,7 @@ import {
   TAKING_TOO_LONG_EXCEPTION,
 } from "../../utils/misc-utils";
 import { marshallRequestParameters } from "../../utils/request-marshaller";
-import { ListFetch } from "./1.3-list-fetch";
+import { ListFetch } from "../_core/items-list-fetch";
 
 export class Query extends ListFetch {
   #ScanIndexForward?: boolean;

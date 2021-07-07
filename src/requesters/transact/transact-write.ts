@@ -14,21 +14,20 @@ import {
   TAKING_TOO_LONG_EXCEPTION,
 } from "../../utils/misc-utils";
 import { marshallRequestParameters } from "../../utils/request-marshaller";
-import { Amend } from "./2-amend";
-import { Check } from "./2.1-check";
-import { Delete } from "./2.1.1-delete";
-import { Put } from "./2.1.2-put";
-import { Update } from "./2.1.3-update";
+import { Amend } from "../_core/items-amend";
+import { Check } from "../_core/items-check";
+import { Delete } from "../items/items-delete";
+import { Put } from "../items/items-put";
+import { Update } from "../items/items-update";
 
 export class TransactWrite extends Amend {
   #ClientRequestToken?: string;
 
   constructor(
     databaseClient: DynamoDBClient,
-    tableName: string,
     private items: (Check | Put | Delete | Update)[],
   ) {
-    super(databaseClient, tableName);
+    super(databaseClient);
   }
 
   /**
@@ -109,8 +108,10 @@ export class TransactWrite extends Amend {
                 ...(UpdateExpression && { UpdateExpression }),
               },
             };
-          default:
+          case "Check":
             return { ConditionCheck: { Key, ...baseRequestInput } };
+          default:
+            return;
         }
       }),
     };

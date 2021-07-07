@@ -1,6 +1,6 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 
-import { Request } from "../../../src/requesters/items/0-request";
+import { Request } from "../../../src/requesters/_core/items-request";
 import { BUILD } from "../../../src/utils/misc-utils";
 
 describe("Request", () => {
