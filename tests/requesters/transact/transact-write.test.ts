@@ -1,6 +1,6 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 
-import { eq } from "../../../src";
+import { DynatronClient, eq } from "../../../src";
 import { Dynatron } from "../../../src";
 import { Amend } from "../../../src/requesters/_core/items-amend";
 import { TransactWrite } from "../../../src/requesters/transact/transact-write";
@@ -8,10 +8,14 @@ import { BUILD } from "../../../src/utils/misc-utils";
 
 const initialSend = DynamoDBClient.prototype.send;
 
-let databaseClient: DynamoDBClient;
+let databaseClient: DynatronClient;
+let database: Dynatron;
 
 beforeAll(() => {
-  databaseClient = new DynamoDBClient({ region: "local" });
+  databaseClient = new DynatronClient(
+    Dynatron.optimizedClientConfigs({ region: "local" }),
+  );
+  database = new Dynatron(databaseClient);
 });
 
 afterAll(() => {
@@ -20,16 +24,16 @@ afterAll(() => {
 
 describe("Item TransactWrite", () => {
   test("should return an instance of Request", () => {
-    const instance = new TransactWrite(databaseClient, "tableName", []);
+    const instance = new TransactWrite(databaseClient, []);
     expect(instance).toBeInstanceOf(Amend);
   });
 
   test("should return an instance of TransactWrite", () => {
-    const instance = new TransactWrite(databaseClient, "", [
-      new Dynatron("tableName1").put({ id: "uuid1" }).returnValues(),
-      new Dynatron("tableName2").check({ id: "uuid2" }).if(eq("value", 7)),
-      new Dynatron("tableName3").delete({ id: "uuid3" }),
-      new Dynatron("tableName4").update({ id: "uuid4" }).assign({ value: 8 }),
+    const instance = new TransactWrite(databaseClient, [
+      database.Items("tableName1").put({ id: "uuid1" }).returnValues(),
+      database.Items("tableName2").check({ id: "uuid2" }).if(eq("value", 7)),
+      database.Items("tableName3").delete({ id: "uuid3" }),
+      database.Items("tableName4").update({ id: "uuid4" }).assign({ value: 8 }),
     ]);
     expect(
       instance
@@ -38,7 +42,7 @@ describe("Item TransactWrite", () => {
         .returnItemCollectionMetrics(),
     ).toBeInstanceOf(TransactWrite);
     expect(instance[BUILD]()).toEqual({
-      TableName: "",
+      TableName: undefined,
       ClientRequestToken: "token",
       ReturnConsumedCapacity: "TOTAL",
       ReturnItemCollectionMetrics: "SIZE",
@@ -50,11 +54,11 @@ describe("Item TransactWrite", () => {
       return {};
     };
 
-    const instance = new TransactWrite(databaseClient, "", [
-      new Dynatron("tableName1").put({ id: "uuid1" }).returnValues(),
-      new Dynatron("tableName2").check({ id: "uuid2" }).if(eq("value", 7)),
-      new Dynatron("tableName3").delete({ id: "uuid3" }),
-      new Dynatron("tableName4").update({ id: "uuid4" }).assign({ value: 8 }),
+    const instance = new TransactWrite(databaseClient, [
+      database.Items("tableName1").put({ id: "uuid1" }).returnValues(),
+      database.Items("tableName2").check({ id: "uuid2" }).if(eq("value", 7)),
+      database.Items("tableName3").delete({ id: "uuid3" }),
+      database.Items("tableName4").update({ id: "uuid4" }).assign({ value: 8 }),
     ]);
     expect(
       instance
@@ -70,7 +74,7 @@ describe("Item TransactWrite", () => {
       throw new Error("ECONN");
     };
 
-    const instance = new TransactWrite(databaseClient, "tableName", []);
+    const instance = new TransactWrite(databaseClient, []);
     try {
       await instance.$();
     } catch (error) {
@@ -83,7 +87,7 @@ describe("Item TransactWrite", () => {
       throw new Error("Unknown");
     };
 
-    const instance = new TransactWrite(databaseClient, "tableName", []);
+    const instance = new TransactWrite(databaseClient, []);
 
     try {
       await instance.$();

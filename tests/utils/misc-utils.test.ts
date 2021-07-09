@@ -2,7 +2,6 @@ import {
   assertNever,
   createShortCircuit,
   isRetryableError,
-  loadProfileCredentials,
   TAKING_TOO_LONG_EXCEPTION,
   validateKey,
 } from "../../src/utils/misc-utils";
@@ -90,13 +89,6 @@ describe("Is Retryable Error", () => {
   ];
   test.each(errors)("given %1 returns true", (_, error) => {
     expect(isRetryableError(error)).toBe(true);
-  });
-});
-
-describe("Load Profile Credentials", () => {
-  test("should load", async () => {
-    const profile = loadProfileCredentials("MISSING PROFILE");
-    expect(profile).toBeUndefined();
   });
 });
 

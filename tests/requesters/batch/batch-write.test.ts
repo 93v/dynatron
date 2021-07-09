@@ -2,13 +2,18 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { Amend } from "../../../src/requesters/_core/items-amend";
 import { BatchWrite } from "../../../src/requesters/batch/batch-write";
 import { BUILD } from "../../../src/utils/misc-utils";
+import { DynatronClient, Dynatron } from "../../../src";
 
 const initialSend = DynamoDBClient.prototype.send;
 
-let databaseClient: DynamoDBClient;
+let databaseClient: DynatronClient;
+let database: Dynatron;
 
 beforeAll(() => {
-  databaseClient = new DynamoDBClient({ region: "local" });
+  databaseClient = new DynatronClient(
+    Dynatron.optimizedClientConfigs({ region: "local" }),
+  );
+  database = new Dynatron(databaseClient);
 });
 
 afterAll(() => {
@@ -17,16 +22,15 @@ afterAll(() => {
 
 describe("Item BatchWrite", () => {
   test("should return an instance of Request", () => {
-    const instance = new BatchWrite(databaseClient, "tableName", []);
+    const instance = new BatchWrite(databaseClient, []);
     expect(instance).toBeInstanceOf(Amend);
   });
 
   test("should return an instance of BatchWrite", () => {
-    const instance = new BatchWrite(databaseClient, "tableName", []);
+    const instance = new BatchWrite(databaseClient, []);
 
     expect(instance[BUILD]()).toEqual({
-      TableName: "tableName",
-      _Keys: [],
+      TableName: undefined,
     });
   });
 
@@ -35,12 +39,12 @@ describe("Item BatchWrite", () => {
       return {};
     };
 
-    const instance = new BatchWrite(databaseClient, "tableName", [
-      { id: "uuid1" },
-      { id: "uuid2" },
-      { id: "uuid3" },
-      { id: "uuid4" },
-      { id: "uuid5" },
+    const instance = new BatchWrite(databaseClient, [
+      database.Items("tableName").put({ id: "uuid1" }),
+      database.Items("tableName").put({ id: "uuid2" }),
+      database.Items("tableName").put({ id: "uuid3" }),
+      database.Items("tableName").put({ id: "uuid4" }),
+      database.Items("tableName").put({ id: "uuid5" }),
     ]);
 
     expect(
@@ -52,11 +56,10 @@ describe("Item BatchWrite", () => {
   });
 
   test("should return an instance of BatchWrite", () => {
-    const instance = new BatchWrite(databaseClient, "tableName", undefined, []);
+    const instance = new BatchWrite(databaseClient, []);
 
     expect(instance[BUILD]()).toEqual({
-      TableName: "tableName",
-      _Items: [],
+      TableName: undefined,
     });
   });
 
@@ -65,23 +68,25 @@ describe("Item BatchWrite", () => {
       return {};
     };
 
-    const instance = new BatchWrite(databaseClient, "tableName", undefined, [
-      { id: "uuid1" },
-      { id: "uuid2" },
-      { id: "uuid3" },
-      { id: "uuid4" },
-      { id: "uuid5" },
+    const instance = new BatchWrite(databaseClient, [
+      database.Items("tableName").put({ id: "uuid1" }),
+      database.Items("tableName").put({ id: "uuid2" }),
+      database.Items("tableName").put({ id: "uuid3" }),
+      database.Items("tableName").put({ id: "uuid4" }),
+      database.Items("tableName").put({ id: "uuid5" }),
     ]);
 
     expect(
       await instance.returnConsumedCapacity().returnItemCollectionMetrics().$(),
-    ).toEqual([
-      { id: "uuid1" },
-      { id: "uuid2" },
-      { id: "uuid3" },
-      { id: "uuid4" },
-      { id: "uuid5" },
-    ]);
+    ).toEqual({
+      tableName: [
+        { id: "uuid1" },
+        { id: "uuid2" },
+        { id: "uuid3" },
+        { id: "uuid4" },
+        { id: "uuid5" },
+      ],
+    });
   });
 
   test("should return an instance of BatchWrite", async () => {
@@ -89,7 +94,7 @@ describe("Item BatchWrite", () => {
       id: "uuid" + index,
     }));
 
-    let page = 1;
+    let page = 0;
     DynamoDBClient.prototype.send = async () => {
       page -= 1;
       return page >= 0
@@ -105,12 +110,17 @@ describe("Item BatchWrite", () => {
             Responses: {
               tableName: [{ id: { S: "uuid1" } }, { id: { S: "uuid2" } }],
             },
-            ConsumedCapacity: [{ CapacityUnits: 2 }],
+            ConsumedCapacity: [{ CapacityUnits: 4 }],
           };
     };
 
-    const instance = new BatchWrite(databaseClient, "tableName", items);
-    expect(await instance.returnConsumedCapacity().$()).toBeUndefined();
+    const instance = new BatchWrite(
+      databaseClient,
+      items.map((k) => database.Items("tableName").put(k)),
+    );
+    expect(await instance.returnConsumedCapacity().$()).toEqual({
+      tableName: items,
+    });
   });
 
   test("should return an instance of BatchWrite", async () => {
@@ -144,14 +154,17 @@ describe("Item BatchWrite", () => {
           };
     };
 
-    const instance = new BatchWrite(databaseClient, "tableName", items);
+    const instance = new BatchWrite(
+      databaseClient,
+      items.map((k) => database.Items("tableName").put(k)),
+    );
     expect(
       await instance
         .returnConsumedCapacity()
         .returnItemCollectionMetrics()
         .$(true),
     ).toEqual({
-      ConsumedCapacity: [{ CapacityUnits: 4 }],
+      ConsumedCapacity: [{ CapacityUnits: 2 }, { CapacityUnits: 2 }],
       ItemCollectionMetrics: { tableName: [] },
     });
   });
@@ -187,15 +200,18 @@ describe("Item BatchWrite", () => {
           };
     };
 
-    const instance = new BatchWrite(databaseClient, "tableName", items);
+    const instance = new BatchWrite(
+      databaseClient,
+      items.map((k) => database.Items("tableName").put(k)),
+    );
     expect(
       await instance
         .returnConsumedCapacity()
         .returnItemCollectionMetrics()
         .$(true),
     ).toEqual({
-      ConsumedCapacity: [{ CapacityUnits: 4 }],
-      ItemCollectionMetrics: { tableName: [], tableName2: [] },
+      ConsumedCapacity: [{ CapacityUnits: 2 }, { CapacityUnits: 2 }],
+      ItemCollectionMetrics: { tableName2: [] },
     });
   });
 
@@ -231,15 +247,22 @@ describe("Item BatchWrite", () => {
           };
     };
 
-    const instance = new BatchWrite(databaseClient, "tableName", items);
+    const instance = new BatchWrite(
+      databaseClient,
+      items.map((k) => database.Items("tableName").put(k)),
+    );
     expect(
       await instance
         .returnConsumedCapacity()
         .returnItemCollectionMetrics()
         .$(true),
     ).toEqual({
-      ConsumedCapacity: [{ CapacityUnits: 6 }],
-      ItemCollectionMetrics: { tableName: [], tableName2: [] },
+      ConsumedCapacity: [
+        { CapacityUnits: 2 },
+        { CapacityUnits: 2 },
+        { CapacityUnits: 2 },
+      ],
+      ItemCollectionMetrics: { tableName2: [] },
     });
   });
 
@@ -275,7 +298,10 @@ describe("Item BatchWrite", () => {
           };
     };
 
-    const instance = new BatchWrite(databaseClient, "tableName", items);
+    const instance = new BatchWrite(
+      databaseClient,
+      items.map((k) => database.Items("tableName").put(k)),
+    );
     expect(
       await instance
         .returnConsumedCapacity()
@@ -283,7 +309,7 @@ describe("Item BatchWrite", () => {
         .$(true),
     ).toEqual({
       ConsumedCapacity: [],
-      ItemCollectionMetrics: { tableName: [], tableName2: [] },
+      ItemCollectionMetrics: { tableName2: [] },
     });
   });
 
@@ -319,15 +345,18 @@ describe("Item BatchWrite", () => {
           };
     };
 
-    const instance = new BatchWrite(databaseClient, "tableName", items);
+    const instance = new BatchWrite(
+      databaseClient,
+      items.map((k) => database.Items("tableName").put(k)),
+    );
     expect(
       await instance
         .returnConsumedCapacity()
         .returnItemCollectionMetrics()
         .$(true),
     ).toEqual({
-      ConsumedCapacity: [],
-      ItemCollectionMetrics: { tableName: [], tableName2: [] },
+      ConsumedCapacity: [{ CapacityUnits: 2 }, { CapacityUnits: 2 }],
+      ItemCollectionMetrics: { tableName2: [] },
     });
   });
 
@@ -359,14 +388,17 @@ describe("Item BatchWrite", () => {
           };
     };
 
-    const instance = new BatchWrite(databaseClient, "tableName", items);
+    const instance = new BatchWrite(
+      databaseClient,
+      items.map((k) => database.Items("tableName").put(k)),
+    );
     expect(
       await instance
         .returnConsumedCapacity()
         .returnItemCollectionMetrics()
         .$(true),
     ).toEqual({
-      ConsumedCapacity: [{ CapacityUnits: 4 }],
+      ConsumedCapacity: [{ CapacityUnits: 2 }, { CapacityUnits: 2 }],
       ItemCollectionMetrics: { tableName: [] },
     });
   });
@@ -400,7 +432,10 @@ describe("Item BatchWrite", () => {
           };
     };
 
-    const instance = new BatchWrite(databaseClient, "tableName", items);
+    const instance = new BatchWrite(
+      databaseClient,
+      items.map((k) => database.Items("tableName").put(k)),
+    );
     expect(
       await instance
         .returnConsumedCapacity()
@@ -436,7 +471,10 @@ describe("Item BatchWrite", () => {
           };
     };
 
-    const instance = new BatchWrite(databaseClient, "tableName", items);
+    const instance = new BatchWrite(
+      databaseClient,
+      items.map((k) => database.Items("tableName").put(k)),
+    );
     expect(await instance.returnConsumedCapacity().$(true)).toEqual({});
   });
 
@@ -449,7 +487,10 @@ describe("Item BatchWrite", () => {
       throw new Error("ECONN");
     };
 
-    const instance = new BatchWrite(databaseClient, "tableName", items);
+    const instance = new BatchWrite(
+      databaseClient,
+      items.map((k) => database.Items("tableName").put(k)),
+    );
     try {
       await instance.$();
     } catch (error) {
@@ -466,7 +507,10 @@ describe("Item BatchWrite", () => {
       throw new Error("Unknown");
     };
 
-    const instance = new BatchWrite(databaseClient, "tableName", items);
+    const instance = new BatchWrite(
+      databaseClient,
+      items.map((k) => database.Items("tableName").put(k)),
+    );
     try {
       await instance.$();
     } catch (error) {
@@ -479,7 +523,7 @@ describe("Item BatchWrite", () => {
       throw new Error("ECONN");
     };
 
-    const instance = new BatchWrite(databaseClient, "tableName", []);
+    const instance = new BatchWrite(databaseClient, []);
     try {
       await instance.$();
     } catch (error) {
@@ -492,7 +536,7 @@ describe("Item BatchWrite", () => {
       throw new Error("Unknown");
     };
 
-    const instance = new BatchWrite(databaseClient, "tableName", []);
+    const instance = new BatchWrite(databaseClient, []);
 
     try {
       await instance.$();

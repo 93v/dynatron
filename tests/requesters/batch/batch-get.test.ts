@@ -2,13 +2,18 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { Fetch } from "../../../src/requesters/_core/items-fetch";
 import { BatchGet } from "../../../src/requesters/batch/batch-get";
 import { BUILD } from "../../../src/utils/misc-utils";
+import { Dynatron, DynatronClient } from "../../../src";
 
 const initialSend = DynamoDBClient.prototype.send;
 
-let databaseClient: DynamoDBClient;
+let databaseClient: DynatronClient;
+let database: Dynatron;
 
 beforeAll(() => {
-  databaseClient = new DynamoDBClient({ region: "local" });
+  databaseClient = new DynatronClient(
+    Dynatron.optimizedClientConfigs({ region: "local" }),
+  );
+  database = new Dynatron(databaseClient);
 });
 
 afterAll(() => {
@@ -17,21 +22,20 @@ afterAll(() => {
 
 describe("Item BatchGet", () => {
   test("should return an instance of Fetch", () => {
-    const instance = new BatchGet(databaseClient, "tableName", [
-      { id: "uuid1" },
-      { id: "uuid2" },
+    const instance = new BatchGet(databaseClient, [
+      database.Items("tableName").get({ id: "uuid1" }),
+      database.Items("tableName").get({ id: "uuid2" }),
     ]);
     expect(instance).toBeInstanceOf(Fetch);
   });
 
   test("should return an instance of BatchGet", () => {
-    const instance = new BatchGet(databaseClient, "tableName", [
-      { id: "uuid1" },
-      { id: "uuid2" },
+    const instance = new BatchGet(databaseClient, [
+      database.Items("tableName").get({ id: "uuid1" }),
+      database.Items("tableName").get({ id: "uuid2" }),
     ]);
     expect(instance[BUILD]()).toEqual({
-      TableName: "tableName",
-      _Keys: [{ id: "uuid1" }, { id: "uuid2" }],
+      TableName: undefined,
     });
   });
 
@@ -40,11 +44,11 @@ describe("Item BatchGet", () => {
       return {};
     };
 
-    const instance = new BatchGet(databaseClient, "tableName", [
-      { id: "uuid1" },
-      { id: "uuid2" },
+    const instance = new BatchGet(databaseClient, [
+      database.Items("tableName").get({ id: "uuid1" }),
+      database.Items("tableName").get({ id: "uuid2" }),
     ]);
-    expect(await instance.$()).toEqual([]);
+    expect(await instance.$()).toEqual({});
   });
 
   test("should return an instance of BatchGet", async () => {
@@ -56,14 +60,13 @@ describe("Item BatchGet", () => {
       };
     };
 
-    const instance = new BatchGet(databaseClient, "tableName", [
-      { id: "uuid1" },
-      { id: "uuid2" },
+    const instance = new BatchGet(databaseClient, [
+      database.Items("tableName").get({ id: "uuid1" }),
+      database.Items("tableName").get({ id: "uuid2" }),
     ]);
-    expect(await instance.returnConsumedCapacity().$()).toEqual([
-      { id: "uuid1" },
-      { id: "uuid2" },
-    ]);
+    expect(await instance.returnConsumedCapacity().$()).toEqual({
+      tableName: [{ id: "uuid1" }, { id: "uuid2" }],
+    });
   });
 
   test("should return an instance of BatchGet", async () => {
@@ -73,11 +76,11 @@ describe("Item BatchGet", () => {
       };
     };
 
-    const instance = new BatchGet(databaseClient, "tableName", [
-      { id: "uuid1" },
-      { id: "uuid2" },
+    const instance = new BatchGet(databaseClient, [
+      database.Items("tableName").get({ id: "uuid1" }),
+      database.Items("tableName").get({ id: "uuid2" }),
     ]);
-    expect(await instance.returnConsumedCapacity().$()).toEqual([]);
+    expect(await instance.returnConsumedCapacity().$()).toEqual({});
   });
 
   test("should return an instance of BatchGet", async () => {
@@ -96,8 +99,11 @@ describe("Item BatchGet", () => {
       };
     };
 
-    const instance = new BatchGet(databaseClient, "tableName", keys);
-    expect(await instance.returnConsumedCapacity().$()).toEqual([]);
+    const instance = new BatchGet(
+      databaseClient,
+      keys.map((k) => database.Items("tableName").get(k)),
+    );
+    expect(await instance.returnConsumedCapacity().$()).toEqual({});
   });
 
   test("should return an instance of BatchGet", async () => {
@@ -112,8 +118,11 @@ describe("Item BatchGet", () => {
       };
     };
 
-    const instance = new BatchGet(databaseClient, "tableName", keys);
-    expect(await instance.returnConsumedCapacity().$()).toEqual([]);
+    const instance = new BatchGet(
+      databaseClient,
+      keys.map((k) => database.Items("tableName").get(k)),
+    );
+    expect(await instance.returnConsumedCapacity().$()).toEqual({});
   });
 
   test("should return an instance of BatchGet", async () => {
@@ -128,8 +137,11 @@ describe("Item BatchGet", () => {
       };
     };
 
-    const instance = new BatchGet(databaseClient, "tableName", keys);
-    expect(await instance.returnConsumedCapacity().$()).toEqual([]);
+    const instance = new BatchGet(
+      databaseClient,
+      keys.map((k) => database.Items("tableName").get(k)),
+    );
+    expect(await instance.returnConsumedCapacity().$()).toEqual({});
   });
 
   test("should return an instance of BatchGet", async () => {
@@ -141,8 +153,11 @@ describe("Item BatchGet", () => {
       return {};
     };
 
-    const instance = new BatchGet(databaseClient, "tableName", keys);
-    expect(await instance.returnConsumedCapacity().$()).toEqual([]);
+    const instance = new BatchGet(
+      databaseClient,
+      keys.map((k) => database.Items("tableName").get(k)),
+    );
+    expect(await instance.returnConsumedCapacity().$()).toEqual({});
   });
 
   test("should return an instance of BatchGet", async () => {
@@ -154,8 +169,8 @@ describe("Item BatchGet", () => {
       };
     };
 
-    const instance = new BatchGet(databaseClient, "tableName", []);
-    expect(await instance.returnConsumedCapacity().$()).toEqual([]);
+    const instance = new BatchGet(databaseClient, []);
+    expect(await instance.returnConsumedCapacity().$()).toEqual({});
   });
 
   test("should return an instance of BatchGet", async () => {
@@ -174,8 +189,11 @@ describe("Item BatchGet", () => {
         : { ConsumedCapacity: [{ CapacityUnits: 1 }] };
     };
 
-    const instance = new BatchGet(databaseClient, "tableName", keys);
-    expect(await instance.returnConsumedCapacity().$()).toEqual([]);
+    const instance = new BatchGet(
+      databaseClient,
+      keys.map((k) => database.Items("tableName").get(k)),
+    );
+    expect(await instance.returnConsumedCapacity().$()).toEqual({});
   });
 
   test("should return an instance of BatchGet", async () => {
@@ -196,8 +214,11 @@ describe("Item BatchGet", () => {
         : { ConsumedCapacity: [{ CapacityUnits: 1 }] };
     };
 
-    const instance = new BatchGet(databaseClient, "tableName", keys);
-    expect(await instance.returnConsumedCapacity().$()).toEqual([]);
+    const instance = new BatchGet(
+      databaseClient,
+      keys.map((k) => database.Items("tableName").get(k)),
+    );
+    expect(await instance.returnConsumedCapacity().$()).toEqual({});
   });
 
   test("should return an instance of BatchGet", async () => {
@@ -226,15 +247,20 @@ describe("Item BatchGet", () => {
           };
     };
 
-    const instance = new BatchGet(databaseClient, "tableName", keys);
-    expect(await instance.returnConsumedCapacity().$()).toEqual([
-      { id: "uuid1" },
-      { id: "uuid2" },
-      { id: "uuid1" },
-      { id: "uuid2" },
-      { id: "uuid1" },
-      { id: "uuid2" },
-    ]);
+    const instance = new BatchGet(
+      databaseClient,
+      keys.map((k) => database.Items("tableName").get(k)),
+    );
+    expect(await instance.returnConsumedCapacity().$()).toEqual({
+      tableName: [
+        { id: "uuid1" },
+        { id: "uuid2" },
+        { id: "uuid1" },
+        { id: "uuid2" },
+        { id: "uuid1" },
+        { id: "uuid2" },
+      ],
+    });
   });
 
   test("should return an instance of BatchGet", async () => {
@@ -263,15 +289,20 @@ describe("Item BatchGet", () => {
           };
     };
 
-    const instance = new BatchGet(databaseClient, "tableName", keys);
-    expect(await instance.returnConsumedCapacity().$()).toEqual([
-      { id: "uuid1" },
-      { id: "uuid2" },
-      { id: "uuid1" },
-      { id: "uuid2" },
-      { id: "uuid1" },
-      { id: "uuid2" },
-    ]);
+    const instance = new BatchGet(
+      databaseClient,
+      keys.map((k) => database.Items("tableName").get(k)),
+    );
+    expect(await instance.returnConsumedCapacity().$()).toEqual({
+      tableName: [
+        { id: "uuid1" },
+        { id: "uuid2" },
+        { id: "uuid1" },
+        { id: "uuid2" },
+        { id: "uuid1" },
+        { id: "uuid2" },
+      ],
+    });
   });
 
   test("should return an instance of BatchGet", async () => {
@@ -299,15 +330,20 @@ describe("Item BatchGet", () => {
           };
     };
 
-    const instance = new BatchGet(databaseClient, "tableName", keys);
-    expect(await instance.returnConsumedCapacity().$()).toEqual([
-      { id: "uuid1" },
-      { id: "uuid2" },
-      { id: "uuid1" },
-      { id: "uuid2" },
-      { id: "uuid1" },
-      { id: "uuid2" },
-    ]);
+    const instance = new BatchGet(
+      databaseClient,
+      keys.map((k) => database.Items("tableName").get(k)),
+    );
+    expect(await instance.returnConsumedCapacity().$()).toEqual({
+      tableName: [
+        { id: "uuid1" },
+        { id: "uuid2" },
+        { id: "uuid1" },
+        { id: "uuid2" },
+        { id: "uuid1" },
+        { id: "uuid2" },
+      ],
+    });
   });
 
   test("should return an instance of BatchGet", async () => {
@@ -320,9 +356,9 @@ describe("Item BatchGet", () => {
       };
     };
 
-    const instance = new BatchGet(databaseClient, "tableName", [
-      { id: "uuid1" },
-      { id: "uuid2" },
+    const instance = new BatchGet(databaseClient, [
+      database.Items("tableName").get({ id: "uuid1" }),
+      database.Items("tableName").get({ id: "uuid2" }),
     ]);
     expect(await instance.$(true)).toEqual({
       Responses: {
@@ -337,9 +373,9 @@ describe("Item BatchGet", () => {
       throw new Error("ECONN");
     };
 
-    const instance = new BatchGet(databaseClient, "tableName", [
-      { id: "uuid1" },
-      { id: "uuid2" },
+    const instance = new BatchGet(databaseClient, [
+      database.Items("tableName").get({ id: "uuid1" }),
+      database.Items("tableName").get({ id: "uuid2" }),
     ]);
     try {
       await instance.$();
@@ -353,9 +389,9 @@ describe("Item BatchGet", () => {
       throw new Error("Unknown");
     };
 
-    const instance = new BatchGet(databaseClient, "tableName", [
-      { id: "uuid1" },
-      { id: "uuid2" },
+    const instance = new BatchGet(databaseClient, [
+      database.Items("tableName").get({ id: "uuid1" }),
+      database.Items("tableName").get({ id: "uuid2" }),
     ]);
 
     try {

@@ -1,7 +1,7 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import nock from "nock";
 
-import { Dynatron } from "../../../src";
+import { Dynatron, DynatronClient } from "../../../src";
 import { Request } from "../../../src/requesters/_core/items-request";
 import { TransactGet } from "../../../src/requesters/transact/transact-get";
 import { BUILD } from "../../../src/utils/misc-utils";
@@ -11,11 +11,20 @@ afterEach(() => {
   // nock.cleanAll();
 });
 
+let databaseClient: DynatronClient;
+let database: Dynatron;
+
+beforeAll(() => {
+  databaseClient = new DynatronClient(
+    Dynatron.optimizedClientConfigs({ region: "local" }),
+  );
+  database = new Dynatron(databaseClient);
+});
+
 describe("Item TransactGet", () => {
   test("should return an instance of Request", () => {
     const instance = new TransactGet(
       new DynamoDBClient({ region: "local" }),
-      "tableName",
       [],
     );
     expect(instance).toBeInstanceOf(Request);
@@ -24,12 +33,11 @@ describe("Item TransactGet", () => {
   test("should build correctly", () => {
     const instance = new TransactGet(
       new DynamoDBClient({ region: "local" }),
-      "",
       [],
     );
     expect(instance.returnConsumedCapacity()).toBeInstanceOf(TransactGet);
     expect(instance[BUILD]()).toEqual({
-      TableName: "",
+      TableName: undefined,
       ReturnConsumedCapacity: "TOTAL",
     });
   });
@@ -40,11 +48,9 @@ describe("Item TransactGet", () => {
       .post("/")
       .reply(200, {});
 
-    const instance = new TransactGet(
-      new DynamoDBClient({ region: "local" }),
-      "",
-      [new Dynatron("tableName1").get({ id: "uuid1" }).select("value")],
-    );
+    const instance = new TransactGet(new DynamoDBClient({ region: "local" }), [
+      database.Items("tableName1").get({ id: "uuid1" }).select("value"),
+    ]);
     expect(await instance.$()).toBeUndefined();
     expect(await instance.returnConsumedCapacity().$(true)).toEqual({
       ConsumedCapacity: undefined,
@@ -60,11 +66,9 @@ describe("Item TransactGet", () => {
       .post("/")
       .reply(200, { Responses: [{ Item: { id: { S: "uuid" } } }] });
 
-    const instance = new TransactGet(
-      new DynamoDBClient({ region: "local" }),
-      "",
-      [new Dynatron("tableName1").get({ id: "uuid1" }).select("value")],
-    );
+    const instance = new TransactGet(new DynamoDBClient({ region: "local" }), [
+      database.Items("tableName1").get({ id: "uuid1" }).select("value"),
+    ]);
     expect(await instance.$()).toEqual([{ id: "uuid" }]);
     expect(await instance.returnConsumedCapacity().$(true)).toEqual({
       ConsumedCapacity: undefined,
@@ -82,7 +86,6 @@ describe("Item TransactGet", () => {
 
     const instance = new TransactGet(
       new DynamoDBClient({ region: "local" }),
-      "tableName",
       [],
     );
     try {
@@ -102,7 +105,6 @@ describe("Item TransactGet", () => {
 
     const instance = new TransactGet(
       new DynamoDBClient({ region: "local" }),
-      "tableName",
       [],
     );
     try {

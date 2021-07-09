@@ -7,6 +7,7 @@ import {
   between,
   contains,
   Dynatron,
+  DynatronClient,
   eq,
   equals,
   exists,
@@ -17,7 +18,6 @@ import {
   isIn,
   lessThan,
   lessThanOrEquals,
-  loadProfileCredentials,
   lt,
   lte,
   ne,
@@ -30,9 +30,13 @@ import {
 } from "../src";
 
 describe("Check exports", () => {
+  test("should export DynatronClient", () => {
+    expect(DynatronClient).toBeDefined();
+    expect(new DynatronClient({})).toBeInstanceOf(DynatronClient);
+  });
   test("should export Dynatron", () => {
     expect(Dynatron).toBeDefined();
-    expect(new Dynatron("")).toBeInstanceOf(Dynatron);
+    expect(new Dynatron(new DynatronClient({}))).toBeInstanceOf(Dynatron);
   });
   test("should export and", () => {
     expect(and).toBeDefined();
@@ -111,8 +115,5 @@ describe("Check exports", () => {
   });
   test("should export size", () => {
     expect(size).toBeDefined();
-  });
-  test("should export loadProfileCredentials", () => {
-    expect(loadProfileCredentials).toBeDefined();
   });
 });

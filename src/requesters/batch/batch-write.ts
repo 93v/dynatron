@@ -1,11 +1,10 @@
 import {
-  // AttributeValue,
   BatchWriteItemCommand,
   BatchWriteItemCommandInput,
   BatchWriteItemOutput,
   DynamoDBClient,
 } from "@aws-sdk/client-dynamodb";
-// import { unmarshall } from "@aws-sdk/util-dynamodb";
+import { unmarshall } from "@aws-sdk/util-dynamodb";
 import AsyncRetry from "async-retry";
 
 import { NativeValue } from "../../dynatron";
@@ -162,18 +161,19 @@ export class BatchWrite extends Amend {
       return aggregatedOutput as any;
     }
 
-    // const responses: Record<string, any> = {};
+    const responses: Record<string, any[]> = {};
 
-    //TODO store items that have been put or deleted and then return if not raw
-    // const nativeResponse =
-    //   this.keys != undefined
-    //     ? undefined
-    //     : marshalledParameters.Items.map(
-    //         (item: Record<string, AttributeValue>) => unmarshall(item),
-    //       );
+    for (const requestInput of requestInputs) {
+      for (const tableName of Object.keys(requestInput.RequestItems || {})) {
+        responses[tableName] ||= [];
+        for (const item of (requestInput.RequestItems || {})[tableName]) {
+          if (item.PutRequest?.Item) {
+            responses[tableName].push(unmarshall(item.PutRequest.Item));
+          }
+        }
+      }
+    }
 
-    // return nativeResponse;
-
-    return {} as any;
+    return responses as any;
   };
 }
