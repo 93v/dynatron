@@ -2,7 +2,7 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import nock from "nock";
 
 import { TableRequest } from "../../../src/requesters/_core/table-request";
-import { TableTTLUpdate } from "../../../src/requesters/manage-tables/table-ttl-update";
+import { TableTTLUpdate } from "../../../src/requesters/tables/tables-ttl-update";
 
 afterEach(() => {
   // nock.abortPendingRequests();

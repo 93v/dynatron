@@ -219,12 +219,12 @@ export class Update extends Check {
   }
 
   [BUILD]() {
-    const keyAttributes = Object.keys(this.key || {});
     return {
       ...super[BUILD](),
       ...(this.#UpdateExpressions.length > 0 && {
         _UpdateExpressions: this.#UpdateExpressions.filter(
-          (expression) => !keyAttributes.includes(expression.attributePath),
+          (expression) =>
+            !Object.keys(this.key || {}).includes(expression.attributePath),
         ),
       }),
     };

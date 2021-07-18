@@ -364,7 +364,7 @@ describe("Item BatchGet", () => {
       Responses: {
         tableName: [{ id: { S: "uuid1" } }, { id: { S: "uuid2" } }],
       },
-      ConsumedCapacity: [{ CapacityUnits: 1 }],
+      ConsumedCapacity: [],
     });
   });
 

@@ -2,7 +2,7 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import nock from "nock";
 
 import { TableRequest } from "../../../src/requesters/_core/table-request";
-import { TableDelete } from "../../../src/requesters/manage-tables/table-delete";
+import { TableDescribe } from "../../../src/requesters/tables/tables-describe";
 import { BUILD } from "../../../src/utils/misc-utils";
 
 afterEach(() => {
@@ -10,9 +10,9 @@ afterEach(() => {
   // nock.cleanAll();
 });
 
-describe("Table Delete", () => {
+describe("Table Describe", () => {
   test("should return an instance of TableRequest", () => {
-    const instance = new TableDelete(
+    const instance = new TableDescribe(
       new DynamoDBClient({ region: "local" }),
       "tableName",
     );
@@ -20,7 +20,7 @@ describe("Table Delete", () => {
   });
 
   test("should build correctly", () => {
-    const instance = new TableDelete(
+    const instance = new TableDescribe(
       new DynamoDBClient({ region: "local" }),
       "tableName",
     );
@@ -30,9 +30,9 @@ describe("Table Delete", () => {
   test("should return a response", async () => {
     const scope = nock("https://localhost:8000")
       .post("/")
-      .reply(200, { TableDescription: {} });
+      .reply(200, { Table: {} });
 
-    const instance = new TableDelete(
+    const instance = new TableDescribe(
       new DynamoDBClient({ region: "local" }),
       "tableName",
     );
@@ -48,7 +48,7 @@ describe("Table Delete", () => {
       .post("/")
       .replyWithError("ECONN: Connection error");
 
-    const instance = new TableDelete(
+    const instance = new TableDescribe(
       new DynamoDBClient({ region: "local" }),
       "tableName",
     );
@@ -68,7 +68,7 @@ describe("Table Delete", () => {
       .post("/")
       .replyWithError("Unknown");
 
-    const instance = new TableDelete(
+    const instance = new TableDescribe(
       new DynamoDBClient({ region: "local" }),
       "tableName",
     );

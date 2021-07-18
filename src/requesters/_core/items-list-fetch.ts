@@ -15,21 +15,19 @@ export class ListFetch extends Fetch {
    * @param conditions Condition | Condition[]
    */
   where = (...conditions: (Condition | Condition[] | undefined)[]) => {
-    if (isConditionEmptyDeep(conditions)) {
-      return this;
+    if (!isConditionEmptyDeep(conditions)) {
+      this.#FilterExpressions = conditions.reduce(
+        (aggregated: Condition[], current) => {
+          return current == undefined
+            ? aggregated
+            : [
+                ...aggregated,
+                ...(Array.isArray(current) ? current : [current]),
+              ];
+        },
+        this.#FilterExpressions ?? [],
+      );
     }
-    this.#FilterExpressions = conditions.reduce(
-      (aggregatedConditions: Condition[], condition) => {
-        if (condition == undefined) {
-          return aggregatedConditions;
-        }
-        return [
-          ...aggregatedConditions,
-          ...(Array.isArray(condition) ? condition : [condition]),
-        ];
-      },
-      this.#FilterExpressions ?? [],
-    );
     return this;
   };
 

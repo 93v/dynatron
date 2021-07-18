@@ -2,7 +2,7 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import nock from "nock";
 
 import { TableRequest } from "../../../src/requesters/_core/table-request";
-import { TableList } from "../../../src/requesters/manage-tables/table-list";
+import { TableList } from "../../../src/requesters/tables/tables-list";
 import { BUILD } from "../../../src/utils/misc-utils";
 
 afterEach(() => {

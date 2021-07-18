@@ -6,10 +6,7 @@ export class TableRequest {
    * @param patienceRatio number
    */
   relaxLatencies = (patienceRatio = 1) => {
-    if (patienceRatio <= 0) {
-      throw new Error("The ratio must be positive");
-    }
-    this.patienceRatio = patienceRatio;
+    this.patienceRatio = patienceRatio <= 0 ? 1 : patienceRatio;
     return this;
   };
 }

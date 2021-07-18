@@ -22,22 +22,21 @@ export class Fetch extends Request {
    */
   select = (...attributePaths: (string | string[] | undefined)[]) => {
     if (
-      attributePaths.every((attributePath) => attributePath == undefined) ||
-      attributePaths.flat().length === 0
+      attributePaths.flat().length > 0 &&
+      !attributePaths.every((attributePath) => attributePath == undefined)
     ) {
-      return this;
-    }
-
-    for (let attributePath of attributePaths) {
-      if (typeof attributePath === "string") {
-        attributePath = [attributePath];
+      for (const attributePath of attributePaths) {
+        if (attributePath) {
+          this.#ProjectionExpressions = [
+            ...new Set([
+              ...(this.#ProjectionExpressions ?? []),
+              ...((typeof attributePath === "string"
+                ? [attributePath]
+                : attributePath) ?? []),
+            ]),
+          ];
+        }
       }
-      this.#ProjectionExpressions = [
-        ...new Set([
-          ...(this.#ProjectionExpressions ?? []),
-          ...(attributePath ?? []),
-        ]),
-      ];
     }
     return this;
   };

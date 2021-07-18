@@ -26,7 +26,6 @@ describe("Fetch", () => {
     expect(instance.select(undefined, "")).toBe(instance);
     expect(instance[BUILD]()).toEqual({
       TableName: "",
-      _ProjectionExpressions: [""],
     });
   });
 

@@ -230,8 +230,8 @@ export class Scan extends ListFetch {
       outputs = [await this.scanSegment(requestInput, disableRecursion)];
     } else {
       outputs = await Promise.all(
-        [...Array.from({ length: requestInput.TotalSegments ?? 1 }).keys()].map(
-          async (segment) => {
+        Array.from({ length: requestInput.TotalSegments ?? 1 }).map(
+          async (_, segment) => {
             const segmentParameters = { ...requestInput };
             if (segmentParameters.TotalSegments) {
               segmentParameters.Segment = segment;

@@ -2,7 +2,7 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import nock from "nock";
 
 import { TableRequest } from "../../../src/requesters/_core/table-request";
-import { TableDescribe } from "../../../src/requesters/manage-tables/table-describe";
+import { TableCreate } from "../../../src/requesters/tables/tables-create";
 import { BUILD } from "../../../src/utils/misc-utils";
 
 afterEach(() => {
@@ -10,33 +10,40 @@ afterEach(() => {
   // nock.cleanAll();
 });
 
-describe("Table Describe", () => {
+describe("Table Create", () => {
   test("should return an instance of TableRequest", () => {
-    const instance = new TableDescribe(
-      new DynamoDBClient({ region: "local" }),
-      "tableName",
-    );
+    const instance = new TableCreate(new DynamoDBClient({ region: "local" }), {
+      AttributeDefinitions: [],
+      KeySchema: [],
+      TableName: "tableName",
+    });
     expect(instance).toBeInstanceOf(TableRequest);
   });
 
   test("should build correctly", () => {
-    const instance = new TableDescribe(
-      new DynamoDBClient({ region: "local" }),
-      "tableName",
-    );
-    expect(instance[BUILD]()).toEqual({ TableName: "tableName" });
+    const instance = new TableCreate(new DynamoDBClient({ region: "local" }), {
+      AttributeDefinitions: [],
+      KeySchema: [],
+      TableName: "tableName",
+    });
+    expect(instance[BUILD]()).toEqual({
+      AttributeDefinitions: [],
+      KeySchema: [],
+      TableName: "tableName",
+    });
   });
 
   test("should return a response", async () => {
     const scope = nock("https://localhost:8000")
+      .persist(true)
       .post("/")
-      .reply(200, { Table: {} });
+      .reply(200, { TableDescription: {} });
 
-    const instance = new TableDescribe(
-      new DynamoDBClient({ region: "local" }),
-      "tableName",
-    );
-
+    const instance = new TableCreate(new DynamoDBClient({ region: "local" }), {
+      AttributeDefinitions: [],
+      KeySchema: [],
+      TableName: "tableName",
+    });
     expect(await instance.$()).toEqual({});
     scope.persist(false);
     nock.cleanAll();
@@ -48,10 +55,11 @@ describe("Table Describe", () => {
       .post("/")
       .replyWithError("ECONN: Connection error");
 
-    const instance = new TableDescribe(
-      new DynamoDBClient({ region: "local" }),
-      "tableName",
-    );
+    const instance = new TableCreate(new DynamoDBClient({ region: "local" }), {
+      AttributeDefinitions: [],
+      KeySchema: [],
+      TableName: "tableName",
+    });
 
     try {
       await instance.$();
@@ -68,10 +76,11 @@ describe("Table Describe", () => {
       .post("/")
       .replyWithError("Unknown");
 
-    const instance = new TableDescribe(
-      new DynamoDBClient({ region: "local" }),
-      "tableName",
-    );
+    const instance = new TableCreate(new DynamoDBClient({ region: "local" }), {
+      AttributeDefinitions: [],
+      KeySchema: [],
+      TableName: "tableName",
+    });
 
     try {
       await instance.$();

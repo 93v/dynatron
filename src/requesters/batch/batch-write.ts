@@ -45,10 +45,14 @@ export class BatchWrite extends Amend {
             this.databaseClient.send(new BatchWriteItemCommand(requestInput)),
             shortCircuit.launch(),
           ]);
-          if (output.UnprocessedItems == undefined) {
-            operationCompleted = true;
-          } else {
+
+          if (
+            output.UnprocessedItems != undefined &&
+            Object.keys(output.UnprocessedItems).length > 0
+          ) {
             requestInput.RequestItems = output.UnprocessedItems;
+          } else {
+            operationCompleted = true;
           }
 
           if (output.ItemCollectionMetrics != undefined) {
@@ -102,6 +106,7 @@ export class BatchWrite extends Amend {
       );
 
       const requestInput: BatchWriteItemCommandInput = {
+        RequestItems: {},
         ...(ReturnConsumedCapacity && { ReturnConsumedCapacity }),
         ...(ReturnItemCollectionMetrics && { ReturnItemCollectionMetrics }),
       };
@@ -111,8 +116,8 @@ export class BatchWrite extends Amend {
           item[BUILD](),
         );
 
-        requestInput.RequestItems ||= {};
-        requestInput.RequestItems[TableName] ||= [];
+        requestInput.RequestItems ??= {};
+        requestInput.RequestItems[TableName] ??= [];
 
         switch (item.constructor.name) {
           case "Delete":
@@ -136,13 +141,17 @@ export class BatchWrite extends Amend {
     );
 
     const aggregatedOutput: BatchWriteItemOutput = {};
+    const consumedCapacityMap = {};
 
     for (const output of outputs) {
       if (output.ConsumedCapacity != undefined) {
-        aggregatedOutput.ConsumedCapacity = [
-          ...(aggregatedOutput.ConsumedCapacity ?? []),
-          ...output.ConsumedCapacity,
-        ];
+        for (const cc of output.ConsumedCapacity) {
+          if (cc.TableName) {
+            consumedCapacityMap[cc.TableName] =
+              consumedCapacityMap[cc.TableName] || 0;
+            consumedCapacityMap[cc.TableName] += cc.CapacityUnits;
+          }
+        }
       }
 
       if (output.ItemCollectionMetrics != undefined) {
@@ -157,6 +166,13 @@ export class BatchWrite extends Amend {
       }
     }
 
+    aggregatedOutput.ConsumedCapacity = Object.keys(consumedCapacityMap).map(
+      (TableName) => ({
+        TableName,
+        CapacityUnits: consumedCapacityMap[TableName],
+      }),
+    );
+
     if (returnRawResponse) {
       return aggregatedOutput as any;
     }
@@ -165,7 +181,7 @@ export class BatchWrite extends Amend {
 
     for (const requestInput of requestInputs) {
       for (const tableName of Object.keys(requestInput.RequestItems || {})) {
-        responses[tableName] ||= [];
+        responses[tableName] ??= [];
         for (const item of (requestInput.RequestItems || {})[tableName]) {
           if (item.PutRequest?.Item) {
             responses[tableName].push(unmarshall(item.PutRequest.Item));

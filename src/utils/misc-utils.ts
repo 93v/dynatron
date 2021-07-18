@@ -16,21 +16,18 @@ export const assertNever = (object: never): never => {
   throw new Error(`Unexpected value: ${JSON.stringify(object)}`);
 };
 
-export const isRetryableError = (error: Error) =>
-  error.message === TAKING_TOO_LONG_EXCEPTION ||
-  (Object.prototype.hasOwnProperty.call(error, "retryable") &&
-    (error as any).retryable) ||
-  [
+export const isRetryableError = (error: Error) => {
+  const errorMessages = [
     "ECONN",
     "Internal Server Error",
     "InternalServerError",
     "NetworkingError",
     "Service Unavailable",
     "Throughput exceeds",
-  ].some((message) =>
-    error.toString().toUpperCase().includes(message.toUpperCase()),
-  ) ||
-  (Object.prototype.hasOwnProperty.call(error, "code") &&
+    "Too Many Requests",
+  ];
+
+  const errorCodes = new Set(
     [
       "ItemCollectionSizeLimitExceededException",
       "LimitExceededException",
@@ -38,8 +35,24 @@ export const isRetryableError = (error: Error) =>
       "RequestLimitExceeded",
       "ResourceInUseException",
       "ThrottlingException",
+      "TooManyRequestsException",
       "UnrecognizedClientException",
-    ].includes((error as any).code));
+    ].map((v) => v.toLowerCase()),
+  );
+
+  return (
+    error.message === TAKING_TOO_LONG_EXCEPTION ||
+    (Object.prototype.hasOwnProperty.call(error, "retryable") &&
+      (error as any).retryable) ||
+    errorMessages.some((message) =>
+      error.toString().toUpperCase().includes(message.toUpperCase()),
+    ) ||
+    (Object.prototype.hasOwnProperty.call(error, "code") &&
+      errorCodes.has((error as any).code.toLowerCase())) ||
+    (Object.prototype.hasOwnProperty.call(error, "name") &&
+      errorCodes.has((error as any).name.toLowerCase()))
+  );
+};
 
 export const validateKey = (key: NativeValue) => {
   const keysLength = Object.keys(key).length;
@@ -55,7 +68,7 @@ export const createShortCircuit = (parameters: {
   duration: number;
   error: Error;
 }) => {
-  let timeoutReference: NodeJS.Timeout;
+  let timeoutReference: unknown;
   let launched = false;
 
   if (parameters.duration < 0) {
@@ -65,7 +78,7 @@ export const createShortCircuit = (parameters: {
   const launch = async (): Promise<never> => {
     launched = true;
     return new Promise((_, reject) => {
-      timeoutReference = global.setTimeout(() => {
+      timeoutReference = setTimeout(() => {
         reject(parameters.error);
       }, parameters.duration);
     });
@@ -75,7 +88,7 @@ export const createShortCircuit = (parameters: {
     if (!launched || timeoutReference == undefined) {
       throw new Error("Cannot halt before launching");
     }
-    clearTimeout(timeoutReference);
+    clearTimeout(timeoutReference as number);
     launched = false;
   };
 

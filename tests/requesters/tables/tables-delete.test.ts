@@ -2,19 +2,29 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import nock from "nock";
 
 import { TableRequest } from "../../../src/requesters/_core/table-request";
-import { TableUpdate } from "../../../src/requesters/manage-tables/table-update";
+import { TableDelete } from "../../../src/requesters/tables/tables-delete";
+import { BUILD } from "../../../src/utils/misc-utils";
 
 afterEach(() => {
   // nock.abortPendingRequests();
   // nock.cleanAll();
 });
 
-describe("Table Update", () => {
+describe("Table Delete", () => {
   test("should return an instance of TableRequest", () => {
-    const instance = new TableUpdate(new DynamoDBClient({ region: "local" }), {
-      TableName: "tableName",
-    });
+    const instance = new TableDelete(
+      new DynamoDBClient({ region: "local" }),
+      "tableName",
+    );
     expect(instance).toBeInstanceOf(TableRequest);
+  });
+
+  test("should build correctly", () => {
+    const instance = new TableDelete(
+      new DynamoDBClient({ region: "local" }),
+      "tableName",
+    );
+    expect(instance[BUILD]()).toEqual({ TableName: "tableName" });
   });
 
   test("should return a response", async () => {
@@ -22,9 +32,10 @@ describe("Table Update", () => {
       .post("/")
       .reply(200, { TableDescription: {} });
 
-    const instance = new TableUpdate(new DynamoDBClient({ region: "local" }), {
-      TableName: "tableName",
-    });
+    const instance = new TableDelete(
+      new DynamoDBClient({ region: "local" }),
+      "tableName",
+    );
 
     expect(await instance.$()).toEqual({});
     scope.persist(false);
@@ -37,9 +48,10 @@ describe("Table Update", () => {
       .post("/")
       .replyWithError("ECONN: Connection error");
 
-    const instance = new TableUpdate(new DynamoDBClient({ region: "local" }), {
-      TableName: "tableName",
-    });
+    const instance = new TableDelete(
+      new DynamoDBClient({ region: "local" }),
+      "tableName",
+    );
 
     try {
       await instance.$();
@@ -56,9 +68,10 @@ describe("Table Update", () => {
       .post("/")
       .replyWithError("Unknown");
 
-    const instance = new TableUpdate(new DynamoDBClient({ region: "local" }), {
-      TableName: "tableName",
-    });
+    const instance = new TableDelete(
+      new DynamoDBClient({ region: "local" }),
+      "tableName",
+    );
 
     try {
       await instance.$();

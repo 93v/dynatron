@@ -1,3 +1,5 @@
+/* eslint-disable unicorn/prefer-module */
+/* eslint-disable @typescript-eslint/no-var-requires */
 import {
   CreateTableInput,
   DynamoDBClient,
@@ -5,35 +7,28 @@ import {
   UpdateTableInput,
   UpdateTimeToLiveInput,
 } from "@aws-sdk/client-dynamodb";
-import { FetchHttpHandler } from "@aws-sdk/fetch-http-handler";
-import { NodeHttpHandler } from "@aws-sdk/node-http-handler";
 import { Credentials } from "@aws-sdk/types";
 import { NativeAttributeValue } from "@aws-sdk/util-dynamodb";
-import { readFileSync } from "fs";
-import { Agent } from "https";
-import { parse } from "ini";
-import { homedir } from "os";
-import path from "path";
 
 import { equals } from "./condition-expression-builders";
-import { Get } from "./requesters/items/items-get";
+import { Check } from "./requesters/_core/items-check";
 import { BatchGet } from "./requesters/batch/batch-get";
+import { BatchWrite } from "./requesters/batch/batch-write";
+import { Delete } from "./requesters/items/items-delete";
+import { Get } from "./requesters/items/items-get";
+import { Put } from "./requesters/items/items-put";
 import { Query } from "./requesters/items/items-query";
 import { Scan } from "./requesters/items/items-scan";
-import { Check } from "./requesters/_core/items-check";
-import { Delete } from "./requesters/items/items-delete";
-import { Put } from "./requesters/items/items-put";
 import { Update } from "./requesters/items/items-update";
-import { BatchWrite } from "./requesters/batch/batch-write";
-import { TransactWrite } from "./requesters/transact/transact-write";
+import { TableCreate } from "./requesters/tables/tables-create";
+import { TableDelete } from "./requesters/tables/tables-delete";
+import { TableDescribe } from "./requesters/tables/tables-describe";
+import { TableList } from "./requesters/tables/tables-list";
+import { TableTTLDescribe } from "./requesters/tables/tables-ttl-describe";
+import { TableTTLUpdate } from "./requesters/tables/tables-ttl-update";
+import { TableUpdate } from "./requesters/tables/tables-update";
 import { TransactGet } from "./requesters/transact/transact-get";
-import { TableCreate } from "./requesters/manage-tables/table-create";
-import { TableDelete } from "./requesters/manage-tables/table-delete";
-import { TableDescribe } from "./requesters/manage-tables/table-describe";
-import { TableList } from "./requesters/manage-tables/table-list";
-import { TableTTLDescribe } from "./requesters/manage-tables/table-ttl-describe";
-import { TableTTLUpdate } from "./requesters/manage-tables/table-ttl-update";
-import { TableUpdate } from "./requesters/manage-tables/table-update";
+import { TransactWrite } from "./requesters/transact/transact-write";
 import { LONG_MAX_LATENCY } from "./utils/misc-utils";
 
 export type NativeValue = Record<string, NativeAttributeValue>;
@@ -105,7 +100,7 @@ export class Dynatron {
       get: (items: Get[]) => new BatchGet(this.client, items),
       /**
        * The operation puts or deletes multiple items in the table.
-       * This operation cannot update items, use Items.update instead
+       * This operation cannot update items, use "Items.update" instead
        * @param items (Put | Delete)[]
        */
       write: (items: (Put | Delete)[]) => new BatchWrite(this.client, items),
@@ -132,9 +127,9 @@ export class Dynatron {
   }
 
   /**
-   * Switch to "Table" mode to work with the database tables management
+   * Switch to "Tables" mode to work with the database tables management
    */
-  public get Table() {
+  public get Tables() {
     return {
       /**
        * The operation adds a new table to your account.
@@ -174,36 +169,47 @@ export class Dynatron {
   }
 
   /**
-   * Returns the path of the home directory of the OS
-   * @returns string
-   */
-  static get homeDirectory(): string {
-    const {
-      HOME,
-      USERPROFILE,
-      HOMEPATH,
-      HOMEDRIVE = `C:${path.sep}`,
-    } = process.env;
-
-    if (HOME) return HOME;
-    if (USERPROFILE) return USERPROFILE;
-    if (HOMEPATH) return `${HOMEDRIVE}${HOMEPATH}`;
-
-    return homedir();
-  }
-
-  /**
    * Loads and returns Credentials from the special credentials file
    * @param profileName string
    * @returns Credential
    */
   static loadProfileCredentials(profileName: string): Credentials | undefined {
+    if (typeof process !== "object") {
+      return;
+    }
+
+    const path = require("path");
+
+    /**
+     * Returns the path of the home directory of the OS
+     * @returns string
+     */
+    const homeDirectory = (): string => {
+      if (typeof process !== "object") {
+        return "";
+      }
+
+      const {
+        HOME,
+        USERPROFILE,
+        HOMEPATH,
+        HOMEDRIVE = `C:${path.sep}`,
+      } = process.env;
+
+      if (HOME) return HOME;
+      if (USERPROFILE) return USERPROFILE;
+      if (HOMEPATH) return `${HOMEDRIVE}${HOMEPATH}`;
+
+      return require("os").homedir();
+    };
+
+    const { readFileSync } = require("fs");
     const credentialsFile = readFileSync(
-      path.join(Dynatron.homeDirectory, ".aws", "credentials"),
+      path.join(homeDirectory(), ".aws", "credentials"),
       "utf-8",
     );
 
-    const profile = parse(credentialsFile)[profileName];
+    const profile = require("ini").parse(credentialsFile)[profileName];
 
     if (profile == undefined) {
       return;
@@ -236,32 +242,28 @@ export class Dynatron {
       ...optimizedConfig
     } = config;
 
-    const safeTimeout = Math.max(timeout, 1);
-    const safeMaxSockets = Math.max(maxSockets, 1);
-    const safeMaxFreeSockets = Math.max(Math.floor(maxSockets / 8), 1);
-
     optimizedConfig.maxAttempts = config.maxAttempts ?? 3;
 
     if (config.region !== "local" && config.requestHandler == undefined) {
-      optimizedConfig.requestHandler =
-        typeof process === "object"
-          ? new NodeHttpHandler({
-              httpsAgent: new Agent({
-                keepAlive: true,
-                rejectUnauthorized: true,
-                maxSockets: safeMaxSockets,
-                maxFreeSockets: safeMaxFreeSockets,
-                secureProtocol: "TLSv1_method",
-                ciphers: "ALL",
-              }),
-              // TODO: make sure these are necessary
-              socketTimeout: safeTimeout,
-              connectionTimeout: safeTimeout,
-            })
-          : new FetchHttpHandler({
-              // TODO: make sure this is necessary
-              requestTimeout: safeTimeout,
-            });
+      const safeTimeout = Math.max(timeout, 1);
+      const safeMaxSockets = Math.max(maxSockets, 1);
+      const safeMaxFreeSockets = Math.max(Math.floor(maxSockets / 8), 1);
+      if (typeof process === "object") {
+        const { NodeHttpHandler } = require("@aws-sdk/node-http-handler");
+        const { Agent } = require("https");
+        optimizedConfig.requestHandler = new NodeHttpHandler({
+          httpsAgent: new Agent({
+            keepAlive: true,
+            rejectUnauthorized: true,
+            maxSockets: safeMaxSockets,
+            maxFreeSockets: safeMaxFreeSockets,
+            secureProtocol: "TLSv1_method",
+            ciphers: "ALL",
+          }),
+          socketTimeout: safeTimeout,
+          connectionTimeout: safeTimeout,
+        });
+      }
     }
 
     return optimizedConfig;

@@ -52,7 +52,7 @@ describe("Item BatchWrite", () => {
         .returnConsumedCapacity()
         .returnItemCollectionMetrics()
         .$(true),
-    ).toEqual({});
+    ).toEqual({ ConsumedCapacity: [] });
   });
 
   test("should return an instance of BatchWrite", () => {
@@ -164,7 +164,7 @@ describe("Item BatchWrite", () => {
         .returnItemCollectionMetrics()
         .$(true),
     ).toEqual({
-      ConsumedCapacity: [{ CapacityUnits: 2 }, { CapacityUnits: 2 }],
+      ConsumedCapacity: [],
       ItemCollectionMetrics: { tableName: [] },
     });
   });
@@ -210,7 +210,7 @@ describe("Item BatchWrite", () => {
         .returnItemCollectionMetrics()
         .$(true),
     ).toEqual({
-      ConsumedCapacity: [{ CapacityUnits: 2 }, { CapacityUnits: 2 }],
+      ConsumedCapacity: [],
       ItemCollectionMetrics: { tableName2: [] },
     });
   });
@@ -257,11 +257,7 @@ describe("Item BatchWrite", () => {
         .returnItemCollectionMetrics()
         .$(true),
     ).toEqual({
-      ConsumedCapacity: [
-        { CapacityUnits: 2 },
-        { CapacityUnits: 2 },
-        { CapacityUnits: 2 },
-      ],
+      ConsumedCapacity: [],
       ItemCollectionMetrics: { tableName2: [] },
     });
   });
@@ -355,7 +351,7 @@ describe("Item BatchWrite", () => {
         .returnItemCollectionMetrics()
         .$(true),
     ).toEqual({
-      ConsumedCapacity: [{ CapacityUnits: 2 }, { CapacityUnits: 2 }],
+      ConsumedCapacity: [],
       ItemCollectionMetrics: { tableName2: [] },
     });
   });
@@ -398,7 +394,7 @@ describe("Item BatchWrite", () => {
         .returnItemCollectionMetrics()
         .$(true),
     ).toEqual({
-      ConsumedCapacity: [{ CapacityUnits: 2 }, { CapacityUnits: 2 }],
+      ConsumedCapacity: [],
       ItemCollectionMetrics: { tableName: [] },
     });
   });
@@ -442,7 +438,7 @@ describe("Item BatchWrite", () => {
         .returnItemCollectionMetrics()
         .$(true),
     ).toEqual({
-      ConsumedCapacity: [{ CapacityUnits: 2 }],
+      ConsumedCapacity: [],
       ItemCollectionMetrics: { tableName: [] },
     });
   });
@@ -475,7 +471,9 @@ describe("Item BatchWrite", () => {
       databaseClient,
       items.map((k) => database.Items("tableName").put(k)),
     );
-    expect(await instance.returnConsumedCapacity().$(true)).toEqual({});
+    expect(await instance.returnConsumedCapacity().$(true)).toEqual({
+      ConsumedCapacity: [],
+    });
   });
 
   test("should return an instance of BatchWrite", async () => {

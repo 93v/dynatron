@@ -44,10 +44,13 @@ export class BatchGet extends Fetch {
             shortCircuit.launch(),
           ]);
 
-          if (output.UnprocessedKeys == undefined) {
-            operationCompleted = true;
-          } else {
+          if (
+            output.UnprocessedKeys != undefined &&
+            Object.keys(output.UnprocessedKeys).length > 0
+          ) {
             requestInput.RequestItems = output.UnprocessedKeys;
+          } else {
+            operationCompleted = true;
           }
 
           if (output.Responses != undefined) {
@@ -91,8 +94,12 @@ export class BatchGet extends Fetch {
   >(
     returnRawResponse?: U,
   ): Promise<U extends true ? BatchGetItemOutput : T | undefined> => {
-    //TODO: handle global projections
-    const { ReturnConsumedCapacity } = marshallRequestParameters(this[BUILD]());
+    const {
+      ReturnConsumedCapacity,
+      ExpressionAttributeNames: globalExpressionAttributeNames,
+      ProjectionExpression: globalProjectionExpression,
+      ConsistentRead: globalConsistentRead,
+    } = marshallRequestParameters(this[BUILD]());
 
     const requestInputs: BatchGetItemCommandInput[] = [];
 
@@ -100,9 +107,11 @@ export class BatchGet extends Fetch {
       const batchGroupItems = this.items.slice(index, index + BATCH_GET_LIMIT);
 
       const requestInput: BatchGetItemCommandInput = {
+        RequestItems: {},
         ...(ReturnConsumedCapacity && { ReturnConsumedCapacity }),
       };
 
+      const expressionAttributeNamesReverseMap: Record<string, string> = {};
       for (const item of batchGroupItems) {
         const {
           Key,
@@ -116,24 +125,66 @@ export class BatchGet extends Fetch {
           continue;
         }
 
-        requestInput.RequestItems ||= {};
-        requestInput.RequestItems[TableName] ||= { Keys: [] };
+        requestInput.RequestItems ??= {};
+        requestInput.RequestItems[TableName] ??= { Keys: [] };
         requestInput.RequestItems[TableName].Keys?.push(Key);
 
-        if (ConsistentRead) {
-          requestInput.RequestItems[TableName].ConsistentRead = ConsistentRead;
+        if (globalConsistentRead || ConsistentRead) {
+          requestInput.RequestItems[TableName].ConsistentRead =
+            globalConsistentRead || ConsistentRead;
         }
 
-        if (ExpressionAttributeNames && ProjectionExpression) {
-          requestInput.RequestItems[TableName].ProjectionExpression +=
-            (requestInput.RequestItems[TableName].ProjectionExpression
-              ? ", "
-              : "") + ProjectionExpression;
+        const expressionsSets: [Record<string, string>, string][] = [
+          // Globals should come first for the replaceAll to happen correctly
+          // Otherwise replace may happen inside a partial string
+          [globalExpressionAttributeNames, globalProjectionExpression],
+          [ExpressionAttributeNames, ProjectionExpression],
+        ];
 
-          requestInput.RequestItems[TableName].ExpressionAttributeNames = {
-            ...requestInput.RequestItems[TableName].ExpressionAttributeNames,
-            ...ExpressionAttributeNames,
-          };
+        for (const [exprAttributeNames, projExpr] of expressionsSets) {
+          if (exprAttributeNames && projExpr) {
+            let projectionExpression = projExpr;
+
+            for (const [key, value] of Object.entries(exprAttributeNames)) {
+              if (!expressionAttributeNamesReverseMap[value]) {
+                expressionAttributeNamesReverseMap[value] = key;
+              } else {
+                projectionExpression = projectionExpression.replace(
+                  new RegExp(key, "g"),
+                  expressionAttributeNamesReverseMap[value],
+                );
+              }
+            }
+
+            requestInput.RequestItems[TableName].ProjectionExpression =
+              (requestInput.RequestItems[TableName].ProjectionExpression ||
+                "") +
+              (requestInput.RequestItems[TableName].ProjectionExpression
+                ? ", "
+                : "") +
+              projectionExpression;
+          }
+        }
+
+        if (requestInput.RequestItems[TableName].ProjectionExpression) {
+          requestInput.RequestItems[TableName].ExpressionAttributeNames ??= {};
+
+          for (const [key, value] of Object.entries(
+            expressionAttributeNamesReverseMap,
+          )) {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            requestInput.RequestItems[TableName].ExpressionAttributeNames![
+              value
+            ] = key;
+          }
+
+          requestInput.RequestItems[TableName].ProjectionExpression = [
+            ...new Set(
+              requestInput.RequestItems[TableName].ProjectionExpression?.split(
+                ", ",
+              ),
+            ),
+          ].join(", ");
         }
       }
 
@@ -145,6 +196,7 @@ export class BatchGet extends Fetch {
     );
 
     const aggregatedOutput: BatchGetItemOutput = {};
+    const consumedCapacityMap = {};
 
     for (const output of outputs) {
       aggregatedOutput.Responses = aggregatedOutput.Responses ?? {};
@@ -159,12 +211,22 @@ export class BatchGet extends Fetch {
       }
 
       if (output.ConsumedCapacity != undefined) {
-        aggregatedOutput.ConsumedCapacity = [
-          ...(aggregatedOutput.ConsumedCapacity ?? []),
-          ...output.ConsumedCapacity,
-        ];
+        for (const cc of output.ConsumedCapacity) {
+          if (cc?.TableName) {
+            consumedCapacityMap[cc.TableName] =
+              consumedCapacityMap[cc.TableName] || 0;
+            consumedCapacityMap[cc.TableName] += cc.CapacityUnits;
+          }
+        }
       }
     }
+
+    aggregatedOutput.ConsumedCapacity = Object.keys(consumedCapacityMap).map(
+      (TableName) => ({
+        TableName,
+        CapacityUnits: consumedCapacityMap[TableName],
+      }),
+    );
 
     if (returnRawResponse) {
       return aggregatedOutput as any;

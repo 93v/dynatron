@@ -18,7 +18,7 @@ describe("Check", () => {
 
     expect(instance[BUILD]()).toEqual({
       TableName: "",
-      ReturnValues: "ALL_OLD",
+      ReturnValues: "ALL_NEW",
     });
   });
 

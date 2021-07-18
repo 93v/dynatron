@@ -10,13 +10,13 @@ import { Update } from "../src/requesters/items/items-update";
 import { BatchWrite } from "../src/requesters/batch/batch-write";
 import { TransactWrite } from "../src/requesters/transact/transact-write";
 import { TransactGet } from "../src/requesters/transact/transact-get";
-import { TableCreate } from "../src/requesters/manage-tables/table-create";
-import { TableDelete } from "../src/requesters/manage-tables/table-delete";
-import { TableDescribe } from "../src/requesters/manage-tables/table-describe";
-import { TableList } from "../src/requesters/manage-tables/table-list";
-import { TableTTLDescribe } from "../src/requesters/manage-tables/table-ttl-describe";
-import { TableTTLUpdate } from "../src/requesters/manage-tables/table-ttl-update";
-import { TableUpdate } from "../src/requesters/manage-tables/table-update";
+import { TableCreate } from "../src/requesters/tables/tables-create";
+import { TableDelete } from "../src/requesters/tables/tables-delete";
+import { TableDescribe } from "../src/requesters/tables/tables-describe";
+import { TableList } from "../src/requesters/tables/tables-list";
+import { TableTTLDescribe } from "../src/requesters/tables/tables-ttl-describe";
+import { TableTTLUpdate } from "../src/requesters/tables/tables-ttl-update";
+import { TableUpdate } from "../src/requesters/tables/tables-update";
 
 describe("Database Client", () => {
   test("should return an instance of Dynatron", () => {
@@ -137,7 +137,7 @@ describe("Dynatron instance", () => {
   });
   test("should be an instance of TableCreator", () => {
     expect(
-      dynatron.Table.create({
+      dynatron.Tables.create({
         AttributeDefinitions: [],
         KeySchema: [],
         TableName: "tableName",
@@ -145,20 +145,20 @@ describe("Dynatron instance", () => {
     ).toBeInstanceOf(TableCreate);
   });
   test("should be an instance of TableDelete", () => {
-    expect(dynatron.Table.delete("")).toBeInstanceOf(TableDelete);
+    expect(dynatron.Tables.delete("")).toBeInstanceOf(TableDelete);
   });
   test("should be an instance of TableDescribe", () => {
-    expect(dynatron.Table.describe("")).toBeInstanceOf(TableDescribe);
+    expect(dynatron.Tables.describe("")).toBeInstanceOf(TableDescribe);
   });
   test("should be an instance of TableList", () => {
-    expect(dynatron.Table.list()).toBeInstanceOf(TableList);
+    expect(dynatron.Tables.list()).toBeInstanceOf(TableList);
   });
   test("should be an instance of TableTTLDescribe", () => {
-    expect(dynatron.Table.describeTTL("")).toBeInstanceOf(TableTTLDescribe);
+    expect(dynatron.Tables.describeTTL("")).toBeInstanceOf(TableTTLDescribe);
   });
   test("should be an instance of TableTTLUpdate", () => {
     expect(
-      dynatron.Table.updateTTL({
+      dynatron.Tables.updateTTL({
         TableName: "tableName",
         TimeToLiveSpecification: {
           AttributeName: "name",
@@ -169,7 +169,7 @@ describe("Dynatron instance", () => {
   });
   test("should be an instance of TableUpdate", () => {
     expect(
-      dynatron.Table.update({
+      dynatron.Tables.update({
         TableName: "tableName",
       }),
     ).toBeInstanceOf(TableUpdate);

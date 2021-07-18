@@ -37,7 +37,7 @@ export class Check extends Amend {
    * @param returnValues NONE | ALL_OLD | UPDATED_OLD | ALL_NEW | UPDATED_NEW
    * @returns Check
    */
-  returnValues = (returnValues: ReturnValue = "ALL_OLD") => {
+  returnValues = (returnValues: ReturnValue = "ALL_NEW") => {
     this.#ReturnValues = returnValues;
     return this;
   };
@@ -48,23 +48,19 @@ export class Check extends Amend {
    * @returns Check
    */
   if = (...conditions: (Condition | Condition[] | undefined)[]) => {
-    if (isConditionEmptyDeep(conditions)) {
-      return this;
+    if (!isConditionEmptyDeep(conditions)) {
+      this.#ConditionExpressions = conditions.reduce(
+        (aggregated: Condition[], current) => {
+          return current == undefined
+            ? aggregated
+            : [
+                ...aggregated,
+                ...(Array.isArray(current) ? current : [current]),
+              ];
+        },
+        this.#ConditionExpressions ?? [],
+      );
     }
-    this.#ConditionExpressions = conditions.reduce(
-      (aggregatedConditions: Condition[], currentCondition) => {
-        if (currentCondition == undefined) {
-          return aggregatedConditions;
-        }
-        return [
-          ...aggregatedConditions,
-          ...(Array.isArray(currentCondition)
-            ? currentCondition
-            : [currentCondition]),
-        ];
-      },
-      this.#ConditionExpressions ?? [],
-    );
     return this;
   };
 

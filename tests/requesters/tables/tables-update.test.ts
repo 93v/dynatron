@@ -2,48 +2,30 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import nock from "nock";
 
 import { TableRequest } from "../../../src/requesters/_core/table-request";
-import { TableCreate } from "../../../src/requesters/manage-tables/table-create";
-import { BUILD } from "../../../src/utils/misc-utils";
+import { TableUpdate } from "../../../src/requesters/tables/tables-update";
 
 afterEach(() => {
   // nock.abortPendingRequests();
   // nock.cleanAll();
 });
 
-describe("Table Create", () => {
+describe("Table Update", () => {
   test("should return an instance of TableRequest", () => {
-    const instance = new TableCreate(new DynamoDBClient({ region: "local" }), {
-      AttributeDefinitions: [],
-      KeySchema: [],
+    const instance = new TableUpdate(new DynamoDBClient({ region: "local" }), {
       TableName: "tableName",
     });
     expect(instance).toBeInstanceOf(TableRequest);
   });
 
-  test("should build correctly", () => {
-    const instance = new TableCreate(new DynamoDBClient({ region: "local" }), {
-      AttributeDefinitions: [],
-      KeySchema: [],
-      TableName: "tableName",
-    });
-    expect(instance[BUILD]()).toEqual({
-      AttributeDefinitions: [],
-      KeySchema: [],
-      TableName: "tableName",
-    });
-  });
-
   test("should return a response", async () => {
     const scope = nock("https://localhost:8000")
-      .persist(true)
       .post("/")
       .reply(200, { TableDescription: {} });
 
-    const instance = new TableCreate(new DynamoDBClient({ region: "local" }), {
-      AttributeDefinitions: [],
-      KeySchema: [],
+    const instance = new TableUpdate(new DynamoDBClient({ region: "local" }), {
       TableName: "tableName",
     });
+
     expect(await instance.$()).toEqual({});
     scope.persist(false);
     nock.cleanAll();
@@ -55,9 +37,7 @@ describe("Table Create", () => {
       .post("/")
       .replyWithError("ECONN: Connection error");
 
-    const instance = new TableCreate(new DynamoDBClient({ region: "local" }), {
-      AttributeDefinitions: [],
-      KeySchema: [],
+    const instance = new TableUpdate(new DynamoDBClient({ region: "local" }), {
       TableName: "tableName",
     });
 
@@ -76,9 +56,7 @@ describe("Table Create", () => {
       .post("/")
       .replyWithError("Unknown");
 
-    const instance = new TableCreate(new DynamoDBClient({ region: "local" }), {
-      AttributeDefinitions: [],
-      KeySchema: [],
+    const instance = new TableUpdate(new DynamoDBClient({ region: "local" }), {
       TableName: "tableName",
     });
 

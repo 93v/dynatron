@@ -4,12 +4,10 @@ import { Request } from "../../../src/requesters/_core/items-request";
 import { BUILD } from "../../../src/utils/misc-utils";
 
 describe("Request", () => {
-  test("should throw on negative relax ratio", () => {
+  test("should default to 1 on negative relax ratio", () => {
     const instance = new Request(new DynamoDBClient({}), "");
 
-    expect(() => instance.relaxLatencies(-1)).toThrow(
-      "The ratio must be positive",
-    );
+    expect(instance.relaxLatencies(-1)).toHaveProperty("patienceRatio", 1);
   });
 
   test("should build to an expected object", () => {
