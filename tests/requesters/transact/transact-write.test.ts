@@ -12,9 +12,7 @@ let databaseClient: DynatronClient;
 let database: Dynatron;
 
 beforeAll(() => {
-  databaseClient = new DynatronClient(
-    Dynatron.optimizedClientConfigs({ region: "local" }),
-  );
+  databaseClient = new DynatronClient({});
   database = new Dynatron(databaseClient);
 });
 

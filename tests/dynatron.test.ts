@@ -49,38 +49,6 @@ describe("Database Client", () => {
     expect(dynatron).toBeInstanceOf(Dynatron);
   });
 
-  test("should return an instance of Dynatron", () => {
-    const client = new DynatronClient(
-      Dynatron.optimizedClientConfigs({ region: "local", timeout: 100 }),
-    );
-    const dynatron = new Dynatron(client);
-    expect(dynatron).toBeInstanceOf(Dynatron);
-  });
-
-  test("should return an instance of Dynatron", () => {
-    const client = new DynatronClient(
-      Dynatron.optimizedClientConfigs({
-        region: "eu-central-1",
-        timeout: undefined,
-      }),
-    );
-    const dynatron = new Dynatron(client);
-    expect(dynatron).toBeInstanceOf(Dynatron);
-  });
-
-  test("should return an instance of Dynatron", () => {
-    const client = new DynatronClient(
-      Dynatron.optimizedClientConfigs({
-        region: "eu-central-1",
-      }),
-    );
-    const dynatron = new Dynatron(client);
-    expect(dynatron).toBeInstanceOf(Dynatron);
-  });
-
-  test("should return have static method optimizedClientConfigs", () => {
-    expect(Dynatron.optimizedClientConfigs).toBeDefined();
-  });
   test("should return have static method loadProfileCredentials", () => {
     expect(Dynatron.loadProfileCredentials).toBeDefined();
   });
@@ -92,11 +60,7 @@ describe("Database Client", () => {
 });
 
 describe("Dynatron instance", () => {
-  const client = new DynatronClient(
-    Dynatron.optimizedClientConfigs({
-      region: "local",
-    }),
-  );
+  const client = new DynatronClient({});
   const dynatron = new Dynatron(client);
 
   test("should be an instance of Dynatron", async () => {

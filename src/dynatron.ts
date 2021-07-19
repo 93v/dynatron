@@ -29,7 +29,6 @@ import { TableTTLUpdate } from "./requesters/tables/tables-ttl-update";
 import { TableUpdate } from "./requesters/tables/tables-update";
 import { TransactGet } from "./requesters/transact/transact-get";
 import { TransactWrite } from "./requesters/transact/transact-write";
-import { LONG_MAX_LATENCY } from "./utils/misc-utils";
 
 export type NativeValue = Record<string, NativeAttributeValue>;
 
@@ -225,47 +224,5 @@ export class Dynatron {
         expiration: new Date(profile.aws_expiration),
       }),
     };
-  }
-
-  /**
-   * Returns an optimized config object for Dynatron Client
-   * @param config DynatronClientConfig
-   * @returns DynatronClientConfig
-   */
-  static optimizedClientConfigs(
-    config: DynatronClientConfig = {},
-  ): DynatronClientConfig {
-    const {
-      // Experiments have shown that this is a sweet spot
-      maxSockets = 256,
-      timeout = LONG_MAX_LATENCY + 1000,
-      ...optimizedConfig
-    } = config;
-
-    optimizedConfig.maxAttempts = config.maxAttempts ?? 3;
-
-    if (config.region !== "local" && config.requestHandler == undefined) {
-      const safeTimeout = Math.max(timeout, 1);
-      const safeMaxSockets = Math.max(maxSockets, 1);
-      const safeMaxFreeSockets = Math.max(Math.floor(maxSockets / 8), 1);
-      if (typeof process === "object") {
-        const { NodeHttpHandler } = require("@aws-sdk/node-http-handler");
-        const { Agent } = require("https");
-        optimizedConfig.requestHandler = new NodeHttpHandler({
-          httpsAgent: new Agent({
-            keepAlive: true,
-            rejectUnauthorized: true,
-            maxSockets: safeMaxSockets,
-            maxFreeSockets: safeMaxFreeSockets,
-            secureProtocol: "TLSv1_method",
-            ciphers: "ALL",
-          }),
-          socketTimeout: safeTimeout,
-          connectionTimeout: safeTimeout,
-        });
-      }
-    }
-
-    return optimizedConfig;
   }
 }
