@@ -47,7 +47,7 @@ export class Dynatron {
   constructor(private readonly client: DynatronClient) {}
 
   /**
-   * Switch to "Table" mode to work with standard table operations
+   * Switch to "Table" mode to work with standard item operations
    * @param tableName string
    */
   public Items(tableName: string) {
@@ -88,7 +88,7 @@ export class Dynatron {
   }
 
   /**
-   * Switch to "Batch" mode to work with the transactional operations
+   * Switch to "Batch" mode to work with the batch operations
    */
   public get Batch() {
     return {
