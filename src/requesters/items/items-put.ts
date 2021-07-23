@@ -39,7 +39,7 @@ export class Put extends Check {
    * Execute the Put request
    */
   $ = async <T = NativeValue | undefined>(): Promise<
-    ({ data: T | undefined } & Omit<PutItemOutput, "Attributes">) | undefined
+    { data: T | undefined } & Omit<PutItemOutput, "Attributes">
   > => {
     const requestInput = marshallRequestParameters<PutItemCommandInput>(
       this[BUILD](),
@@ -70,7 +70,7 @@ export class Put extends Check {
       } finally {
         shortCircuit.halt();
       }
-      return;
+      return { data: undefined };
     }, RETRY_OPTIONS);
   };
 }

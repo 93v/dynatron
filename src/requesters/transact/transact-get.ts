@@ -30,8 +30,7 @@ export class TransactGet extends Request {
    * Execute the TransactGet request
    */
   $ = async <T = NativeValue[] | undefined>(): Promise<
-    | ({ data: T | undefined } & Omit<TransactGetItemsOutput, "Responses">)
-    | undefined
+    { data: T | undefined } & Omit<TransactGetItemsOutput, "Responses">
   > => {
     const { ReturnConsumedCapacity } = marshallRequestParameters(this[BUILD]());
 
@@ -83,7 +82,7 @@ export class TransactGet extends Request {
       } finally {
         shortCircuit.halt();
       }
-      return;
+      return { data: undefined };
     }, RETRY_OPTIONS);
   };
 }

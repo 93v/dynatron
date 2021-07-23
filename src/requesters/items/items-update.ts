@@ -234,7 +234,7 @@ export class Update extends Check {
    * Execute the Update request
    */
   $ = async <T = NativeValue | undefined>(): Promise<
-    ({ data: T | undefined } & Omit<UpdateItemOutput, "Attributes">) | undefined
+    { data: T | undefined } & Omit<UpdateItemOutput, "Attributes">
   > => {
     const requestInput = marshallRequestParameters<UpdateItemCommandInput>(
       this[BUILD](),
@@ -265,7 +265,7 @@ export class Update extends Check {
       } finally {
         shortCircuit.halt();
       }
-      return;
+      return { data: undefined };
     }, RETRY_OPTIONS);
   };
 }

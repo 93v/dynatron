@@ -92,7 +92,7 @@ export class BatchWrite extends Amend {
    */
 
   $ = async <T = NativeValue[] | undefined>(): Promise<
-    ({ data: T | undefined } & BatchWriteItemOutput) | undefined
+    { data: T | undefined } & BatchWriteItemOutput
   > => {
     const { ReturnConsumedCapacity, ReturnItemCollectionMetrics } =
       marshallRequestParameters(this[BUILD]());
