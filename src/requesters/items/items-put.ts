@@ -37,11 +37,10 @@ export class Put extends Check {
 
   /**
    * Execute the Put request
-   * @param returnRawResponse boolean
    */
-  $ = async <T = NativeValue | undefined, U extends boolean = false>(
-    returnRawResponse?: U,
-  ): Promise<U extends true ? PutItemOutput : T | undefined> => {
+  $ = async <T = NativeValue | undefined>(): Promise<
+    ({ data: T | undefined } & Omit<PutItemOutput, "Attributes">) | undefined
+  > => {
     const requestInput = marshallRequestParameters<PutItemCommandInput>(
       this[BUILD](),
     );
@@ -57,11 +56,11 @@ export class Put extends Check {
           shortCircuit.launch(),
         ]);
 
-        return (
-          returnRawResponse
-            ? output
-            : requestInput.Item && unmarshall(requestInput.Item)
-        ) as any;
+        return {
+          ItemCollectionMetrics: output.ItemCollectionMetrics,
+          ConsumedCapacity: output.ConsumedCapacity,
+          data: requestInput.Item && (unmarshall(requestInput.Item) as T),
+        };
       } catch (error) {
         if (isRetryableError(error)) {
           throw error;
@@ -71,6 +70,7 @@ export class Put extends Check {
       } finally {
         shortCircuit.halt();
       }
+      return;
     }, RETRY_OPTIONS);
   };
 }

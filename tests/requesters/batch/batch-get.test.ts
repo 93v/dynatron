@@ -46,7 +46,10 @@ describe("Item BatchGet", () => {
       database.Items("tableName").get({ id: "uuid1" }),
       database.Items("tableName").get({ id: "uuid2" }),
     ]);
-    expect(await instance.$()).toEqual({});
+    expect(await instance.$()).toEqual({
+      ConsumedCapacity: [],
+      data: {},
+    });
   });
 
   test("should return an instance of BatchGet", async () => {
@@ -63,7 +66,10 @@ describe("Item BatchGet", () => {
       database.Items("tableName").get({ id: "uuid2" }),
     ]);
     expect(await instance.returnConsumedCapacity().$()).toEqual({
-      tableName: [{ id: "uuid1" }, { id: "uuid2" }],
+      ConsumedCapacity: [],
+      data: {
+        tableName: [{ id: "uuid1" }, { id: "uuid2" }],
+      },
     });
   });
 
@@ -78,7 +84,10 @@ describe("Item BatchGet", () => {
       database.Items("tableName").get({ id: "uuid1" }),
       database.Items("tableName").get({ id: "uuid2" }),
     ]);
-    expect(await instance.returnConsumedCapacity().$()).toEqual({});
+    expect(await instance.returnConsumedCapacity().$()).toEqual({
+      ConsumedCapacity: [],
+      data: {},
+    });
   });
 
   test("should return an instance of BatchGet", async () => {
@@ -101,7 +110,10 @@ describe("Item BatchGet", () => {
       databaseClient,
       keys.map((k) => database.Items("tableName").get(k)),
     );
-    expect(await instance.returnConsumedCapacity().$()).toEqual({});
+    expect(await instance.returnConsumedCapacity().$()).toEqual({
+      ConsumedCapacity: [],
+      data: {},
+    });
   });
 
   test("should return an instance of BatchGet", async () => {
@@ -120,7 +132,10 @@ describe("Item BatchGet", () => {
       databaseClient,
       keys.map((k) => database.Items("tableName").get(k)),
     );
-    expect(await instance.returnConsumedCapacity().$()).toEqual({});
+    expect(await instance.returnConsumedCapacity().$()).toEqual({
+      ConsumedCapacity: [],
+      data: {},
+    });
   });
 
   test("should return an instance of BatchGet", async () => {
@@ -139,7 +154,10 @@ describe("Item BatchGet", () => {
       databaseClient,
       keys.map((k) => database.Items("tableName").get(k)),
     );
-    expect(await instance.returnConsumedCapacity().$()).toEqual({});
+    expect(await instance.returnConsumedCapacity().$()).toEqual({
+      ConsumedCapacity: [],
+      data: {},
+    });
   });
 
   test("should return an instance of BatchGet", async () => {
@@ -155,7 +173,10 @@ describe("Item BatchGet", () => {
       databaseClient,
       keys.map((k) => database.Items("tableName").get(k)),
     );
-    expect(await instance.returnConsumedCapacity().$()).toEqual({});
+    expect(await instance.returnConsumedCapacity().$()).toEqual({
+      ConsumedCapacity: [],
+      data: {},
+    });
   });
 
   test("should return an instance of BatchGet", async () => {
@@ -168,7 +189,10 @@ describe("Item BatchGet", () => {
     };
 
     const instance = new BatchGet(databaseClient, []);
-    expect(await instance.returnConsumedCapacity().$()).toEqual({});
+    expect(await instance.returnConsumedCapacity().$()).toEqual({
+      ConsumedCapacity: [],
+      data: {},
+    });
   });
 
   test("should return an instance of BatchGet", async () => {
@@ -191,7 +215,10 @@ describe("Item BatchGet", () => {
       databaseClient,
       keys.map((k) => database.Items("tableName").get(k)),
     );
-    expect(await instance.returnConsumedCapacity().$()).toEqual({});
+    expect(await instance.returnConsumedCapacity().$()).toEqual({
+      ConsumedCapacity: [],
+      data: {},
+    });
   });
 
   test("should return an instance of BatchGet", async () => {
@@ -216,7 +243,10 @@ describe("Item BatchGet", () => {
       databaseClient,
       keys.map((k) => database.Items("tableName").get(k)),
     );
-    expect(await instance.returnConsumedCapacity().$()).toEqual({});
+    expect(await instance.returnConsumedCapacity().$()).toEqual({
+      ConsumedCapacity: [],
+      data: {},
+    });
   });
 
   test("should return an instance of BatchGet", async () => {
@@ -250,14 +280,17 @@ describe("Item BatchGet", () => {
       keys.map((k) => database.Items("tableName").get(k)),
     );
     expect(await instance.returnConsumedCapacity().$()).toEqual({
-      tableName: [
-        { id: "uuid1" },
-        { id: "uuid2" },
-        { id: "uuid1" },
-        { id: "uuid2" },
-        { id: "uuid1" },
-        { id: "uuid2" },
-      ],
+      ConsumedCapacity: [],
+      data: {
+        tableName: [
+          { id: "uuid1" },
+          { id: "uuid2" },
+          { id: "uuid1" },
+          { id: "uuid2" },
+          { id: "uuid1" },
+          { id: "uuid2" },
+        ],
+      },
     });
   });
 
@@ -292,14 +325,17 @@ describe("Item BatchGet", () => {
       keys.map((k) => database.Items("tableName").get(k)),
     );
     expect(await instance.returnConsumedCapacity().$()).toEqual({
-      tableName: [
-        { id: "uuid1" },
-        { id: "uuid2" },
-        { id: "uuid1" },
-        { id: "uuid2" },
-        { id: "uuid1" },
-        { id: "uuid2" },
-      ],
+      ConsumedCapacity: [],
+      data: {
+        tableName: [
+          { id: "uuid1" },
+          { id: "uuid2" },
+          { id: "uuid1" },
+          { id: "uuid2" },
+          { id: "uuid1" },
+          { id: "uuid2" },
+        ],
+      },
     });
   });
 
@@ -333,36 +369,17 @@ describe("Item BatchGet", () => {
       keys.map((k) => database.Items("tableName").get(k)),
     );
     expect(await instance.returnConsumedCapacity().$()).toEqual({
-      tableName: [
-        { id: "uuid1" },
-        { id: "uuid2" },
-        { id: "uuid1" },
-        { id: "uuid2" },
-        { id: "uuid1" },
-        { id: "uuid2" },
-      ],
-    });
-  });
-
-  test("should return an instance of BatchGet", async () => {
-    DynamoDBClient.prototype.send = async () => {
-      return {
-        Responses: {
-          tableName: [{ id: { S: "uuid1" } }, { id: { S: "uuid2" } }],
-        },
-        ConsumedCapacity: [{ CapacityUnits: 1 }],
-      };
-    };
-
-    const instance = new BatchGet(databaseClient, [
-      database.Items("tableName").get({ id: "uuid1" }),
-      database.Items("tableName").get({ id: "uuid2" }),
-    ]);
-    expect(await instance.$(true)).toEqual({
-      Responses: {
-        tableName: [{ id: { S: "uuid1" } }, { id: { S: "uuid2" } }],
-      },
       ConsumedCapacity: [],
+      data: {
+        tableName: [
+          { id: "uuid1" },
+          { id: "uuid2" },
+          { id: "uuid1" },
+          { id: "uuid2" },
+          { id: "uuid1" },
+          { id: "uuid2" },
+        ],
+      },
     });
   });
 

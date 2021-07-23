@@ -179,13 +179,13 @@ export class Scan extends ListFetch {
 
   /**
    * Execute the Scan request
-   * @param returnRawResponse boolean
    * @param disableRecursion boolean
    */
-  $ = async <T = NativeValue[] | undefined, U extends boolean = false>(
-    returnRawResponse?: U,
+  $ = async <T = NativeValue[] | undefined>(
     disableRecursion = false,
-  ): Promise<U extends true ? ScanOutput : T | undefined> => {
+  ): Promise<
+    ({ data: T | undefined } & Omit<ScanOutput, "Items">) | undefined
+  > => {
     const requestInput = marshallRequestParameters<ScanCommandInput>(
       this[BUILD](),
     );
@@ -270,10 +270,12 @@ export class Scan extends ListFetch {
       aggregatedOutput.Items = aggregatedOutput.Items?.slice(0, initialLimit);
       aggregatedOutput.Count = aggregatedOutput.Items?.length ?? 0;
     }
-    return (
-      returnRawResponse
-        ? aggregatedOutput
-        : aggregatedOutput.Items?.map((item) => unmarshall(item))
-    ) as any;
+    return {
+      ConsumedCapacity: aggregatedOutput.ConsumedCapacity,
+      Count: aggregatedOutput.Count,
+      LastEvaluatedKey: aggregatedOutput.LastEvaluatedKey,
+      ScannedCount: aggregatedOutput.ScannedCount,
+      data: aggregatedOutput.Items?.map((item) => unmarshall(item)) as unknown as T,
+    };
   };
 }

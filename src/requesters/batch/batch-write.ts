@@ -89,11 +89,11 @@ export class BatchWrite extends Amend {
 
   /**
    * Execute the BatchWrite request
-   * @param returnRawResponse boolean
    */
-  $ = async <T = NativeValue[] | undefined, U extends boolean = false>(
-    returnRawResponse?: U,
-  ): Promise<U extends true ? BatchWriteItemOutput : T | undefined> => {
+
+  $ = async <T = NativeValue[] | undefined>(): Promise<
+    ({ data: T | undefined } & BatchWriteItemOutput) | undefined
+  > => {
     const { ReturnConsumedCapacity, ReturnItemCollectionMetrics } =
       marshallRequestParameters(this[BUILD]());
 
@@ -173,11 +173,7 @@ export class BatchWrite extends Amend {
       }),
     );
 
-    if (returnRawResponse) {
-      return aggregatedOutput as any;
-    }
-
-    const responses: Record<string, any[]> = {};
+    const responses: Record<string, any> = {};
 
     for (const requestInput of requestInputs) {
       for (const tableName of Object.keys(requestInput.RequestItems || {})) {
@@ -190,6 +186,11 @@ export class BatchWrite extends Amend {
       }
     }
 
-    return responses as any;
+    return {
+      ConsumedCapacity: aggregatedOutput.ConsumedCapacity,
+      UnprocessedItems: aggregatedOutput.UnprocessedItems,
+      ItemCollectionMetrics: aggregatedOutput.ItemCollectionMetrics,
+      data: responses as T,
+    };
   };
 }

@@ -232,11 +232,10 @@ export class Update extends Check {
 
   /**
    * Execute the Update request
-   * @param returnRawResponse boolean
    */
-  $ = async <T = NativeValue | undefined, U extends boolean = false>(
-    returnRawResponse?: U,
-  ): Promise<U extends true ? UpdateItemOutput : T | undefined> => {
+  $ = async <T = NativeValue | undefined>(): Promise<
+    ({ data: T | undefined } & Omit<UpdateItemOutput, "Attributes">) | undefined
+  > => {
     const requestInput = marshallRequestParameters<UpdateItemCommandInput>(
       this[BUILD](),
     );
@@ -252,11 +251,11 @@ export class Update extends Check {
           shortCircuit.launch(),
         ]);
 
-        return (
-          returnRawResponse
-            ? output
-            : output.Attributes && unmarshall(output.Attributes)
-        ) as any;
+        return {
+          ConsumedCapacity: output.ConsumedCapacity,
+          ItemCollectionMetrics: output.ItemCollectionMetrics,
+          data: (output.Attributes && unmarshall(output.Attributes)) as T,
+        };
       } catch (error) {
         if (isRetryableError(error)) {
           throw error;
@@ -266,6 +265,7 @@ export class Update extends Check {
       } finally {
         shortCircuit.halt();
       }
+      return;
     }, RETRY_OPTIONS);
   };
 }

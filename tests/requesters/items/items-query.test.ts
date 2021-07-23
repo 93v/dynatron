@@ -54,12 +54,11 @@ describe("Query", () => {
       "tableName",
       equals("id", "uuid1"),
     );
-    expect(await instance.indexName("indexName").$()).toEqual([
-      { id: "uuid1" },
-      { id: "uuid2" },
-    ]);
+    expect(await instance.indexName("indexName").$()).toEqual({
+      data: [{ id: "uuid1" }, { id: "uuid2" }],
+    });
     expect(await instance.$(true)).toEqual({
-      Items: [{ id: { S: "uuid1" } }, { id: { S: "uuid2" } }],
+      data: [{ id: "uuid1" }, { id: "uuid2" }],
     });
     scope.persist(false);
     nock.cleanAll();
@@ -76,7 +75,11 @@ describe("Query", () => {
       "tableName",
       equals("id", "uuid1"),
     );
-    expect(await instance.limit(1).$()).toEqual([{ id: "uuid1" }]);
+    expect(await instance.limit(1).$()).toEqual({
+      Count: 1,
+      LastEvaluatedKey: {},
+      data: [{ id: "uuid1" }],
+    });
     scope.persist(false);
     nock.cleanAll();
   });
@@ -98,10 +101,18 @@ describe("Query", () => {
       "tableName",
       equals("id", "uuid1"),
     );
-    expect(await instance.limit(1).$(true, true)).toEqual({
-      ConsumedCapacity: { CapacityUnits: 1 },
+    expect(await instance.limit(1).$(true)).toEqual({
+      ConsumedCapacity: {
+        CapacityUnits: 1,
+        GlobalSecondaryIndexes: undefined,
+        LocalSecondaryIndexes: undefined,
+        ReadCapacityUnits: undefined,
+        Table: undefined,
+        TableName: undefined,
+        WriteCapacityUnits: undefined,
+      },
       Count: 1,
-      Items: [{ id: { S: "uuid1" } }],
+      data: [{ id: "uuid1" }],
       LastEvaluatedKey: { id: { S: "uuid1" } },
       ScannedCount: 1,
     });
@@ -127,7 +138,7 @@ describe("Query", () => {
       equals("id", "uuid1"),
     );
     expect(
-      await instance.limit(1).where(beginsWith("name", "A")).$(true, false),
+      await instance.limit(1).where(beginsWith("name", "A")).$(false),
     ).toEqual({
       ConsumedCapacity: {
         CapacityUnits: 1,
@@ -139,7 +150,7 @@ describe("Query", () => {
         WriteCapacityUnits: undefined,
       },
       Count: 1,
-      Items: [{ id: { S: "uuid1" } }],
+      data: [{ id: "uuid1" }],
       LastEvaluatedKey: {
         id: {
           S: "uuid1",

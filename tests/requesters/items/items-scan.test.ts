@@ -73,9 +73,9 @@ describe("Scan", () => {
       new DynamoDBClient({ region: "local" }),
       "tableName",
     );
-    expect(await instance.$(true, true)).toEqual({
+    expect(await instance.$(true)).toEqual({
       Count: 0,
-      Items: [],
+      data: [],
       LastEvaluatedKey: undefined,
       ScannedCount: 0,
     });
@@ -98,18 +98,7 @@ describe("Scan", () => {
     instance.totalSegments(1);
     expect(await instance.$(true)).toEqual({
       Count: 0,
-      Items: [
-        {
-          id: {
-            S: "uuid1",
-          },
-        },
-        {
-          id: {
-            S: "uuid2",
-          },
-        },
-      ],
+      data: [{ id: "uuid1" }, { id: "uuid2" }],
       LastEvaluatedKey: undefined,
       ScannedCount: 0,
     });
@@ -129,9 +118,11 @@ describe("Scan", () => {
       "tableName",
     );
     instance.totalSegments(1);
-    expect(await instance.limit(1).where(beginsWith("name", "A")).$()).toEqual([
-      { id: "uuid1" },
-    ]);
+    expect(await instance.limit(1).where(beginsWith("name", "A")).$()).toEqual({
+      data: [{ id: "uuid1" }],
+      Count: 1,
+      ScannedCount: 0,
+    });
     scope.persist(false);
     nock.cleanAll();
   });
@@ -150,7 +141,14 @@ describe("Scan", () => {
       "tableName",
     );
     instance.totalSegments(1);
-    expect(await instance.limit(1).$(false, true)).toEqual([{ id: "uuid1" }]);
+    expect(await instance.limit(1).$(true)).toEqual({
+      data: [{ id: "uuid1" }],
+      Count: 1,
+      LastEvaluatedKey: {
+        id: { S: "uuid1" },
+      },
+      ScannedCount: 0,
+    });
     scope.persist(false);
     nock.cleanAll();
   });
@@ -169,7 +167,11 @@ describe("Scan", () => {
       "tableName",
     );
     instance.totalSegments(1);
-    expect(await instance.limit(1).$()).toEqual([{ id: "uuid1" }]);
+    expect(await instance.limit(1).$()).toEqual({
+      data: [{ id: "uuid1" }],
+      Count: 1,
+      ScannedCount: 0,
+    });
     scope.persist(false);
     nock.cleanAll();
   });
@@ -189,7 +191,11 @@ describe("Scan", () => {
     instance.totalSegments(1);
     expect(
       await instance.indexName("index").start({ id: "uuid1" }).$(),
-    ).toEqual([{ id: "uuid1" }, { id: "uuid2" }]);
+    ).toEqual({
+      data: [{ id: "uuid1" }, { id: "uuid2" }],
+      Count: 0,
+      ScannedCount: 0,
+    });
     scope.persist(false);
     nock.cleanAll();
   });
@@ -207,14 +213,14 @@ describe("Scan", () => {
     instance.totalSegments(1);
     expect(await instance.segment(1).$(true)).toEqual({
       Count: 0,
-      Items: [],
+      data: [],
       ScannedCount: 0,
     });
 
     instance.disableSegments();
     expect(await instance.segment(1).$(true)).toEqual({
       Count: 0,
-      Items: [],
+      data: [],
       ScannedCount: 0,
     });
 
@@ -227,7 +233,7 @@ describe("Scan", () => {
       .persist(true)
       .post("/")
       .reply(200, {
-        Items: [{ id: { S: "uuid1" } }, { id: { S: "uuid2" } }],
+        data: [{ id: "uuid1" }, { id: "uuid2" }],
         Count: 2,
         ScannedCount: 1,
         ConsumedCapacity: { CapacityUnits: 1 },
@@ -238,8 +244,8 @@ describe("Scan", () => {
       "tableName",
     );
     instance.totalSegments(1);
-    expect(await instance.$(true, false)).toEqual({
-      Items: [{ id: { S: "uuid1" } }, { id: { S: "uuid2" } }],
+    expect(await instance.$(false)).toEqual({
+      data: [],
       Count: 2,
       ScannedCount: 1,
       ConsumedCapacity: { CapacityUnits: 1 },

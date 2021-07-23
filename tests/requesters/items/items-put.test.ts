@@ -44,11 +44,8 @@ describe("Item Put", () => {
       "tableName",
       { id: "uuid" },
     );
-    expect(await instance.$()).toEqual({ id: "uuid" });
-    expect(await instance.$(true)).toEqual({
-      Attributes: undefined,
-      ConsumedCapacity: undefined,
-      ItemCollectionMetrics: undefined,
+    expect(await instance.$()).toEqual({
+      data: { id: "uuid" },
     });
     scope.persist(false);
     nock.cleanAll();

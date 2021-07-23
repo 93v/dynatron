@@ -86,14 +86,11 @@ export class BatchGet extends Fetch {
 
   /**
    * Execute the BatchGet request
-   * @param returnRawResponse boolean
    */
-  $ = async <
-    T = Record<string, NativeValue[]> | undefined,
-    U extends boolean = false,
-  >(
-    returnRawResponse?: U,
-  ): Promise<U extends true ? BatchGetItemOutput : T | undefined> => {
+  $ = async <T = Record<string, NativeValue[]> | undefined>(): Promise<
+    | ({ data: T | undefined } & Omit<BatchGetItemOutput, "Responses">)
+    | undefined
+  > => {
     const {
       ReturnConsumedCapacity,
       ExpressionAttributeNames: globalExpressionAttributeNames,
@@ -228,10 +225,6 @@ export class BatchGet extends Fetch {
       }),
     );
 
-    if (returnRawResponse) {
-      return aggregatedOutput as any;
-    }
-
     const responses: Record<string, any> = {};
 
     if (aggregatedOutput.Responses != undefined) {
@@ -242,6 +235,10 @@ export class BatchGet extends Fetch {
       }
     }
 
-    return responses as T;
+    return {
+      ConsumedCapacity: aggregatedOutput.ConsumedCapacity,
+      UnprocessedKeys: aggregatedOutput.UnprocessedKeys,
+      data: responses as T,
+    };
   };
 }
