@@ -49,11 +49,8 @@ describe("Item TransactGet", () => {
     const instance = new TransactGet(new DynamoDBClient({ region: "local" }), [
       database.Items("tableName1").get({ id: "uuid1" }).select("value"),
     ]);
-    expect(await instance.$()).toBeUndefined();
-    expect(await instance.returnConsumedCapacity().$(true)).toEqual({
-      ConsumedCapacity: undefined,
-      Responses: undefined,
-    });
+    expect(await instance.$()).toEqual({});
+    expect(await instance.returnConsumedCapacity().$()).toEqual({});
     scope.persist(false);
     nock.cleanAll();
   });
@@ -67,10 +64,9 @@ describe("Item TransactGet", () => {
     const instance = new TransactGet(new DynamoDBClient({ region: "local" }), [
       database.Items("tableName1").get({ id: "uuid1" }).select("value"),
     ]);
-    expect(await instance.$()).toEqual([{ id: "uuid" }]);
-    expect(await instance.returnConsumedCapacity().$(true)).toEqual({
-      ConsumedCapacity: undefined,
-      Responses: [{ Item: { id: { S: "uuid" } } }],
+    expect(await instance.$()).toEqual({ data: [{ id: "uuid" }] });
+    expect(await instance.returnConsumedCapacity().$()).toEqual({
+      data: [{ id: "uuid" }],
     });
     scope.persist(false);
     nock.cleanAll();

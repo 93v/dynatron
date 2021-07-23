@@ -28,11 +28,11 @@ export class TransactGet extends Request {
 
   /**
    * Execute the TransactGet request
-   * @param returnRawResponse boolean
    */
-  $ = async <T = NativeValue[] | undefined, U extends boolean = false>(
-    returnRawResponse?: U,
-  ): Promise<U extends true ? TransactGetItemsOutput : T | undefined> => {
+  $ = async <T = NativeValue[] | undefined>(): Promise<
+    | ({ data: T | undefined } & Omit<TransactGetItemsOutput, "Responses">)
+    | undefined
+  > => {
     const { ReturnConsumedCapacity } = marshallRequestParameters(this[BUILD]());
 
     const requestInput: TransactGetItemsCommandInput = {
@@ -68,13 +68,12 @@ export class TransactGet extends Request {
           shortCircuit.launch(),
         ]);
 
-        return (
-          returnRawResponse
-            ? output
-            : output.Responses?.map(
-                (response) => response.Item && unmarshall(response.Item),
-              )
-        ) as any;
+        return {
+          ConsumedCapacity: output.ConsumedCapacity,
+          data: output.Responses?.map(
+            (response) => response.Item && unmarshall(response.Item),
+          ) as unknown as T,
+        };
       } catch (error) {
         if (isRetryableError(error)) {
           throw error;
@@ -84,6 +83,7 @@ export class TransactGet extends Request {
       } finally {
         shortCircuit.halt();
       }
+      return;
     }, RETRY_OPTIONS);
   };
 }

@@ -39,11 +39,10 @@ export class Get extends Fetch {
 
   /**
    * Execute the Get request
-   * @param returnRawResponse boolean
    */
-  $ = async <T = NativeValue | undefined, U extends boolean = false>(
-    returnRawResponse?: U,
-  ): Promise<U extends true ? GetItemOutput : T | undefined> => {
+  $ = async <T = NativeValue | undefined>(): Promise<
+    ({ data: T | undefined } & Omit<GetItemOutput, "Item">) | undefined
+  > => {
     const requestInput = marshallRequestParameters<GetItemCommandInput>(
       this[BUILD](),
     );
@@ -59,9 +58,10 @@ export class Get extends Fetch {
           shortCircuit.launch(),
         ]);
 
-        return (
-          returnRawResponse ? output : output.Item && unmarshall(output.Item)
-        ) as any;
+        return {
+          ConsumedCapacity: output.ConsumedCapacity,
+          data: (output.Item && unmarshall(output.Item)) as T,
+        };
       } catch (error) {
         if (isRetryableError(error)) {
           throw error;
@@ -71,6 +71,7 @@ export class Get extends Fetch {
       } finally {
         shortCircuit.halt();
       }
+      return;
     }, RETRY_OPTIONS);
   };
 }

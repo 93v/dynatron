@@ -75,13 +75,13 @@ export class Query extends ListFetch {
 
   /**
    * Execute the Query request
-   * @param returnRawResponse boolean
    * @param disableRecursion boolean
    */
-  $ = async <T = NativeValue[] | undefined, U extends boolean = false>(
-    returnRawResponse?: U,
+  $ = async <T = NativeValue[] | undefined>(
     disableRecursion = false,
-  ): Promise<U extends true ? QueryOutput : T | undefined> => {
+  ): Promise<
+    ({ data: T | undefined } & Omit<QueryOutput, "Items">) | undefined
+  > => {
     const requestInput = marshallRequestParameters<QueryCommandInput>(
       this[BUILD](),
     );
@@ -192,11 +192,15 @@ export class Query extends ListFetch {
           shortCircuit.halt();
         }
       }
-      return (
-        returnRawResponse
-          ? aggregatedOutput
-          : aggregatedOutput.Items?.map((item) => unmarshall(item))
-      ) as any;
+      return {
+        ConsumedCapacity: aggregatedOutput.ConsumedCapacity,
+        Count: aggregatedOutput.Count,
+        LastEvaluatedKey: aggregatedOutput.LastEvaluatedKey,
+        ScannedCount: aggregatedOutput.ScannedCount,
+        data: aggregatedOutput.Items?.map((item) =>
+          unmarshall(item),
+        ) as unknown as T,
+      };
     }, RETRY_OPTIONS);
   };
 }

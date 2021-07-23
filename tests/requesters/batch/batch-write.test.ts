@@ -32,27 +32,6 @@ describe("Item BatchWrite", () => {
     });
   });
 
-  test("should return an instance of BatchWrite", async () => {
-    DynamoDBClient.prototype.send = async () => {
-      return {};
-    };
-
-    const instance = new BatchWrite(databaseClient, [
-      database.Items("tableName").put({ id: "uuid1" }),
-      database.Items("tableName").put({ id: "uuid2" }),
-      database.Items("tableName").put({ id: "uuid3" }),
-      database.Items("tableName").put({ id: "uuid4" }),
-      database.Items("tableName").put({ id: "uuid5" }),
-    ]);
-
-    expect(
-      await instance
-        .returnConsumedCapacity()
-        .returnItemCollectionMetrics()
-        .$(true),
-    ).toEqual({ ConsumedCapacity: [] });
-  });
-
   test("should return an instance of BatchWrite", () => {
     const instance = new BatchWrite(databaseClient, []);
 
@@ -77,13 +56,16 @@ describe("Item BatchWrite", () => {
     expect(
       await instance.returnConsumedCapacity().returnItemCollectionMetrics().$(),
     ).toEqual({
-      tableName: [
-        { id: "uuid1" },
-        { id: "uuid2" },
-        { id: "uuid3" },
-        { id: "uuid4" },
-        { id: "uuid5" },
-      ],
+      ConsumedCapacity: [],
+      data: {
+        tableName: [
+          { id: "uuid1" },
+          { id: "uuid2" },
+          { id: "uuid3" },
+          { id: "uuid4" },
+          { id: "uuid5" },
+        ],
+      },
     });
   });
 
@@ -117,7 +99,8 @@ describe("Item BatchWrite", () => {
       items.map((k) => database.Items("tableName").put(k)),
     );
     expect(await instance.returnConsumedCapacity().$()).toEqual({
-      tableName: items,
+      ConsumedCapacity: [],
+      data: { tableName: items },
     });
   });
 
@@ -157,13 +140,13 @@ describe("Item BatchWrite", () => {
       items.map((k) => database.Items("tableName").put(k)),
     );
     expect(
-      await instance
-        .returnConsumedCapacity()
-        .returnItemCollectionMetrics()
-        .$(true),
+      await instance.returnConsumedCapacity().returnItemCollectionMetrics().$(),
     ).toEqual({
       ConsumedCapacity: [],
       ItemCollectionMetrics: { tableName: [] },
+      data: {
+        tableName: items.slice(-25),
+      },
     });
   });
 
@@ -203,13 +186,13 @@ describe("Item BatchWrite", () => {
       items.map((k) => database.Items("tableName").put(k)),
     );
     expect(
-      await instance
-        .returnConsumedCapacity()
-        .returnItemCollectionMetrics()
-        .$(true),
+      await instance.returnConsumedCapacity().returnItemCollectionMetrics().$(),
     ).toEqual({
       ConsumedCapacity: [],
       ItemCollectionMetrics: { tableName2: [] },
+      data: {
+        tableName: items.slice(-25),
+      },
     });
   });
 
@@ -250,60 +233,13 @@ describe("Item BatchWrite", () => {
       items.map((k) => database.Items("tableName").put(k)),
     );
     expect(
-      await instance
-        .returnConsumedCapacity()
-        .returnItemCollectionMetrics()
-        .$(true),
+      await instance.returnConsumedCapacity().returnItemCollectionMetrics().$(),
     ).toEqual({
       ConsumedCapacity: [],
       ItemCollectionMetrics: { tableName2: [] },
-    });
-  });
-
-  test("should return an instance of BatchWrite", async () => {
-    const items = Array.from({ length: 50 }).map((_, index) => ({
-      id: "uuid" + index,
-    }));
-
-    let page = 1;
-    DynamoDBClient.prototype.send = async () => {
-      page -= 1;
-      return page >= 0
-        ? {
-            Responses: {
-              tableName: [{ id: { S: "uuid1" } }, { id: { S: "uuid2" } }],
-            },
-            UnprocessedItems: {
-              tableName: items,
-            },
-            ConsumedCapacity: [],
-            ItemCollectionMetrics: {
-              tableName2: [],
-            },
-          }
-        : {
-            Responses: {
-              tableName: [{ id: { S: "uuid1" } }, { id: { S: "uuid2" } }],
-            },
-            ConsumedCapacity: [],
-            ItemCollectionMetrics: {
-              tableName2: [],
-            },
-          };
-    };
-
-    const instance = new BatchWrite(
-      databaseClient,
-      items.map((k) => database.Items("tableName").put(k)),
-    );
-    expect(
-      await instance
-        .returnConsumedCapacity()
-        .returnItemCollectionMetrics()
-        .$(true),
-    ).toEqual({
-      ConsumedCapacity: [],
-      ItemCollectionMetrics: { tableName2: [] },
+      data: {
+        tableName: items.slice(-25),
+      },
     });
   });
 
@@ -332,6 +268,53 @@ describe("Item BatchWrite", () => {
             Responses: {
               tableName: [{ id: { S: "uuid1" } }, { id: { S: "uuid2" } }],
             },
+            ConsumedCapacity: [],
+            ItemCollectionMetrics: {
+              tableName2: [],
+            },
+          };
+    };
+
+    const instance = new BatchWrite(
+      databaseClient,
+      items.map((k) => database.Items("tableName").put(k)),
+    );
+    expect(
+      await instance.returnConsumedCapacity().returnItemCollectionMetrics().$(),
+    ).toEqual({
+      ConsumedCapacity: [],
+      ItemCollectionMetrics: { tableName2: [] },
+      data: {
+        tableName: items.slice(-25),
+      },
+    });
+  });
+
+  test("should return an instance of BatchWrite", async () => {
+    const items = Array.from({ length: 50 }).map((_, index) => ({
+      id: "uuid" + index,
+    }));
+
+    let page = 1;
+    DynamoDBClient.prototype.send = async () => {
+      page -= 1;
+      return page >= 0
+        ? {
+            Responses: {
+              tableName: [{ id: { S: "uuid1" } }, { id: { S: "uuid2" } }],
+            },
+            UnprocessedItems: {
+              tableName: items,
+            },
+            ConsumedCapacity: [],
+            ItemCollectionMetrics: {
+              tableName2: [],
+            },
+          }
+        : {
+            Responses: {
+              tableName: [{ id: { S: "uuid1" } }, { id: { S: "uuid2" } }],
+            },
             ConsumedCapacity: [{ CapacityUnits: 2 }],
             ItemCollectionMetrics: {
               tableName2: [],
@@ -344,13 +327,13 @@ describe("Item BatchWrite", () => {
       items.map((k) => database.Items("tableName").put(k)),
     );
     expect(
-      await instance
-        .returnConsumedCapacity()
-        .returnItemCollectionMetrics()
-        .$(true),
+      await instance.returnConsumedCapacity().returnItemCollectionMetrics().$(),
     ).toEqual({
       ConsumedCapacity: [],
       ItemCollectionMetrics: { tableName2: [] },
+      data: {
+        tableName: items.slice(-25),
+      },
     });
   });
 
@@ -387,13 +370,13 @@ describe("Item BatchWrite", () => {
       items.map((k) => database.Items("tableName").put(k)),
     );
     expect(
-      await instance
-        .returnConsumedCapacity()
-        .returnItemCollectionMetrics()
-        .$(true),
+      await instance.returnConsumedCapacity().returnItemCollectionMetrics().$(),
     ).toEqual({
       ConsumedCapacity: [],
       ItemCollectionMetrics: { tableName: [] },
+      data: {
+        tableName: items.slice(-25),
+      },
     });
   });
 
@@ -431,13 +414,13 @@ describe("Item BatchWrite", () => {
       items.map((k) => database.Items("tableName").put(k)),
     );
     expect(
-      await instance
-        .returnConsumedCapacity()
-        .returnItemCollectionMetrics()
-        .$(true),
+      await instance.returnConsumedCapacity().returnItemCollectionMetrics().$(),
     ).toEqual({
       ConsumedCapacity: [],
       ItemCollectionMetrics: { tableName: [] },
+      data: {
+        tableName: items.slice(-25),
+      },
     });
   });
 
@@ -469,8 +452,11 @@ describe("Item BatchWrite", () => {
       databaseClient,
       items.map((k) => database.Items("tableName").put(k)),
     );
-    expect(await instance.returnConsumedCapacity().$(true)).toEqual({
+    expect(await instance.returnConsumedCapacity().$()).toEqual({
       ConsumedCapacity: [],
+      data: {
+        tableName: items.slice(-25),
+      },
     });
   });
 
