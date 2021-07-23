@@ -79,9 +79,7 @@ export class Query extends ListFetch {
    */
   $ = async <T = NativeValue[] | undefined>(
     disableRecursion = false,
-  ): Promise<
-    ({ data: T | undefined } & Omit<QueryOutput, "Items">) | undefined
-  > => {
+  ): Promise<{ data: T | undefined } & Omit<QueryOutput, "Items">> => {
     const requestInput = marshallRequestParameters<QueryCommandInput>(
       this[BUILD](),
     );

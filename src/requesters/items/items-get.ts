@@ -41,7 +41,7 @@ export class Get extends Fetch {
    * Execute the Get request
    */
   $ = async <T = NativeValue | undefined>(): Promise<
-    ({ data: T | undefined } & Omit<GetItemOutput, "Item">) | undefined
+    { data: T | undefined } & Omit<GetItemOutput, "Item">
   > => {
     const requestInput = marshallRequestParameters<GetItemCommandInput>(
       this[BUILD](),
@@ -71,7 +71,7 @@ export class Get extends Fetch {
       } finally {
         shortCircuit.halt();
       }
-      return;
+      return { data: undefined };
     }, RETRY_OPTIONS);
   };
 }

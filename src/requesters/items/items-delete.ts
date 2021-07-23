@@ -23,7 +23,7 @@ export class Delete extends Check {
    * Execute the Delete request
    */
   $ = async <T = NativeValue | undefined>(): Promise<
-    ({ data: T | undefined } & Omit<DeleteItemOutput, "Attributes">) | undefined
+    { data: T | undefined } & Omit<DeleteItemOutput, "Attributes">
   > => {
     const requestInput = marshallRequestParameters<DeleteItemCommandInput>(
       this[BUILD](),
@@ -54,7 +54,7 @@ export class Delete extends Check {
       } finally {
         shortCircuit.halt();
       }
-      return;
+      return { data: undefined };
     }, RETRY_OPTIONS);
   };
 }

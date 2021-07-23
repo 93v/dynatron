@@ -88,8 +88,7 @@ export class BatchGet extends Fetch {
    * Execute the BatchGet request
    */
   $ = async <T = Record<string, NativeValue[]> | undefined>(): Promise<
-    | ({ data: T | undefined } & Omit<BatchGetItemOutput, "Responses">)
-    | undefined
+    { data: T | undefined } & Omit<BatchGetItemOutput, "Responses">
   > => {
     const {
       ReturnConsumedCapacity,
