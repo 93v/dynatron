@@ -121,38 +121,38 @@ export class Query extends ListFetch {
         };
         try {
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { $metadata, ...output } = await Promise.race([
+          const { $metadata, ...queryOutput } = await Promise.race([
             this.databaseClient.send(new QueryCommand(input)),
             shortCircuit.launch(),
           ]);
 
-          if (output.LastEvaluatedKey == undefined || disableRecursion) {
+          if (queryOutput.LastEvaluatedKey == undefined || disableRecursion) {
             operationCompleted = true;
           } else {
-            requestInput.ExclusiveStartKey = output.LastEvaluatedKey;
-            keyAttributes = Object.keys(output.LastEvaluatedKey);
+            requestInput.ExclusiveStartKey = queryOutput.LastEvaluatedKey;
+            keyAttributes = Object.keys(queryOutput.LastEvaluatedKey);
           }
-          if (output.Items) {
+          if (queryOutput.Items) {
             aggregatedOutput.Items = [
               ...(aggregatedOutput.Items ?? []),
-              ...output.Items,
+              ...queryOutput.Items,
             ];
           }
-          if (output.Count) {
+          if (queryOutput.Count) {
             aggregatedOutput.Count =
-              (aggregatedOutput.Count ?? 0) + output.Count;
+              (aggregatedOutput.Count ?? 0) + queryOutput.Count;
           }
-          if (output.ScannedCount) {
+          if (queryOutput.ScannedCount) {
             aggregatedOutput.ScannedCount =
-              (aggregatedOutput.ScannedCount ?? 0) + output.ScannedCount;
+              (aggregatedOutput.ScannedCount ?? 0) + queryOutput.ScannedCount;
           }
-          if (output.ConsumedCapacity) {
+          if (queryOutput.ConsumedCapacity) {
             if (aggregatedOutput.ConsumedCapacity) {
               aggregatedOutput.ConsumedCapacity.CapacityUnits =
                 (aggregatedOutput.ConsumedCapacity.CapacityUnits ?? 0) +
-                (output.ConsumedCapacity.CapacityUnits ?? 0);
+                (queryOutput.ConsumedCapacity.CapacityUnits ?? 0);
             } else {
-              aggregatedOutput.ConsumedCapacity = output.ConsumedCapacity;
+              aggregatedOutput.ConsumedCapacity = queryOutput.ConsumedCapacity;
             }
           }
           if (
@@ -176,8 +176,8 @@ export class Query extends ListFetch {
             aggregatedOutput.LastEvaluatedKey = lastEvaluatedKey;
             operationCompleted = true;
           }
-          if (disableRecursion && output.LastEvaluatedKey != undefined) {
-            aggregatedOutput.LastEvaluatedKey = output.LastEvaluatedKey;
+          if (disableRecursion && queryOutput.LastEvaluatedKey != undefined) {
+            aggregatedOutput.LastEvaluatedKey = queryOutput.LastEvaluatedKey;
           }
         } catch (error) {
           if (isRetryableError(error)) {
@@ -190,14 +190,12 @@ export class Query extends ListFetch {
           shortCircuit.halt();
         }
       }
+
+      const { Items, ...output } = aggregatedOutput;
+
       return {
-        ConsumedCapacity: aggregatedOutput.ConsumedCapacity,
-        Count: aggregatedOutput.Count,
-        LastEvaluatedKey: aggregatedOutput.LastEvaluatedKey,
-        ScannedCount: aggregatedOutput.ScannedCount,
-        data: aggregatedOutput.Items?.map((item) =>
-          unmarshall(item),
-        ) as unknown as T,
+        ...output,
+        data: Items?.map((item) => unmarshall(item)) as unknown as T,
       };
     }, RETRY_OPTIONS);
   };

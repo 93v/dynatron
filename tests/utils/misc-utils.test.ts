@@ -78,6 +78,9 @@ describe("Is Retryable Error", () => {
   const customError3 = new Error("Throttling exception") as any;
   customError3.code = "ThrottlingException";
 
+  const customError4 = new Error("Throttling exception") as any;
+  customError4.name = "TooManyRequestsException";
+
   const errors: [string, Error][] = [
     [TAKING_TOO_LONG_EXCEPTION, new Error(TAKING_TOO_LONG_EXCEPTION)],
     ["retryable", customError],
@@ -86,6 +89,7 @@ describe("Is Retryable Error", () => {
     ["InternalServerError", new Error("InternalServerError")],
     ["ProvisionedThroughputExceededException", customError2],
     ["ThrottlingException", customError3],
+    ["TooManyRequestsException", customError4],
   ];
   test.each(errors)("given %1 returns true", (_, error) => {
     expect(isRetryableError(error)).toBe(true);

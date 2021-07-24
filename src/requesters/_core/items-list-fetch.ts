@@ -16,17 +16,12 @@ export class ListFetch extends Fetch {
    */
   where = (...conditions: (Condition | Condition[] | undefined)[]) => {
     if (!isConditionEmptyDeep(conditions)) {
-      this.#FilterExpressions = conditions.reduce(
-        (aggregated: Condition[], current) => {
-          return current == undefined
-            ? aggregated
-            : [
-                ...aggregated,
-                ...(Array.isArray(current) ? current : [current]),
-              ];
-        },
-        this.#FilterExpressions ?? [],
-      );
+      this.#FilterExpressions = [
+        ...(this.#FilterExpressions ?? []),
+        ...conditions
+          .flatMap((c) => (Array.isArray(c) ? c : [c]))
+          .filter((c): c is Condition => c != undefined),
+      ];
     }
     return this;
   };

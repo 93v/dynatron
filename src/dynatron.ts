@@ -174,7 +174,7 @@ export class Dynatron {
    */
   static loadProfileCredentials(profileName: string): Credentials | undefined {
     if (typeof process !== "object") {
-      return;
+      return undefined;
     }
 
     const path = require("path");
@@ -210,19 +210,17 @@ export class Dynatron {
 
     const profile = require("ini").parse(credentialsFile)[profileName];
 
-    if (profile == undefined) {
-      return;
-    }
-
-    return {
-      accessKeyId: profile.aws_access_key_id ?? "",
-      secretAccessKey: profile.aws_secret_access_key ?? "",
-      ...(profile.aws_session_token && {
-        sessionToken: profile.aws_session_token,
-      }),
-      ...(profile.aws_expiration && {
-        expiration: new Date(profile.aws_expiration),
-      }),
-    };
+    return (
+      profile && {
+        accessKeyId: profile.aws_access_key_id ?? "",
+        secretAccessKey: profile.aws_secret_access_key ?? "",
+        ...(profile.aws_session_token && {
+          sessionToken: profile.aws_session_token,
+        }),
+        ...(profile.aws_expiration && {
+          expiration: new Date(profile.aws_expiration),
+        }),
+      }
+    );
   }
 }

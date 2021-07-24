@@ -123,12 +123,12 @@ export class TransactWrite extends Amend {
       });
       try {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { $metadata, ...output } = await Promise.race([
+        const { $metadata, ...transactWriteOutput } = await Promise.race([
           this.databaseClient.send(new TransactWriteItemsCommand(requestInput)),
           shortCircuit.launch(),
         ]);
 
-        return output;
+        return transactWriteOutput;
       } catch (error) {
         if (isRetryableError(error)) {
           throw error;

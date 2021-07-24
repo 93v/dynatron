@@ -53,14 +53,14 @@ export class Get extends Fetch {
       });
       try {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { $metadata, ...output } = await Promise.race([
+        const { $metadata, Item, ...getOutput } = await Promise.race([
           this.databaseClient.send(new GetItemCommand(requestInput)),
           shortCircuit.launch(),
         ]);
 
         return {
-          ConsumedCapacity: output.ConsumedCapacity,
-          data: (output.Item && unmarshall(output.Item)) as T,
+          ...getOutput,
+          data: (Item && unmarshall(Item)) as T,
         };
       } catch (error) {
         if (isRetryableError(error)) {

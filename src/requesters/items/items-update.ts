@@ -246,15 +246,14 @@ export class Update extends Check {
       });
       try {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { $metadata, ...output } = await Promise.race([
+        const { $metadata, Attributes, ...updateOutput } = await Promise.race([
           this.databaseClient.send(new UpdateItemCommand(requestInput)),
           shortCircuit.launch(),
         ]);
 
         return {
-          ConsumedCapacity: output.ConsumedCapacity,
-          ItemCollectionMetrics: output.ItemCollectionMetrics,
-          data: (output.Attributes && unmarshall(output.Attributes)) as T,
+          ...updateOutput,
+          data: (Attributes && unmarshall(Attributes)) as T,
         };
       } catch (error) {
         if (isRetryableError(error)) {

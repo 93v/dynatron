@@ -51,14 +51,13 @@ export class Put extends Check {
       });
       try {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { $metadata, ...output } = await Promise.race([
+        const { $metadata, Attributes, ...putOutput } = await Promise.race([
           this.databaseClient.send(new PutItemCommand(requestInput)),
           shortCircuit.launch(),
         ]);
 
         return {
-          ItemCollectionMetrics: output.ItemCollectionMetrics,
-          ConsumedCapacity: output.ConsumedCapacity,
+          ...putOutput,
           data: requestInput.Item && (unmarshall(requestInput.Item) as T),
         };
       } catch (error) {

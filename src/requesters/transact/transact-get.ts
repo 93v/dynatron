@@ -62,14 +62,15 @@ export class TransactGet extends Request {
       });
       try {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { $metadata, ...output } = await Promise.race([
-          this.databaseClient.send(new TransactGetItemsCommand(requestInput)),
-          shortCircuit.launch(),
-        ]);
+        const { $metadata, Responses, ...transactGetOutput } =
+          await Promise.race([
+            this.databaseClient.send(new TransactGetItemsCommand(requestInput)),
+            shortCircuit.launch(),
+          ]);
 
         return {
-          ConsumedCapacity: output.ConsumedCapacity,
-          data: output.Responses?.map(
+          ...transactGetOutput,
+          data: Responses?.map(
             (response) => response.Item && unmarshall(response.Item),
           ) as unknown as T,
         };

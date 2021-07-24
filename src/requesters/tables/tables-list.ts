@@ -77,22 +77,21 @@ export class TableList extends TableRequest {
         });
 
         try {
-          const output = await Promise.race([
+          const { LastEvaluatedTableName, TableNames } = await Promise.race([
             this.client.send(new ListTablesCommand(requestInput)),
             shortCircuit.launch(),
           ]);
 
-          if (output.LastEvaluatedTableName == undefined) {
+          if (LastEvaluatedTableName == undefined) {
             operationCompleted = true;
           } else {
-            requestInput.ExclusiveStartTableName =
-              output.LastEvaluatedTableName;
+            requestInput.ExclusiveStartTableName = LastEvaluatedTableName;
           }
 
-          if (output.TableNames) {
+          if (TableNames) {
             aggregatedResponse.TableNames = [
               ...(aggregatedResponse.TableNames ?? []),
-              ...output.TableNames,
+              ...TableNames,
             ];
           }
 

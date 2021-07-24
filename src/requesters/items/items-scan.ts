@@ -112,33 +112,33 @@ export class Scan extends ListFetch {
         };
         try {
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { $metadata, ...output } = await Promise.race([
+          const { $metadata, ...scanOutput } = await Promise.race([
             this.databaseClient.send(new ScanCommand(input)),
             shortCircuit.launch(),
           ]);
-          if (output.LastEvaluatedKey == undefined || disableRecursion) {
+          if (scanOutput.LastEvaluatedKey == undefined || disableRecursion) {
             operationCompleted = true;
           } else {
-            requestInput.ExclusiveStartKey = output.LastEvaluatedKey;
-            keyAttributes = Object.keys(output.LastEvaluatedKey);
+            requestInput.ExclusiveStartKey = scanOutput.LastEvaluatedKey;
+            keyAttributes = Object.keys(scanOutput.LastEvaluatedKey);
           }
-          if (output.Items) {
-            response.Items = [...(response.Items ?? []), ...output.Items];
+          if (scanOutput.Items) {
+            response.Items = [...(response.Items ?? []), ...scanOutput.Items];
           }
-          if (output.Count) {
-            response.Count = (response.Count ?? 0) + output.Count;
+          if (scanOutput.Count) {
+            response.Count = (response.Count ?? 0) + scanOutput.Count;
           }
-          if (output.ScannedCount) {
+          if (scanOutput.ScannedCount) {
             response.ScannedCount =
-              (response.ScannedCount ?? 0) + output.ScannedCount;
+              (response.ScannedCount ?? 0) + scanOutput.ScannedCount;
           }
-          if (output.ConsumedCapacity) {
+          if (scanOutput.ConsumedCapacity) {
             if (response.ConsumedCapacity) {
               response.ConsumedCapacity.CapacityUnits =
                 (response.ConsumedCapacity.CapacityUnits ?? 0) +
-                (output.ConsumedCapacity.CapacityUnits ?? 0);
+                (scanOutput.ConsumedCapacity.CapacityUnits ?? 0);
             } else {
-              response.ConsumedCapacity = output.ConsumedCapacity;
+              response.ConsumedCapacity = scanOutput.ConsumedCapacity;
             }
           }
           if (
@@ -159,8 +159,8 @@ export class Scan extends ListFetch {
             response.LastEvaluatedKey = lastEvaluatedKey;
             operationCompleted = true;
           }
-          if (disableRecursion && output.LastEvaluatedKey != undefined) {
-            response.LastEvaluatedKey = output.LastEvaluatedKey;
+          if (disableRecursion && scanOutput.LastEvaluatedKey != undefined) {
+            response.LastEvaluatedKey = scanOutput.LastEvaluatedKey;
           }
         } catch (error) {
           if (isRetryableError(error)) {
@@ -239,43 +239,55 @@ export class Scan extends ListFetch {
         ),
       );
     }
-    const aggregatedOutput = outputs.reduce((aggregated, currentOutput) => {
-      const output: ScanOutput = {
-        Items: [...(aggregated.Items ?? []), ...(currentOutput.Items ?? [])],
-        Count: (aggregated.Count ?? 0) + (currentOutput.Count ?? 0),
-        ScannedCount:
-          (aggregated.ScannedCount ?? 0) + (currentOutput.ScannedCount ?? 0),
-        ...(disableRecursion
-          ? {
-              LastEvaluatedKey:
-                aggregated.LastEvaluatedKey ?? currentOutput.LastEvaluatedKey,
-            }
-          : {}),
-      };
-      if (currentOutput.ConsumedCapacity) {
-        if (aggregated.ConsumedCapacity) {
-          output.ConsumedCapacity = output.ConsumedCapacity ?? {};
-          output.ConsumedCapacity.CapacityUnits =
-            (aggregated.ConsumedCapacity.CapacityUnits ?? 0) +
-            (currentOutput.ConsumedCapacity.CapacityUnits ?? 0);
+
+    const aggregatedScanOutput: ScanOutput = {};
+
+    for (const output of outputs) {
+      aggregatedScanOutput.Items = [
+        ...(aggregatedScanOutput.Items ?? []),
+        ...(output.Items ?? []),
+      ];
+
+      aggregatedScanOutput.Count =
+        (aggregatedScanOutput.Count ?? 0) + (output.Count ?? 0);
+
+      aggregatedScanOutput.ScannedCount =
+        (aggregatedScanOutput.ScannedCount ?? 0) + (output.ScannedCount ?? 0);
+
+      aggregatedScanOutput.LastEvaluatedKey =
+        aggregatedScanOutput.LastEvaluatedKey ?? output.LastEvaluatedKey;
+
+      if (output.ConsumedCapacity) {
+        if (aggregatedScanOutput.ConsumedCapacity) {
+          aggregatedScanOutput.ConsumedCapacity.CapacityUnits =
+            (aggregatedScanOutput.ConsumedCapacity.CapacityUnits ?? 0) +
+            (output.ConsumedCapacity.CapacityUnits ?? 0);
         } else {
-          output.ConsumedCapacity = currentOutput.ConsumedCapacity;
+          aggregatedScanOutput.ConsumedCapacity = output.ConsumedCapacity;
         }
       }
-      return output;
-    }, {});
-    if (initialLimit && (aggregatedOutput.Items?.length ?? 0) >= initialLimit) {
-      aggregatedOutput.Items = aggregatedOutput.Items?.slice(0, initialLimit);
-      aggregatedOutput.Count = aggregatedOutput.Items?.length ?? 0;
     }
+
+    if (
+      initialLimit &&
+      (aggregatedScanOutput.Items?.length ?? 0) >= initialLimit
+    ) {
+      aggregatedScanOutput.Items = aggregatedScanOutput.Items?.slice(
+        0,
+        initialLimit,
+      );
+      aggregatedScanOutput.Count = aggregatedScanOutput.Items?.length ?? 0;
+    }
+
+    const { Items, LastEvaluatedKey, ...partialAggregatedScanOutput } =
+      aggregatedScanOutput;
+
     return {
-      ConsumedCapacity: aggregatedOutput.ConsumedCapacity,
-      Count: aggregatedOutput.Count,
-      LastEvaluatedKey: aggregatedOutput.LastEvaluatedKey,
-      ScannedCount: aggregatedOutput.ScannedCount,
-      data: aggregatedOutput.Items?.map((item) =>
-        unmarshall(item),
-      ) as unknown as T,
+      ...partialAggregatedScanOutput,
+      ...(LastEvaluatedKey
+        ? { LastEvaluatedKey: unmarshall(LastEvaluatedKey) }
+        : {}),
+      data: Items?.map((item) => unmarshall(item)) as unknown as T,
     };
   };
 }

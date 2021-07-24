@@ -30,7 +30,7 @@ export class BatchGet extends Fetch {
 
   private batchGetSegment = async (requestInput: BatchGetItemCommandInput) => {
     let operationCompleted = false;
-    const response: BatchGetItemOutput = {};
+    const batchGetItemOutput: BatchGetItemOutput = {};
     return AsyncRetry(async (bail, attempt) => {
       while (!operationCompleted) {
         const shortCircuit = createShortCircuit({
@@ -38,35 +38,35 @@ export class BatchGet extends Fetch {
           error: new Error(TAKING_TOO_LONG_EXCEPTION),
         });
         try {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { $metadata, ...output } = await Promise.race([
-            this.databaseClient.send(new BatchGetItemCommand(requestInput)),
-            shortCircuit.launch(),
-          ]);
+          const { ConsumedCapacity, Responses, UnprocessedKeys } =
+            await Promise.race([
+              this.databaseClient.send(new BatchGetItemCommand(requestInput)),
+              shortCircuit.launch(),
+            ]);
 
           if (
-            output.UnprocessedKeys != undefined &&
-            Object.keys(output.UnprocessedKeys).length > 0
+            UnprocessedKeys != undefined &&
+            Object.keys(UnprocessedKeys).length > 0
           ) {
-            requestInput.RequestItems = output.UnprocessedKeys;
+            requestInput.RequestItems = UnprocessedKeys;
           } else {
             operationCompleted = true;
           }
 
-          if (output.Responses != undefined) {
-            for (const tableName of Object.keys(output.Responses)) {
-              response.Responses = response.Responses ?? {};
-              response.Responses[tableName] = [
-                ...(response.Responses[tableName] ?? []),
-                ...output.Responses[tableName],
+          if (Responses != undefined) {
+            for (const tableName of Object.keys(Responses)) {
+              batchGetItemOutput.Responses = batchGetItemOutput.Responses ?? {};
+              batchGetItemOutput.Responses[tableName] = [
+                ...(batchGetItemOutput.Responses[tableName] ?? []),
+                ...Responses[tableName],
               ];
             }
           }
 
-          if (output.ConsumedCapacity != undefined) {
-            response.ConsumedCapacity = [
-              ...(response.ConsumedCapacity ?? []),
-              ...output.ConsumedCapacity,
+          if (ConsumedCapacity != undefined) {
+            batchGetItemOutput.ConsumedCapacity = [
+              ...(batchGetItemOutput.ConsumedCapacity ?? []),
+              ...ConsumedCapacity,
             ];
           }
         } catch (error) {
@@ -80,7 +80,7 @@ export class BatchGet extends Fetch {
           shortCircuit.halt();
         }
       }
-      return response;
+      return batchGetItemOutput;
     }, RETRY_OPTIONS);
   };
 
@@ -224,20 +224,21 @@ export class BatchGet extends Fetch {
       }),
     );
 
-    const responses: Record<string, any> = {};
+    const unmarshalledResponses: Record<string, NativeValue[]> = {};
 
     if (aggregatedOutput.Responses != undefined) {
       for (const tableName of Object.keys(aggregatedOutput.Responses)) {
-        responses[tableName] = aggregatedOutput.Responses[tableName].map(
-          (item) => unmarshall(item),
-        );
+        unmarshalledResponses[tableName] = aggregatedOutput.Responses[
+          tableName
+        ].map((item) => unmarshall(item));
       }
     }
 
     return {
       ConsumedCapacity: aggregatedOutput.ConsumedCapacity,
       UnprocessedKeys: aggregatedOutput.UnprocessedKeys,
-      data: responses as T,
+
+      data: unmarshalledResponses as unknown as T,
     };
   };
 }

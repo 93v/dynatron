@@ -235,23 +235,26 @@ const serializeConditionExpression = (
         typeof condition.attributePath === "string"
           ? condition.attributePath
           : condition.attributePath.attributePath;
-      const aPath = serializeAttributePath(path, prefix);
-      const aValues = condition.values.map((value) =>
+      const attributePath = serializeAttributePath(path, prefix);
+      const attributeValues = condition.values.map((value) =>
         serializeExpressionValue(value, prefix),
       );
+
       return {
         expressionString: `${
           typeof condition.attributePath !== "string" ? "size(" : ""
-        }${aPath.expressionString}${
+        }${attributePath.expressionString}${
           typeof condition.attributePath !== "string" ? ")" : ""
-        } ${condition.kind} ${aValues
+        } ${condition.kind} ${attributeValues
           .map((v) => v.name)
           .filter((t) => t.trim() !== "")
           .join(` AND `)}`,
-        expressionAttributeNames: aPath.expressionAttributeNames,
-        expressionAttributeValues: aValues.reduce(
-          (p, c) => ({ ...p, [c.name]: c.value }),
-          {},
+        expressionAttributeNames: attributePath.expressionAttributeNames,
+        expressionAttributeValues: Object.fromEntries(
+          attributeValues.map((attributeValue) => [
+            attributeValue.name,
+            attributeValue.value,
+          ]),
         ),
       };
     }
@@ -265,16 +268,18 @@ const serializeConditionExpression = (
         typeof condition.attributePath === "string"
           ? condition.attributePath
           : condition.attributePath.attributePath;
-      const aPath = serializeAttributePath(path, prefix);
-      const aValue = serializeExpressionValue(condition.value, prefix);
+      const attributePath = serializeAttributePath(path, prefix);
+      const attributeValue = serializeExpressionValue(condition.value, prefix);
       return {
         expressionString: `${
           typeof condition.attributePath !== "string" ? "size(" : ""
-        }${aPath.expressionString}${
+        }${attributePath.expressionString}${
           typeof condition.attributePath !== "string" ? ")" : ""
-        }${condition.kind}${aValue.name}`,
-        expressionAttributeNames: aPath.expressionAttributeNames,
-        expressionAttributeValues: { [aValue.name]: aValue.value },
+        }${condition.kind}${attributeValue.name}`,
+        expressionAttributeNames: attributePath.expressionAttributeNames,
+        expressionAttributeValues: {
+          [attributeValue.name]: attributeValue.value,
+        },
       };
     }
     case "IN": {
@@ -282,23 +287,25 @@ const serializeConditionExpression = (
         typeof condition.attributePath === "string"
           ? condition.attributePath
           : condition.attributePath.attributePath;
-      const aPath = serializeAttributePath(path, prefix);
-      const aValues = condition.values.map((value) =>
+      const attributePath = serializeAttributePath(path, prefix);
+      const attributeValues = condition.values.map((value) =>
         serializeExpressionValue(value, prefix),
       );
       return {
         expressionString: `${
           typeof condition.attributePath !== "string" ? "size(" : ""
-        }${aPath.expressionString}${
+        }${attributePath.expressionString}${
           typeof condition.attributePath !== "string" ? ")" : ""
-        } ${condition.kind}(${aValues
+        } ${condition.kind}(${attributeValues
           .map((v) => v.name)
           // .filter((t) => t.trim() !== "")
           .join(",")})`,
-        expressionAttributeNames: aPath.expressionAttributeNames,
-        expressionAttributeValues: aValues.reduce(
-          (p, c) => ({ ...p, [c.name]: c.value }),
-          {},
+        expressionAttributeNames: attributePath.expressionAttributeNames,
+        expressionAttributeValues: Object.fromEntries(
+          attributeValues.map((attributeValue) => [
+            attributeValue.name,
+            attributeValue.value,
+          ]),
         ),
       };
     }
@@ -332,19 +339,13 @@ const serializeConditionExpression = (
           .join(` ${condition.kind} `)}${
           condition.conditions.length > 1 && level > 0 ? ")" : ""
         }`,
-        expressionAttributeNames: serializedConditions.reduce(
-          (p, c) => ({
-            ...p,
-            ...c.expressionAttributeNames,
-          }),
+        expressionAttributeNames: Object.assign(
           {},
+          ...serializedConditions.map((c) => c.expressionAttributeNames),
         ),
-        expressionAttributeValues: serializedConditions.reduce(
-          (p, c) => ({
-            ...p,
-            ...c.expressionAttributeValues,
-          }),
+        expressionAttributeValues: Object.assign(
           {},
+          ...serializedConditions.map((c) => c.expressionAttributeValues),
         ),
       };
     }
@@ -439,21 +440,26 @@ export const marshallUpdateExpression = (
 
   for (const updateGroup of Object.keys(updateMap)) {
     const group: NativeExpressionModel[] = updateMap[updateGroup];
-    const flatGroup = group.reduce((p, c) => {
-      return {
-        expressionString: p.expressionString
-          ? `${p.expressionString}, ${c.expressionString}`
-          : c.expressionString,
-        expressionAttributeNames: {
-          ...p.expressionAttributeNames,
-          ...c.expressionAttributeNames,
-        },
-        expressionAttributeValues: {
-          ...p.expressionAttributeValues,
-          ...c.expressionAttributeValues,
-        },
+
+    const flatGroup: NativeExpressionModel = {
+      expressionString: "",
+      expressionAttributeNames: {},
+      expressionAttributeValues: {},
+    };
+
+    for (const update of group) {
+      flatGroup.expressionString = flatGroup.expressionString
+        ? `${flatGroup.expressionString}, ${update.expressionString}`
+        : update.expressionString;
+      flatGroup.expressionAttributeNames = {
+        ...flatGroup.expressionAttributeNames,
+        ...update.expressionAttributeNames,
       };
-    });
+      flatGroup.expressionAttributeValues = {
+        ...flatGroup.expressionAttributeValues,
+        ...update.expressionAttributeValues,
+      };
+    }
 
     updateObject.expressionString =
       updateObject.expressionString +

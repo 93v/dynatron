@@ -35,15 +35,14 @@ export class Delete extends Check {
       });
       try {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { $metadata, ...output } = await Promise.race([
+        const { $metadata, Attributes, ...deleteOutput } = await Promise.race([
           this.databaseClient.send(new DeleteItemCommand(requestInput)),
           shortCircuit.launch(),
         ]);
 
         return {
-          ConsumedCapacity: output.ConsumedCapacity,
-          ItemCollectionMetrics: output.ItemCollectionMetrics,
-          data: output.Attributes && (unmarshall(output.Attributes) as T),
+          ...deleteOutput,
+          data: Attributes && (unmarshall(Attributes) as T),
         };
       } catch (error) {
         if (isRetryableError(error)) {

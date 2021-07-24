@@ -32,7 +32,7 @@ export class BatchWrite extends Amend {
     requestInput: BatchWriteItemCommandInput,
   ) => {
     let operationCompleted = false;
-    const response: BatchWriteItemOutput = {};
+    const batchWriteItemOutput: BatchWriteItemOutput = {};
     return AsyncRetry(async (bail, attempt) => {
       while (!operationCompleted) {
         const shortCircuit = createShortCircuit({
@@ -40,36 +40,37 @@ export class BatchWrite extends Amend {
           error: new Error(TAKING_TOO_LONG_EXCEPTION),
         });
         try {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { $metadata, ...output } = await Promise.race([
-            this.databaseClient.send(new BatchWriteItemCommand(requestInput)),
-            shortCircuit.launch(),
-          ]);
+          const { ConsumedCapacity, ItemCollectionMetrics, UnprocessedItems } =
+            await Promise.race([
+              this.databaseClient.send(new BatchWriteItemCommand(requestInput)),
+              shortCircuit.launch(),
+            ]);
 
           if (
-            output.UnprocessedItems != undefined &&
-            Object.keys(output.UnprocessedItems).length > 0
+            UnprocessedItems != undefined &&
+            Object.keys(UnprocessedItems).length > 0
           ) {
-            requestInput.RequestItems = output.UnprocessedItems;
+            requestInput.RequestItems = UnprocessedItems;
           } else {
             operationCompleted = true;
           }
 
-          if (output.ItemCollectionMetrics != undefined) {
-            for (const tableName of Object.keys(output.ItemCollectionMetrics)) {
-              response.ItemCollectionMetrics =
-                response.ItemCollectionMetrics ?? {};
-              response.ItemCollectionMetrics[tableName] = [
-                ...(response.ItemCollectionMetrics[tableName] ?? []),
-                ...output.ItemCollectionMetrics[tableName],
+          if (ItemCollectionMetrics != undefined) {
+            for (const tableName of Object.keys(ItemCollectionMetrics)) {
+              batchWriteItemOutput.ItemCollectionMetrics =
+                batchWriteItemOutput.ItemCollectionMetrics ?? {};
+              batchWriteItemOutput.ItemCollectionMetrics[tableName] = [
+                ...(batchWriteItemOutput.ItemCollectionMetrics[tableName] ??
+                  []),
+                ...ItemCollectionMetrics[tableName],
               ];
             }
           }
 
-          if (output.ConsumedCapacity != undefined) {
-            response.ConsumedCapacity = [
-              ...(response.ConsumedCapacity ?? []),
-              ...output.ConsumedCapacity,
+          if (ConsumedCapacity != undefined) {
+            batchWriteItemOutput.ConsumedCapacity = [
+              ...(batchWriteItemOutput.ConsumedCapacity ?? []),
+              ...ConsumedCapacity,
             ];
           }
         } catch (error) {
@@ -83,14 +84,13 @@ export class BatchWrite extends Amend {
           shortCircuit.halt();
         }
       }
-      return response;
+      return batchWriteItemOutput;
     }, RETRY_OPTIONS);
   };
 
   /**
    * Execute the BatchWrite request
    */
-
   $ = async <T = NativeValue[] | undefined>(): Promise<
     { data: T | undefined } & BatchWriteItemOutput
   > => {
@@ -143,9 +143,9 @@ export class BatchWrite extends Amend {
     const aggregatedOutput: BatchWriteItemOutput = {};
     const consumedCapacityMap = {};
 
-    for (const output of outputs) {
-      if (output.ConsumedCapacity != undefined) {
-        for (const cc of output.ConsumedCapacity) {
+    for (const { ConsumedCapacity, ItemCollectionMetrics } of outputs) {
+      if (ConsumedCapacity != undefined) {
+        for (const cc of ConsumedCapacity) {
           if (cc.TableName) {
             consumedCapacityMap[cc.TableName] =
               consumedCapacityMap[cc.TableName] || 0;
@@ -154,13 +154,13 @@ export class BatchWrite extends Amend {
         }
       }
 
-      if (output.ItemCollectionMetrics != undefined) {
-        for (const tableName of Object.keys(output.ItemCollectionMetrics)) {
+      if (ItemCollectionMetrics != undefined) {
+        for (const tableName of Object.keys(ItemCollectionMetrics)) {
           aggregatedOutput.ItemCollectionMetrics =
             aggregatedOutput.ItemCollectionMetrics ?? {};
           aggregatedOutput.ItemCollectionMetrics[tableName] = [
             ...(aggregatedOutput.ItemCollectionMetrics[tableName] ?? []),
-            ...output.ItemCollectionMetrics[tableName],
+            ...ItemCollectionMetrics[tableName],
           ];
         }
       }
@@ -190,6 +190,7 @@ export class BatchWrite extends Amend {
       ConsumedCapacity: aggregatedOutput.ConsumedCapacity,
       UnprocessedItems: aggregatedOutput.UnprocessedItems,
       ItemCollectionMetrics: aggregatedOutput.ItemCollectionMetrics,
+
       data: responses as T,
     };
   };

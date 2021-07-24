@@ -38,11 +38,11 @@ export class TableDescribe extends TableRequest {
         error: new Error(TAKING_TOO_LONG_EXCEPTION),
       });
       try {
-        const output = await Promise.race([
+        const { Table } = await Promise.race([
           this.client.send(new DescribeTableCommand(requestInput)),
           shortCircuit.launch(),
         ]);
-        return output.Table;
+        return Table;
       } catch (error) {
         if (isRetryableError(error)) {
           throw error;

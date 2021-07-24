@@ -49,17 +49,12 @@ export class Check extends Amend {
    */
   if = (...conditions: (Condition | Condition[] | undefined)[]) => {
     if (!isConditionEmptyDeep(conditions)) {
-      this.#ConditionExpressions = conditions.reduce(
-        (aggregated: Condition[], current) => {
-          return current == undefined
-            ? aggregated
-            : [
-                ...aggregated,
-                ...(Array.isArray(current) ? current : [current]),
-              ];
-        },
-        this.#ConditionExpressions ?? [],
-      );
+      this.#ConditionExpressions = [
+        ...(this.#ConditionExpressions ?? []),
+        ...conditions
+          .flatMap((c) => (Array.isArray(c) ? c : [c]))
+          .filter((c): c is Condition => c != undefined),
+      ];
     }
     return this;
   };
@@ -71,7 +66,7 @@ export class Check extends Amend {
       ...(this.#ConditionExpressions?.length && {
         _ConditionExpressions: this.#ConditionExpressions,
       }),
-      ...(this.#ReturnValues && { ReturnValues: this.#ReturnValues }),
+      ReturnValues: this.#ReturnValues || "ALL_NEW",
     };
   }
 }
