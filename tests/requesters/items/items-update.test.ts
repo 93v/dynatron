@@ -44,6 +44,8 @@ describe("Item Update", () => {
         .drop("value9"),
     ).toBeInstanceOf(Update);
     expect(instance[BUILD]()).toEqual({
+      ReturnConsumedCapacity: "INDEXES",
+      ReturnValues: "ALL_NEW",
       TableName: "tableName",
       _Key: { id: "uuid" },
       _UpdateExpressions: [

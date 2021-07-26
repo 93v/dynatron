@@ -28,6 +28,8 @@ describe("Item Put", () => {
     );
 
     expect(instance[BUILD]()).toEqual({
+      ReturnConsumedCapacity: "INDEXES",
+      ReturnValues: "NONE",
       TableName: "tableName",
       _Item: { id: "uuid" },
     });

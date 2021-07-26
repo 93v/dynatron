@@ -27,6 +27,8 @@ describe("Item Delete", () => {
       { id: "uuid" },
     );
     expect(instance[BUILD]()).toEqual({
+      ReturnConsumedCapacity: "INDEXES",
+      ReturnValues: "NONE",
       TableName: "tableName",
       _Key: { id: "uuid" },
     });

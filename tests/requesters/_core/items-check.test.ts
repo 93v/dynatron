@@ -17,6 +17,7 @@ describe("Check", () => {
     expect(instance.returnValues()).toBe(instance);
 
     expect(instance[BUILD]()).toEqual({
+      ReturnConsumedCapacity: "INDEXES",
       TableName: "",
       ReturnValues: "ALL_NEW",
     });
@@ -26,6 +27,8 @@ describe("Check", () => {
     const instance = new Check(new DynamoDBClient({}), "", { id: "uuid" });
 
     expect(instance[BUILD]()).toEqual({
+      ReturnConsumedCapacity: "INDEXES",
+      ReturnValues: "NONE",
       TableName: "",
       _Key: { id: "uuid" },
     });
@@ -43,6 +46,8 @@ describe("Check", () => {
         .if([eq("id3", "uuid3"), eq("value3", 30)]),
     ).toBe(instance);
     expect(instance[BUILD]()).toEqual({
+      ReturnConsumedCapacity: "INDEXES",
+      ReturnValues: "NONE",
       TableName: "",
       _ConditionExpressions: [
         {

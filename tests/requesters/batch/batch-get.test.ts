@@ -34,6 +34,7 @@ describe("Item BatchGet", () => {
     ]);
     expect(instance[BUILD]()).toEqual({
       TableName: undefined,
+      ReturnConsumedCapacity: "INDEXES",
     });
   });
 
@@ -65,7 +66,7 @@ describe("Item BatchGet", () => {
       database.Items("tableName").get({ id: "uuid1" }),
       database.Items("tableName").get({ id: "uuid2" }),
     ]);
-    expect(await instance.returnConsumedCapacity().$()).toEqual({
+    expect(await instance.$()).toEqual({
       ConsumedCapacity: [],
       data: {
         tableName: [{ id: "uuid1" }, { id: "uuid2" }],
@@ -84,7 +85,7 @@ describe("Item BatchGet", () => {
       database.Items("tableName").get({ id: "uuid1" }),
       database.Items("tableName").get({ id: "uuid2" }),
     ]);
-    expect(await instance.returnConsumedCapacity().$()).toEqual({
+    expect(await instance.$()).toEqual({
       ConsumedCapacity: [],
       data: {},
     });
@@ -110,7 +111,7 @@ describe("Item BatchGet", () => {
       databaseClient,
       keys.map((k) => database.Items("tableName").get(k)),
     );
-    expect(await instance.returnConsumedCapacity().$()).toEqual({
+    expect(await instance.$()).toEqual({
       ConsumedCapacity: [],
       data: {},
     });
@@ -132,7 +133,7 @@ describe("Item BatchGet", () => {
       databaseClient,
       keys.map((k) => database.Items("tableName").get(k)),
     );
-    expect(await instance.returnConsumedCapacity().$()).toEqual({
+    expect(await instance.$()).toEqual({
       ConsumedCapacity: [],
       data: {},
     });
@@ -154,7 +155,7 @@ describe("Item BatchGet", () => {
       databaseClient,
       keys.map((k) => database.Items("tableName").get(k)),
     );
-    expect(await instance.returnConsumedCapacity().$()).toEqual({
+    expect(await instance.$()).toEqual({
       ConsumedCapacity: [],
       data: {},
     });
@@ -173,7 +174,7 @@ describe("Item BatchGet", () => {
       databaseClient,
       keys.map((k) => database.Items("tableName").get(k)),
     );
-    expect(await instance.returnConsumedCapacity().$()).toEqual({
+    expect(await instance.$()).toEqual({
       ConsumedCapacity: [],
       data: {},
     });
@@ -189,7 +190,7 @@ describe("Item BatchGet", () => {
     };
 
     const instance = new BatchGet(databaseClient, []);
-    expect(await instance.returnConsumedCapacity().$()).toEqual({
+    expect(await instance.$()).toEqual({
       ConsumedCapacity: [],
       data: {},
     });
@@ -215,7 +216,7 @@ describe("Item BatchGet", () => {
       databaseClient,
       keys.map((k) => database.Items("tableName").get(k)),
     );
-    expect(await instance.returnConsumedCapacity().$()).toEqual({
+    expect(await instance.$()).toEqual({
       ConsumedCapacity: [],
       data: {},
     });
@@ -243,7 +244,7 @@ describe("Item BatchGet", () => {
       databaseClient,
       keys.map((k) => database.Items("tableName").get(k)),
     );
-    expect(await instance.returnConsumedCapacity().$()).toEqual({
+    expect(await instance.$()).toEqual({
       ConsumedCapacity: [],
       data: {},
     });
@@ -279,7 +280,7 @@ describe("Item BatchGet", () => {
       databaseClient,
       keys.map((k) => database.Items("tableName").get(k)),
     );
-    expect(await instance.returnConsumedCapacity().$()).toEqual({
+    expect(await instance.$()).toEqual({
       ConsumedCapacity: [],
       data: {
         tableName: [
@@ -324,7 +325,7 @@ describe("Item BatchGet", () => {
       databaseClient,
       keys.map((k) => database.Items("tableName").get(k)),
     );
-    expect(await instance.returnConsumedCapacity().$()).toEqual({
+    expect(await instance.$()).toEqual({
       ConsumedCapacity: [],
       data: {
         tableName: [
@@ -368,7 +369,7 @@ describe("Item BatchGet", () => {
       databaseClient,
       keys.map((k) => database.Items("tableName").get(k)),
     );
-    expect(await instance.returnConsumedCapacity().$()).toEqual({
+    expect(await instance.$()).toEqual({
       ConsumedCapacity: [],
       data: {
         tableName: [

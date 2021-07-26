@@ -28,6 +28,7 @@ describe("Item BatchWrite", () => {
     const instance = new BatchWrite(databaseClient, []);
 
     expect(instance[BUILD]()).toEqual({
+      ReturnConsumedCapacity: "INDEXES",
       TableName: undefined,
     });
   });
@@ -36,6 +37,7 @@ describe("Item BatchWrite", () => {
     const instance = new BatchWrite(databaseClient, []);
 
     expect(instance[BUILD]()).toEqual({
+      ReturnConsumedCapacity: "INDEXES",
       TableName: undefined,
     });
   });
@@ -53,9 +55,7 @@ describe("Item BatchWrite", () => {
       database.Items("tableName").put({ id: "uuid5" }),
     ]);
 
-    expect(
-      await instance.returnConsumedCapacity().returnItemCollectionMetrics().$(),
-    ).toEqual({
+    expect(await instance.returnItemCollectionMetrics().$()).toEqual({
       ConsumedCapacity: [],
       data: {
         tableName: [
@@ -98,7 +98,7 @@ describe("Item BatchWrite", () => {
       databaseClient,
       items.map((k) => database.Items("tableName").put(k)),
     );
-    expect(await instance.returnConsumedCapacity().$()).toEqual({
+    expect(await instance.$()).toEqual({
       ConsumedCapacity: [],
       data: { tableName: items },
     });
@@ -139,9 +139,7 @@ describe("Item BatchWrite", () => {
       databaseClient,
       items.map((k) => database.Items("tableName").put(k)),
     );
-    expect(
-      await instance.returnConsumedCapacity().returnItemCollectionMetrics().$(),
-    ).toEqual({
+    expect(await instance.returnItemCollectionMetrics().$()).toEqual({
       ConsumedCapacity: [],
       ItemCollectionMetrics: { tableName: [] },
       data: {
@@ -185,9 +183,7 @@ describe("Item BatchWrite", () => {
       databaseClient,
       items.map((k) => database.Items("tableName").put(k)),
     );
-    expect(
-      await instance.returnConsumedCapacity().returnItemCollectionMetrics().$(),
-    ).toEqual({
+    expect(await instance.returnItemCollectionMetrics().$()).toEqual({
       ConsumedCapacity: [],
       ItemCollectionMetrics: { tableName2: [] },
       data: {
@@ -232,9 +228,7 @@ describe("Item BatchWrite", () => {
       databaseClient,
       items.map((k) => database.Items("tableName").put(k)),
     );
-    expect(
-      await instance.returnConsumedCapacity().returnItemCollectionMetrics().$(),
-    ).toEqual({
+    expect(await instance.returnItemCollectionMetrics().$()).toEqual({
       ConsumedCapacity: [],
       ItemCollectionMetrics: { tableName2: [] },
       data: {
@@ -279,9 +273,7 @@ describe("Item BatchWrite", () => {
       databaseClient,
       items.map((k) => database.Items("tableName").put(k)),
     );
-    expect(
-      await instance.returnConsumedCapacity().returnItemCollectionMetrics().$(),
-    ).toEqual({
+    expect(await instance.returnItemCollectionMetrics().$()).toEqual({
       ConsumedCapacity: [],
       ItemCollectionMetrics: { tableName2: [] },
       data: {
@@ -326,9 +318,7 @@ describe("Item BatchWrite", () => {
       databaseClient,
       items.map((k) => database.Items("tableName").put(k)),
     );
-    expect(
-      await instance.returnConsumedCapacity().returnItemCollectionMetrics().$(),
-    ).toEqual({
+    expect(await instance.returnItemCollectionMetrics().$()).toEqual({
       ConsumedCapacity: [],
       ItemCollectionMetrics: { tableName2: [] },
       data: {
@@ -369,9 +359,7 @@ describe("Item BatchWrite", () => {
       databaseClient,
       items.map((k) => database.Items("tableName").put(k)),
     );
-    expect(
-      await instance.returnConsumedCapacity().returnItemCollectionMetrics().$(),
-    ).toEqual({
+    expect(await instance.returnItemCollectionMetrics().$()).toEqual({
       ConsumedCapacity: [],
       ItemCollectionMetrics: { tableName: [] },
       data: {
@@ -413,9 +401,7 @@ describe("Item BatchWrite", () => {
       databaseClient,
       items.map((k) => database.Items("tableName").put(k)),
     );
-    expect(
-      await instance.returnConsumedCapacity().returnItemCollectionMetrics().$(),
-    ).toEqual({
+    expect(await instance.returnItemCollectionMetrics().$()).toEqual({
       ConsumedCapacity: [],
       ItemCollectionMetrics: { tableName: [] },
       data: {
@@ -452,7 +438,7 @@ describe("Item BatchWrite", () => {
       databaseClient,
       items.map((k) => database.Items("tableName").put(k)),
     );
-    expect(await instance.returnConsumedCapacity().$()).toEqual({
+    expect(await instance.$()).toEqual({
       ConsumedCapacity: [],
       data: {
         tableName: items.slice(-25),

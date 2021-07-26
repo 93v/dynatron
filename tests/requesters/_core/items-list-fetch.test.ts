@@ -18,6 +18,7 @@ describe("ListFetch", () => {
       instance.indexName("index").limit(2).start().start({ id: "id" }),
     ).toBe(instance);
     expect(instance[BUILD]()).toEqual({
+      ReturnConsumedCapacity: "INDEXES",
       TableName: "",
       IndexName: "index",
       Limit: 2,
@@ -37,6 +38,7 @@ describe("ListFetch", () => {
         .where([and([]), or(eq("id", "uuid"))]),
     ).toBe(instance);
     expect(instance[BUILD]()).toEqual({
+      ReturnConsumedCapacity: "INDEXES",
       TableName: "",
       _FilterExpressions: [
         { conditions: [], kind: "AND" },

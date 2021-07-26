@@ -13,10 +13,10 @@ describe("Request", () => {
   test("should build to an expected object", () => {
     const instance = new Request(new DynamoDBClient({}), "");
 
-    expect(instance.returnConsumedCapacity().relaxLatencies()).toBe(instance);
+    expect(instance.relaxLatencies()).toBe(instance);
     expect(instance[BUILD]()).toEqual({
       TableName: "",
-      ReturnConsumedCapacity: "TOTAL",
+      ReturnConsumedCapacity: "INDEXES",
     });
   });
 });

@@ -34,15 +34,12 @@ describe("Item TransactWrite", () => {
       database.Items("tableName4").update({ id: "uuid4" }).assign({ value: 8 }),
     ]);
     expect(
-      instance
-        .returnConsumedCapacity()
-        .clientRequestToken("token")
-        .returnItemCollectionMetrics(),
+      instance.clientRequestToken("token").returnItemCollectionMetrics(),
     ).toBeInstanceOf(TransactWrite);
     expect(instance[BUILD]()).toEqual({
       TableName: undefined,
       ClientRequestToken: "token",
-      ReturnConsumedCapacity: "TOTAL",
+      ReturnConsumedCapacity: "INDEXES",
       ReturnItemCollectionMetrics: "SIZE",
     });
   });
@@ -59,10 +56,7 @@ describe("Item TransactWrite", () => {
       database.Items("tableName4").update({ id: "uuid4" }).assign({ value: 8 }),
     ]);
     expect(
-      instance
-        .returnConsumedCapacity()
-        .clientRequestToken("token")
-        .returnItemCollectionMetrics(),
+      instance.clientRequestToken("token").returnItemCollectionMetrics(),
     ).toBeInstanceOf(TransactWrite);
     expect(await instance.$()).toEqual({});
   });

@@ -32,6 +32,7 @@ describe("Query", () => {
       instance.having(equals("id2", "uuid2")).sort("ASC").sort("DSC")[BUILD](),
     ).toEqual({
       TableName: "",
+      ReturnConsumedCapacity: "INDEXES",
       ScanIndexForward: false,
       _KeyConditionExpression: {
         kind: "AND",

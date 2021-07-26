@@ -15,6 +15,7 @@ describe("Amend", () => {
 
     expect(instance.returnItemCollectionMetrics()).toBe(instance);
     expect(instance[BUILD]()).toEqual({
+      ReturnConsumedCapacity: "INDEXES",
       TableName: "",
       ReturnItemCollectionMetrics: "SIZE",
     });

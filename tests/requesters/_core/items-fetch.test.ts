@@ -15,6 +15,7 @@ describe("Fetch", () => {
 
     expect(instance.consistentRead().select()).toBe(instance);
     expect(instance[BUILD]()).toEqual({
+      ReturnConsumedCapacity: "INDEXES",
       TableName: "",
       ConsistentRead: true,
     });
@@ -25,6 +26,7 @@ describe("Fetch", () => {
 
     expect(instance.select(undefined, "")).toBe(instance);
     expect(instance[BUILD]()).toEqual({
+      ReturnConsumedCapacity: "INDEXES",
       TableName: "",
     });
   });
@@ -34,6 +36,7 @@ describe("Fetch", () => {
 
     expect(instance.select("id")).toBe(instance);
     expect(instance[BUILD]()).toEqual({
+      ReturnConsumedCapacity: "INDEXES",
       TableName: "",
       _ProjectionExpressions: ["id"],
     });

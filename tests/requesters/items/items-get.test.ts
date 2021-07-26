@@ -27,6 +27,7 @@ describe("Item Get", () => {
       { id: "uuid" },
     );
     expect(instance[BUILD]()).toEqual({
+      ReturnConsumedCapacity: "INDEXES",
       TableName: "tableName",
       _Key: { id: "uuid" },
     });

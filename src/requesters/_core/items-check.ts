@@ -66,7 +66,9 @@ export class Check extends Amend {
       ...(this.#ConditionExpressions?.length && {
         _ConditionExpressions: this.#ConditionExpressions,
       }),
-      ...(this.#ReturnValues && { ReturnValues: this.#ReturnValues }),
+      ReturnValues:
+        this.#ReturnValues ||
+        (this.constructor.name === "Update" ? "ALL_NEW" : "NONE"),
     };
   }
 }

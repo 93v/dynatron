@@ -27,12 +27,14 @@ describe("Scan", () => {
     );
     instance.totalSegments();
     expect(instance[BUILD]()).toEqual({
+      ReturnConsumedCapacity: "INDEXES",
       TableName: "tableName",
       TotalSegments: 10,
     });
 
     instance.totalSegments(100);
     expect(instance[BUILD]()).toEqual({
+      ReturnConsumedCapacity: "INDEXES",
       TableName: "tableName",
       TotalSegments: 100,
     });
@@ -45,6 +47,7 @@ describe("Scan", () => {
     );
     instance.segment(100);
     expect(instance[BUILD]()).toEqual({
+      ReturnConsumedCapacity: "INDEXES",
       Segment: 100,
       TableName: "tableName",
       TotalSegments: 10,
@@ -58,8 +61,8 @@ describe("Scan", () => {
     );
     instance.disableSegments();
     expect(instance[BUILD]()).toEqual({
+      ReturnConsumedCapacity: "INDEXES",
       TableName: "tableName",
-      TotalSegments: undefined,
     });
   });
 
@@ -122,6 +125,7 @@ describe("Scan", () => {
       data: [{ id: "uuid1" }],
       Count: 1,
       ScannedCount: 0,
+      LastEvaluatedKey: {},
     });
     scope.persist(false);
     nock.cleanAll();
@@ -145,7 +149,7 @@ describe("Scan", () => {
       data: [{ id: "uuid1" }],
       Count: 1,
       LastEvaluatedKey: {
-        id: { S: "uuid1" },
+        id: "uuid1",
       },
       ScannedCount: 0,
     });
@@ -171,6 +175,9 @@ describe("Scan", () => {
       data: [{ id: "uuid1" }],
       Count: 1,
       ScannedCount: 0,
+      LastEvaluatedKey: {
+        id: "uuid1",
+      },
     });
     scope.persist(false);
     nock.cleanAll();
