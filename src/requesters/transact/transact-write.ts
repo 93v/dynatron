@@ -108,10 +108,9 @@ export class TransactWrite extends Amend {
                 ...(UpdateExpression && { UpdateExpression }),
               },
             };
-          case "Check":
-            return { ConditionCheck: { Key, ...baseRequestInput } };
+          // Default to Check
           default:
-            return;
+            return { ConditionCheck: { Key, ...baseRequestInput } };
         }
       }),
     };
