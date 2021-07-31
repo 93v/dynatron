@@ -1,6 +1,8 @@
+/* eslint-disable unicorn/prefer-module */
 /* eslint-disable @typescript-eslint/no-var-requires */
 const path = require("path");
 const TerserPlugin = require("terser-webpack-plugin");
+const nodeExternals = require("webpack-node-externals");
 
 module.exports = {
   entry: "./src/index.ts",
@@ -27,5 +29,10 @@ module.exports = {
     libraryTarget: "commonjs2",
     path: path.resolve(__dirname, "dist"),
   },
-  target: "node",
+  externals: [
+    nodeExternals({
+      allowlist: ["@aws-sdk/util-dynamodb", "async-retry", "ini"],
+    }),
+  ],
+  externalsPresets: { node: true, web: true },
 };

@@ -15,14 +15,14 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        node-version: [14, 15]
+        node-version: [14, 16]
         os: [ubuntu-latest, macOS-latest]
 
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
         with:
           fetch-depth: 1
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
       - run: |
@@ -31,6 +31,7 @@ jobs:
           echo "[default]" >> ~/.aws/credentials
           echo "aws_access_key_id=aws_access_key_id" >> ~/.aws/credentials
           echo -n "aws_secret_access_key=aws_secret_access_key" >> ~/.aws/credentials
+      - run: npm i -g npm
       - run: npm ci
       - run: npm run lint
       - run: npm test

@@ -1,9 +1,4 @@
-import { Credentials } from "@aws-sdk/types";
 import { Options } from "async-retry";
-import { readFileSync } from "fs";
-import { parse } from "ini";
-import { homedir } from "os";
-import path from "path";
 
 import { NativeValue } from "../dynatron";
 
@@ -21,21 +16,18 @@ export const assertNever = (object: never): never => {
   throw new Error(`Unexpected value: ${JSON.stringify(object)}`);
 };
 
-export const isRetryableError = (error: Error) =>
-  error.message === TAKING_TOO_LONG_EXCEPTION ||
-  (Object.prototype.hasOwnProperty.call(error, "retryable") &&
-    (error as any).retryable) ||
-  [
+export const isRetryableError = (error: Error) => {
+  const errorMessages = [
     "ECONN",
     "Internal Server Error",
     "InternalServerError",
     "NetworkingError",
     "Service Unavailable",
     "Throughput exceeds",
-  ].some((message) =>
-    error.toString().toUpperCase().includes(message.toUpperCase()),
-  ) ||
-  (Object.prototype.hasOwnProperty.call(error, "code") &&
+    "Too Many Requests",
+  ];
+
+  const errorCodes = new Set(
     [
       "ItemCollectionSizeLimitExceededException",
       "LimitExceededException",
@@ -43,8 +35,24 @@ export const isRetryableError = (error: Error) =>
       "RequestLimitExceeded",
       "ResourceInUseException",
       "ThrottlingException",
+      "TooManyRequestsException",
       "UnrecognizedClientException",
-    ].includes((error as any).code));
+    ].map((v) => v.toLowerCase()),
+  );
+
+  return (
+    error.message === TAKING_TOO_LONG_EXCEPTION ||
+    (Object.prototype.hasOwnProperty.call(error, "retryable") &&
+      (error as any).retryable) ||
+    errorMessages.some((message) =>
+      error.toString().toUpperCase().includes(message.toUpperCase()),
+    ) ||
+    (Object.prototype.hasOwnProperty.call(error, "code") &&
+      errorCodes.has((error as any).code.toLowerCase())) ||
+    (Object.prototype.hasOwnProperty.call(error, "name") &&
+      errorCodes.has((error as any).name.toLowerCase()))
+  );
+};
 
 export const validateKey = (key: NativeValue) => {
   const keysLength = Object.keys(key).length;
@@ -56,52 +64,11 @@ export const validateKey = (key: NativeValue) => {
   }
 };
 
-const getHomeDirectory = (): string => {
-  const {
-    HOME,
-    USERPROFILE,
-    HOMEPATH,
-    HOMEDRIVE = `C:${path.sep}`,
-  } = process.env;
-
-  if (HOME) return HOME;
-  if (USERPROFILE) return USERPROFILE;
-  if (HOMEPATH) return `${HOMEDRIVE}${HOMEPATH}`;
-
-  return homedir();
-};
-
-export const loadProfileCredentials = (
-  profileName: string,
-): Credentials | undefined => {
-  const credentialsFile = readFileSync(
-    path.join(getHomeDirectory(), ".aws", "credentials"),
-    "utf-8",
-  );
-
-  const profile = parse(credentialsFile)[profileName];
-
-  if (profile == undefined) {
-    return;
-  }
-
-  return {
-    accessKeyId: profile.aws_access_key_id ?? "",
-    secretAccessKey: profile.aws_secret_access_key ?? "",
-    ...(profile.aws_session_token && {
-      sessionToken: profile.aws_session_token,
-    }),
-    ...(profile.aws_expiration && {
-      expiration: new Date(profile.aws_expiration),
-    }),
-  };
-};
-
 export const createShortCircuit = (parameters: {
   duration: number;
   error: Error;
 }) => {
-  let timeoutReference: NodeJS.Timeout;
+  let timeoutReference: unknown;
   let launched = false;
 
   if (parameters.duration < 0) {
@@ -111,7 +78,7 @@ export const createShortCircuit = (parameters: {
   const launch = async (): Promise<never> => {
     launched = true;
     return new Promise((_, reject) => {
-      timeoutReference = global.setTimeout(() => {
+      timeoutReference = setTimeout(() => {
         reject(parameters.error);
       }, parameters.duration);
     });
@@ -121,7 +88,7 @@ export const createShortCircuit = (parameters: {
     if (!launched || timeoutReference == undefined) {
       throw new Error("Cannot halt before launching");
     }
-    clearTimeout(timeoutReference);
+    clearTimeout(timeoutReference as number);
     launched = false;
   };
 

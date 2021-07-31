@@ -1,128 +1,103 @@
-import { Dynatron } from "../src";
-import { Get } from "../src/requesters/items/1.1-get";
-import { BatchGet } from "../src/requesters/items/1.2-batch-get";
-import { Query } from "../src/requesters/items/1.3.1-query";
-import { Scan } from "../src/requesters/items/1.3.2-scan";
-import { Check } from "../src/requesters/items/2.1-check";
-import { Delete } from "../src/requesters/items/2.1.1-delete";
-import { Put } from "../src/requesters/items/2.1.2-put";
-import { Update } from "../src/requesters/items/2.1.3-update";
-import { BatchWrite } from "../src/requesters/items/2.2-batch-write";
-import { TransactWrite } from "../src/requesters/items/2.3-transact-write";
-import { TransactGet } from "../src/requesters/items/3-transact-get";
-import { TableCreate } from "../src/requesters/tables/table-create";
-import { TableDelete } from "../src/requesters/tables/table-delete";
-import { TableDescribe } from "../src/requesters/tables/table-describe";
-import { TableList } from "../src/requesters/tables/table-list";
-import { TableTTLDescribe } from "../src/requesters/tables/table-ttl-describe";
-import { TableTTLUpdate } from "../src/requesters/tables/table-ttl-update";
-import { TableUpdate } from "../src/requesters/tables/table-update";
+import { Dynatron, DynatronClient } from "../src";
+import { Get } from "../src/requesters/items/items-get";
+import { BatchGet } from "../src/requesters/batch/batch-get";
+import { Query } from "../src/requesters/items/items-query";
+import { Scan } from "../src/requesters/items/items-scan";
+import { Check } from "../src/requesters/_core/items-check";
+import { Delete } from "../src/requesters/items/items-delete";
+import { Put } from "../src/requesters/items/items-put";
+import { Update } from "../src/requesters/items/items-update";
+import { BatchWrite } from "../src/requesters/batch/batch-write";
+import { TransactWrite } from "../src/requesters/transact/transact-write";
+import { TransactGet } from "../src/requesters/transact/transact-get";
+import { TableCreate } from "../src/requesters/tables/tables-create";
+import { TableDelete } from "../src/requesters/tables/tables-delete";
+import { TableDescribe } from "../src/requesters/tables/tables-describe";
+import { TableList } from "../src/requesters/tables/tables-list";
+import { TableTTLDescribe } from "../src/requesters/tables/tables-ttl-describe";
+import { TableTTLUpdate } from "../src/requesters/tables/tables-ttl-update";
+import { TableUpdate } from "../src/requesters/tables/tables-update";
 
 describe("Database Client", () => {
   test("should return an instance of Dynatron", () => {
-    const dynatron = new Dynatron("", {});
+    const client = new DynatronClient({});
+    const dynatron = new Dynatron(client);
     expect(dynatron).toBeInstanceOf(Dynatron);
   });
 
   test("should return an instance of Dynatron", () => {
-    const dynatron = new Dynatron("", { timeout: 100 });
+    const client = new DynatronClient({ timeout: 100 });
+    const dynatron = new Dynatron(client);
     expect(dynatron).toBeInstanceOf(Dynatron);
   });
 
   test("should return an instance of Dynatron", () => {
-    const dynatron = new Dynatron("", { timeout: undefined });
+    const client = new DynatronClient({ timeout: undefined });
+    const dynatron = new Dynatron(client);
     expect(dynatron).toBeInstanceOf(Dynatron);
   });
 
   test("should return an instance of Dynatron", () => {
-    const dynatron = new Dynatron("", { region: "local" });
+    const client = new DynatronClient({ region: "local" });
+    const dynatron = new Dynatron(client);
     expect(dynatron).toBeInstanceOf(Dynatron);
   });
 
   test("should return an instance of Dynatron", () => {
-    const dynatron = new Dynatron("", { region: "local", timeout: 100 });
+    const client = new DynatronClient({ region: "local", timeout: 100 });
+    const dynatron = new Dynatron(client);
     expect(dynatron).toBeInstanceOf(Dynatron);
   });
 
-  test("should return an instance of Dynatron", () => {
-    const dynatron = new Dynatron(
-      "other1",
-      {
-        region: "eu-central-1",
-        timeout: undefined,
-      },
-      "otherInstance1",
-    );
-    expect(dynatron).toBeInstanceOf(Dynatron);
+  test("should return have static method loadProfileCredentials", () => {
+    expect(Dynatron.loadProfileCredentials).toBeDefined();
   });
 
-  test("should return an instance of Dynatron", () => {
-    const dynatron = new Dynatron(
-      "other1",
-      {
-        region: "eu-central-1",
-        timeout: 100,
-      },
-      "otherInstance2",
-    );
-    expect(dynatron).toBeInstanceOf(Dynatron);
-  });
-
-  test("should return an instance of Dynatron", () => {
-    const dynatron = new Dynatron(
-      "",
-      { region: "eu-central-1" },
-      "newInstance",
-    );
-    expect(dynatron).toBeInstanceOf(Dynatron);
-  });
-
-  test("should return an instance of Dynatron", () => {
-    const dynatron = new Dynatron("", { region: "local" }, "newInstance2");
-    expect(dynatron).toBeInstanceOf(Dynatron);
+  test("should load credentials", async () => {
+    const profile = Dynatron.loadProfileCredentials("MISSING PROFILE");
+    expect(profile).toBeUndefined();
   });
 });
 
 describe("Dynatron instance", () => {
-  const dynatron = new Dynatron("");
+  const client = new DynatronClient({});
+  const dynatron = new Dynatron(client);
+
   test("should be an instance of Dynatron", async () => {
     expect(dynatron).toBeInstanceOf(Dynatron);
   });
   test("should be an instance of BatchWrite", () => {
-    expect(dynatron.batchDelete([])).toBeInstanceOf(BatchWrite);
+    expect(dynatron.Batch.write([])).toBeInstanceOf(BatchWrite);
   });
   test("should be an instance of BatchGet", () => {
-    expect(dynatron.batchGet([])).toBeInstanceOf(BatchGet);
-  });
-  test("should be an instance of BatchWrite", () => {
-    expect(dynatron.batchPut([])).toBeInstanceOf(BatchWrite);
+    expect(dynatron.Batch.get([])).toBeInstanceOf(BatchGet);
   });
   test("should be an instance of Check", () => {
-    expect(dynatron.check({ id: "" })).toBeInstanceOf(Check);
+    expect(dynatron.Items("").check({ id: "" })).toBeInstanceOf(Check);
   });
   test("should be an instance of Delete", () => {
-    expect(dynatron.delete({ id: "" })).toBeInstanceOf(Delete);
+    expect(dynatron.Items("").delete({ id: "" })).toBeInstanceOf(Delete);
   });
   test("should be an instance of Get", () => {
-    expect(dynatron.get({ id: "1" })).toBeInstanceOf(Get);
+    expect(dynatron.Items("").get({ id: "1" })).toBeInstanceOf(Get);
   });
   test("should be an instance of Put", () => {
-    expect(dynatron.put({})).toBeInstanceOf(Put);
+    expect(dynatron.Items("").put({})).toBeInstanceOf(Put);
   });
   test("should be an instance of Query", () => {
-    expect(dynatron.query("id", "")).toBeInstanceOf(Query);
+    expect(dynatron.Items("").query("id", "")).toBeInstanceOf(Query);
   });
   test("should be an instance of Scan", () => {
-    expect(dynatron.scan()).toBeInstanceOf(Scan);
+    expect(dynatron.Items("").scan()).toBeInstanceOf(Scan);
   });
   test("should be an instance of Update", () => {
-    expect(dynatron.update({ id: "" })).toBeInstanceOf(Update);
+    expect(dynatron.Items("").update({ id: "" })).toBeInstanceOf(Update);
   });
   test("should be an instance of TransactGet", () => {
-    expect(dynatron.transactGet([])).toBeInstanceOf(TransactGet);
+    expect(dynatron.Transact.get([])).toBeInstanceOf(TransactGet);
   });
   test("should be an instance of TransactWrite", () => {
-    expect(dynatron.transactWrite([])).toBeInstanceOf(TransactWrite);
+    expect(dynatron.Transact.write([])).toBeInstanceOf(TransactWrite);
   });
   test("should be an instance of TableCreator", () => {
     expect(

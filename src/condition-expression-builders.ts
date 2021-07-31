@@ -26,10 +26,7 @@ export const and = (
   ...conditions: (Condition | Condition[])[]
 ): AndCondition => ({
   kind: "AND",
-  conditions: conditions.reduce(
-    (p: Condition[], c) => [...p, ...(Array.isArray(c) ? c : [c])],
-    [],
-  ),
+  conditions: conditions.flatMap((c) => (Array.isArray(c) ? c : [c])),
 });
 
 export const attributeExists = (
@@ -177,13 +174,10 @@ export const notEquals = (
 export const ne = notEquals;
 
 export const or = (
-  ...arguments_: (Condition | Condition[])[]
+  ...conditions: (Condition | Condition[])[]
 ): OrCondition => ({
   kind: "OR",
-  conditions: arguments_.reduce(
-    (p: Condition[], c) => [...p, ...(Array.isArray(c) ? c : [c])],
-    [],
-  ),
+  conditions: conditions.flatMap((c) => (Array.isArray(c) ? c : [c])),
 });
 
 export const size = (attributePath: string): SizeCondition => ({
@@ -193,8 +187,8 @@ export const size = (attributePath: string): SizeCondition => ({
 
 export const isConditionEmptyDeep = (
   conditions: (Condition | Condition[] | undefined)[],
-): boolean => {
-  return conditions.every((argument) => {
+): boolean =>
+  conditions.every((argument) => {
     if (argument == undefined) {
       return true;
     }
@@ -209,4 +203,3 @@ export const isConditionEmptyDeep = (
 
     return false;
   });
-};
