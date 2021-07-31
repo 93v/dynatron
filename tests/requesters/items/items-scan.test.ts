@@ -122,10 +122,10 @@ describe("Scan", () => {
     );
     instance.totalSegments(1);
     expect(await instance.limit(1).where(beginsWith("name", "A")).$()).toEqual({
+      LastEvaluatedKey: {},
       data: [{ id: "uuid1" }],
       Count: 1,
       ScannedCount: 0,
-      LastEvaluatedKey: {},
     });
     scope.persist(false);
     nock.cleanAll();
@@ -148,9 +148,7 @@ describe("Scan", () => {
     expect(await instance.limit(1).$(true)).toEqual({
       data: [{ id: "uuid1" }],
       Count: 1,
-      LastEvaluatedKey: {
-        id: "uuid1",
-      },
+      LastEvaluatedKey: { id: "uuid1" },
       ScannedCount: 0,
     });
     scope.persist(false);
@@ -174,10 +172,10 @@ describe("Scan", () => {
     expect(await instance.limit(1).$()).toEqual({
       data: [{ id: "uuid1" }],
       Count: 1,
-      ScannedCount: 0,
       LastEvaluatedKey: {
         id: "uuid1",
       },
+      ScannedCount: 0,
     });
     scope.persist(false);
     nock.cleanAll();

@@ -13,9 +13,9 @@ import {
   SHORT_MAX_LATENCY,
   TAKING_TOO_LONG_EXCEPTION,
 } from "../../utils/misc-utils";
-import { TableRequest } from "../_core/table-request";
+import { Request } from "../_core/request";
 
-export class TableDescribe extends TableRequest {
+export class TableDescribe extends Request {
   constructor(
     protected readonly client: DynamoDBClient,
     protected tableName: string,
@@ -42,7 +42,7 @@ export class TableDescribe extends TableRequest {
           this.client.send(new DescribeTableCommand(requestInput)),
           shortCircuit.launch(),
         ]);
-        return Table;
+        return { data: Table };
       } catch (error) {
         if (isRetryableError(error)) {
           throw error;
@@ -52,7 +52,7 @@ export class TableDescribe extends TableRequest {
       } finally {
         shortCircuit.halt();
       }
-      return;
+      return { data: undefined };
     }, RETRY_OPTIONS);
   };
 }

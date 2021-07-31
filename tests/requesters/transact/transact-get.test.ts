@@ -2,7 +2,7 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import nock from "nock";
 
 import { Dynatron, DynatronClient } from "../../../src";
-import { Request } from "../../../src/requesters/_core/items-request";
+import { ItemRequest } from "../../../src/requesters/_core/items-request";
 import { TransactGet } from "../../../src/requesters/transact/transact-get";
 import { BUILD } from "../../../src/utils/misc-utils";
 
@@ -20,12 +20,12 @@ beforeAll(() => {
 });
 
 describe("Item TransactGet", () => {
-  test("should return an instance of Request", () => {
+  test("should return an instance of ItemRequest", () => {
     const instance = new TransactGet(
       new DynamoDBClient({ region: "local" }),
       [],
     );
-    expect(instance).toBeInstanceOf(Request);
+    expect(instance).toBeInstanceOf(ItemRequest);
   });
 
   test("should build correctly", () => {

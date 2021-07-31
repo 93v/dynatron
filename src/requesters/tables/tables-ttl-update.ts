@@ -13,9 +13,9 @@ import {
   SHORT_MAX_LATENCY,
   TAKING_TOO_LONG_EXCEPTION,
 } from "../../utils/misc-utils";
-import { TableRequest } from "../_core/table-request";
+import { Request } from "../_core/request";
 
-export class TableTTLUpdate extends TableRequest {
+export class TableTTLUpdate extends Request {
   constructor(
     protected readonly client: DynamoDBClient,
     protected parameters: UpdateTimeToLiveInput,
@@ -42,7 +42,7 @@ export class TableTTLUpdate extends TableRequest {
           this.client.send(new UpdateTimeToLiveCommand(requestInput)),
           shortCircuit.launch(),
         ]);
-        return TimeToLiveSpecification;
+        return { data: TimeToLiveSpecification };
       } catch (error) {
         if (isRetryableError(error)) {
           throw error;
@@ -52,7 +52,7 @@ export class TableTTLUpdate extends TableRequest {
       } finally {
         shortCircuit.halt();
       }
-      return;
+      return { data: undefined };
     }, RETRY_OPTIONS);
   };
 }

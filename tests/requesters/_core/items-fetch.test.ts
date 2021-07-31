@@ -1,13 +1,13 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 
-import { Request } from "../../../src/requesters/_core/items-request";
+import { ItemRequest } from "../../../src/requesters/_core/items-request";
 import { Fetch } from "../../../src/requesters/_core/items-fetch";
 import { BUILD } from "../../../src/utils/misc-utils";
 
 describe("Fetch", () => {
-  test("should return an instance of Request", () => {
+  test("should return an instance of ItemRequest", () => {
     const instance = new Fetch(new DynamoDBClient({}), "");
-    expect(instance).toBeInstanceOf(Request);
+    expect(instance).toBeInstanceOf(ItemRequest);
   });
 
   test("should return an instance of Fetch and build to expected minimal object", () => {

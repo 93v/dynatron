@@ -1,9 +1,9 @@
 import { ReturnItemCollectionMetrics } from "@aws-sdk/client-dynamodb";
 
 import { BUILD } from "../../utils/misc-utils";
-import { Request } from "./items-request";
+import { ItemRequest } from "./items-request";
 
-export class Amend extends Request {
+export class Amend extends ItemRequest {
   #ReturnItemCollectionMetrics?: ReturnItemCollectionMetrics;
 
   /**

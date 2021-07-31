@@ -13,9 +13,9 @@ import {
   RETRY_OPTIONS,
   TAKING_TOO_LONG_EXCEPTION,
 } from "../../utils/misc-utils";
-import { TableRequest } from "../_core/table-request";
+import { Request } from "../_core/request";
 
-export class TableCreate extends TableRequest {
+export class TableCreate extends Request {
   constructor(
     protected readonly client: DynamoDBClient,
     protected parameters: CreateTableInput,
@@ -42,7 +42,7 @@ export class TableCreate extends TableRequest {
           this.client.send(new CreateTableCommand(requestInput)),
           shortCircuit.launch(),
         ]);
-        return TableDescription;
+        return { data: TableDescription };
       } catch (error) {
         if (isRetryableError(error)) {
           throw error;
@@ -52,7 +52,7 @@ export class TableCreate extends TableRequest {
       } finally {
         shortCircuit.halt();
       }
-      return;
+      return { data: undefined };
     }, RETRY_OPTIONS);
   };
 }

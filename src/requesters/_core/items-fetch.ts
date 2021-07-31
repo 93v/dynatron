@@ -1,7 +1,7 @@
 import { BUILD } from "../../utils/misc-utils";
-import { Request } from "./items-request";
+import { ItemRequest } from "./items-request";
 
-export class Fetch extends Request {
+export class Fetch extends ItemRequest {
   #ConsistentRead?: boolean;
   #ProjectionExpressions?: string[];
 

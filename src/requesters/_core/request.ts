@@ -1,4 +1,4 @@
-export class TableRequest {
+export class Request {
   protected patienceRatio = 1;
 
   /**

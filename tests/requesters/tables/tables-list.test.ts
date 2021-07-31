@@ -1,7 +1,7 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import nock from "nock";
 
-import { TableRequest } from "../../../src/requesters/_core/table-request";
+import { Request } from "../../../src/requesters/_core/request";
 import { TableList } from "../../../src/requesters/tables/tables-list";
 import { BUILD } from "../../../src/utils/misc-utils";
 
@@ -11,9 +11,9 @@ afterEach(() => {
 });
 
 describe("Table List", () => {
-  test("should return an instance of TableRequest", () => {
+  test("should return an instance of Request", () => {
     const instance = new TableList(new DynamoDBClient({ region: "local" }));
-    expect(instance).toBeInstanceOf(TableRequest);
+    expect(instance).toBeInstanceOf(Request);
   });
 
   test("should throw on negative limit", () => {
@@ -48,7 +48,9 @@ describe("Table List", () => {
 
     const instance = new TableList(new DynamoDBClient({ region: "local" }));
 
-    expect(await instance.limit(3).$()).toEqual(["table1", "table2", "table3"]);
+    expect(await instance.limit(3).$()).toEqual({
+      data: ["table1", "table2", "table3"],
+    });
     scope.persist(false);
     nock.cleanAll();
   });

@@ -14,9 +14,9 @@ import {
   RETRY_OPTIONS,
   TAKING_TOO_LONG_EXCEPTION,
 } from "../../utils/misc-utils";
-import { TableRequest } from "../_core/table-request";
+import { Request } from "../_core/request";
 
-export class TableList extends TableRequest {
+export class TableList extends Request {
   #Limit?: number;
   #ExclusiveStartTableName?: string;
 
@@ -117,7 +117,7 @@ export class TableList extends TableRequest {
           shortCircuit.halt();
         }
       }
-      return aggregatedResponse.TableNames;
+      return { data: aggregatedResponse.TableNames };
     }, RETRY_OPTIONS);
   };
 }

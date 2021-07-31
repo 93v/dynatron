@@ -138,7 +138,7 @@ export class TransactWrite extends Amend {
       } finally {
         shortCircuit.halt();
       }
-      return;
+      return {};
     }, RETRY_OPTIONS);
   };
 }

@@ -1,7 +1,7 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import nock from "nock";
 
-import { TableRequest } from "../../../src/requesters/_core/table-request";
+import { Request } from "../../../src/requesters/_core/request";
 import { TableUpdate } from "../../../src/requesters/tables/tables-update";
 
 afterEach(() => {
@@ -10,11 +10,11 @@ afterEach(() => {
 });
 
 describe("Table Update", () => {
-  test("should return an instance of TableRequest", () => {
+  test("should return an instance of Request", () => {
     const instance = new TableUpdate(new DynamoDBClient({ region: "local" }), {
       TableName: "tableName",
     });
-    expect(instance).toBeInstanceOf(TableRequest);
+    expect(instance).toBeInstanceOf(Request);
   });
 
   test("should return a response", async () => {
@@ -26,7 +26,7 @@ describe("Table Update", () => {
       TableName: "tableName",
     });
 
-    expect(await instance.$()).toEqual({});
+    expect(await instance.$()).toEqual({ data: {} });
     scope.persist(false);
     nock.cleanAll();
   });

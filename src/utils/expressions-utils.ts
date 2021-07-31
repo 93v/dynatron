@@ -46,12 +46,13 @@ export const parseAttributePath = (attributePath: string) => {
     | { type: "name"; name: string }
     | { type: "index"; index: number }
   )[] = [];
-  // eslint-disable-next-line unicorn/no-array-for-each
-  [...path].forEach((char, index, chars) => {
+
+  const chars = [...path];
+  for (const [index, char] of chars.entries()) {
     if (mode === Mode.ESCAPED) {
       buffer += char;
       mode = Mode.NORMAL;
-      return;
+      continue;
     }
 
     if (mode === Mode.LIST_INDEX) {
@@ -70,7 +71,7 @@ export const parseAttributePath = (attributePath: string) => {
         });
         buffer = "";
         mode = Mode.AFTER_LIST_INDEX;
-        return;
+        continue;
       }
 
       if (!/^\d$/.test(char)) {
@@ -79,7 +80,7 @@ export const parseAttributePath = (attributePath: string) => {
         );
       }
       buffer += char;
-      return;
+      continue;
     }
 
     if (mode === Mode.AFTER_LIST_INDEX) {
@@ -89,7 +90,7 @@ export const parseAttributePath = (attributePath: string) => {
         );
       }
       mode = char === SpecialChar.LEFT_BRACKET ? Mode.LIST_INDEX : Mode.NORMAL;
-      return;
+      continue;
     }
 
     // Normal mode
@@ -104,7 +105,7 @@ export const parseAttributePath = (attributePath: string) => {
       if (char === SpecialChar.LEFT_BRACKET) {
         mode = Mode.LIST_INDEX;
       }
-      return;
+      continue;
     }
 
     if (char === SpecialChar.ESCAPE) {
@@ -115,12 +116,12 @@ export const parseAttributePath = (attributePath: string) => {
         nextChar === SpecialChar.ESCAPE
       ) {
         mode = Mode.ESCAPED;
-        return;
+        continue;
       }
     }
 
     buffer += char;
-  });
+  }
   if (buffer.length > 0) {
     elements.push({ type: "name", name: buffer });
   }

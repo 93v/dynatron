@@ -4,22 +4,26 @@ import {
 } from "@aws-sdk/client-dynamodb";
 
 import { BUILD } from "../../utils/misc-utils";
+import { Request } from "./request";
 
-export class Request {
+export class ItemRequest extends Request {
   protected ReturnConsumedCapacity: ReturnConsumedCapacity = "INDEXES";
-  protected patienceRatio = 1;
 
   constructor(
     protected readonly databaseClient: DynamoDBClient,
     protected tableName?: string,
-  ) {}
+  ) {
+    super();
+  }
 
   /**
-   * Modifies the requests timeouts latencies by the provided ratio.
-   * @param patienceRatio number
+   * Determines the level of detail about provisioned throughput consumption in the response.
+   * @param returnConsumedCapacity "INDEXES" | "TOTAL" | "NONE"
    */
-  relaxLatencies = (patienceRatio = 1) => {
-    this.patienceRatio = patienceRatio <= 0 ? 1 : patienceRatio;
+  returnConsumedCapacity = (
+    returnConsumedCapacity: ReturnConsumedCapacity = "TOTAL",
+  ) => {
+    this.ReturnConsumedCapacity = returnConsumedCapacity;
     return this;
   };
 

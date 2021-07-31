@@ -1,7 +1,7 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import nock from "nock";
 
-import { TableRequest } from "../../../src/requesters/_core/table-request";
+import { Request } from "../../../src/requesters/_core/request";
 import { TableCreate } from "../../../src/requesters/tables/tables-create";
 import { BUILD } from "../../../src/utils/misc-utils";
 
@@ -11,13 +11,13 @@ afterEach(() => {
 });
 
 describe("Table Create", () => {
-  test("should return an instance of TableRequest", () => {
+  test("should return an instance of Request", () => {
     const instance = new TableCreate(new DynamoDBClient({ region: "local" }), {
       AttributeDefinitions: [],
       KeySchema: [],
       TableName: "tableName",
     });
-    expect(instance).toBeInstanceOf(TableRequest);
+    expect(instance).toBeInstanceOf(Request);
   });
 
   test("should build correctly", () => {
@@ -44,7 +44,7 @@ describe("Table Create", () => {
       KeySchema: [],
       TableName: "tableName",
     });
-    expect(await instance.$()).toEqual({});
+    expect(await instance.$()).toEqual({ data: {} });
     scope.persist(false);
     nock.cleanAll();
   });

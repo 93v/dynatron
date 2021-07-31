@@ -1,13 +1,13 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 
-import { Request } from "../../../src/requesters/_core/items-request";
+import { ItemRequest } from "../../../src/requesters/_core/items-request";
 import { Amend } from "../../../src/requesters/_core/items-amend";
 import { BUILD } from "../../../src/utils/misc-utils";
 
 describe("Amend", () => {
-  test("should return an instance of Request", () => {
+  test("should return an instance of ItemRequest", () => {
     const instance = new Amend(new DynamoDBClient({}), "");
-    expect(instance).toBeInstanceOf(Request);
+    expect(instance).toBeInstanceOf(ItemRequest);
   });
 
   test("should return an instance of Amend and correctly build", () => {

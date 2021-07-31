@@ -1,7 +1,7 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import nock from "nock";
 
-import { TableRequest } from "../../../src/requesters/_core/table-request";
+import { Request } from "../../../src/requesters/_core/request";
 import { TableTTLUpdate } from "../../../src/requesters/tables/tables-ttl-update";
 
 afterEach(() => {
@@ -10,7 +10,7 @@ afterEach(() => {
 });
 
 describe("Table TTL Update", () => {
-  test("should return an instance of TableRequest", () => {
+  test("should return an instance of Request", () => {
     const instance = new TableTTLUpdate(
       new DynamoDBClient({ region: "local" }),
       {
@@ -21,7 +21,7 @@ describe("Table TTL Update", () => {
         },
       },
     );
-    expect(instance).toBeInstanceOf(TableRequest);
+    expect(instance).toBeInstanceOf(Request);
   });
 
   test("should return a response with the specification", async () => {
@@ -39,7 +39,7 @@ describe("Table TTL Update", () => {
         },
       },
     );
-    expect(await instance.$()).toEqual({});
+    expect(await instance.$()).toEqual({ data: {} });
     scope.persist(false);
     nock.cleanAll();
   });

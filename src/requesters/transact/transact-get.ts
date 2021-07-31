@@ -18,10 +18,10 @@ import {
   TAKING_TOO_LONG_EXCEPTION,
 } from "../../utils/misc-utils";
 import { marshallRequestParameters } from "../../utils/request-marshaller";
-import { Request } from "../_core/items-request";
+import { ItemRequest } from "../_core/items-request";
 import { Get } from "../items/items-get";
 
-export class TransactGet extends Request {
+export class TransactGet extends ItemRequest {
   constructor(databaseClient: DynamoDBClient, private items: Get[]) {
     super(databaseClient);
   }
