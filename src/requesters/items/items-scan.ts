@@ -137,6 +137,44 @@ export class Scan extends ListFetch {
               response.ConsumedCapacity.CapacityUnits =
                 (response.ConsumedCapacity.CapacityUnits ?? 0) +
                 (scanOutput.ConsumedCapacity.CapacityUnits ?? 0);
+
+              response.ConsumedCapacity.Table = response.ConsumedCapacity
+                .Table || { CapacityUnits: 0 };
+              response.ConsumedCapacity.Table.CapacityUnits =
+                (response.ConsumedCapacity.Table?.CapacityUnits ?? 0) +
+                (scanOutput.ConsumedCapacity.Table?.CapacityUnits ?? 0);
+
+              if (input.IndexName != undefined) {
+                response.ConsumedCapacity.GlobalSecondaryIndexes = response
+                  .ConsumedCapacity.GlobalSecondaryIndexes || {
+                  [input.IndexName]: { CapacityUnits: 0 },
+                };
+                response.ConsumedCapacity.GlobalSecondaryIndexes[
+                  input.IndexName
+                ].CapacityUnits =
+                  (response.ConsumedCapacity.GlobalSecondaryIndexes[
+                    input.IndexName
+                  ].CapacityUnits ?? 0) +
+                  (scanOutput.ConsumedCapacity.GlobalSecondaryIndexes?.[
+                    input.IndexName
+                  ].CapacityUnits ?? 0);
+              }
+
+              if (input.IndexName != undefined) {
+                response.ConsumedCapacity.LocalSecondaryIndexes = response
+                  .ConsumedCapacity.LocalSecondaryIndexes || {
+                  [input.IndexName]: { CapacityUnits: 0 },
+                };
+                response.ConsumedCapacity.LocalSecondaryIndexes[
+                  input.IndexName
+                ].CapacityUnits =
+                  (response.ConsumedCapacity.LocalSecondaryIndexes[
+                    input.IndexName
+                  ].CapacityUnits ?? 0) +
+                  (scanOutput.ConsumedCapacity.LocalSecondaryIndexes?.[
+                    input.IndexName
+                  ].CapacityUnits ?? 0);
+              }
             } else {
               response.ConsumedCapacity = scanOutput.ConsumedCapacity;
             }
@@ -173,6 +211,7 @@ export class Scan extends ListFetch {
           shortCircuit.halt();
         }
       }
+
       return response;
     }, RETRY_OPTIONS);
   };
@@ -242,28 +281,69 @@ export class Scan extends ListFetch {
 
     const aggregatedScanOutput: ScanOutput = {};
 
-    for (const output of outputs) {
+    for (const scanOutput of outputs) {
       aggregatedScanOutput.Items = [
         ...(aggregatedScanOutput.Items ?? []),
-        ...(output.Items ?? []),
+        ...(scanOutput.Items ?? []),
       ];
 
       aggregatedScanOutput.Count =
-        (aggregatedScanOutput.Count ?? 0) + (output.Count ?? 0);
+        (aggregatedScanOutput.Count ?? 0) + (scanOutput.Count ?? 0);
 
       aggregatedScanOutput.ScannedCount =
-        (aggregatedScanOutput.ScannedCount ?? 0) + (output.ScannedCount ?? 0);
+        (aggregatedScanOutput.ScannedCount ?? 0) +
+        (scanOutput.ScannedCount ?? 0);
 
       aggregatedScanOutput.LastEvaluatedKey =
-        aggregatedScanOutput.LastEvaluatedKey ?? output.LastEvaluatedKey;
+        aggregatedScanOutput.LastEvaluatedKey ?? scanOutput.LastEvaluatedKey;
 
-      if (output.ConsumedCapacity) {
+      if (scanOutput.ConsumedCapacity) {
         if (aggregatedScanOutput.ConsumedCapacity) {
           aggregatedScanOutput.ConsumedCapacity.CapacityUnits =
             (aggregatedScanOutput.ConsumedCapacity.CapacityUnits ?? 0) +
-            (output.ConsumedCapacity.CapacityUnits ?? 0);
+            (scanOutput.ConsumedCapacity.CapacityUnits ?? 0);
+
+          aggregatedScanOutput.ConsumedCapacity.Table = aggregatedScanOutput
+            .ConsumedCapacity.Table || {
+            CapacityUnits: 0,
+          };
+          aggregatedScanOutput.ConsumedCapacity.Table.CapacityUnits =
+            (aggregatedScanOutput.ConsumedCapacity.Table?.CapacityUnits ?? 0) +
+            (scanOutput.ConsumedCapacity.Table?.CapacityUnits ?? 0);
+
+          if (requestInput.IndexName != undefined) {
+            aggregatedScanOutput.ConsumedCapacity.GlobalSecondaryIndexes =
+              aggregatedScanOutput.ConsumedCapacity.GlobalSecondaryIndexes || {
+                [requestInput.IndexName]: { CapacityUnits: 0 },
+              };
+            aggregatedScanOutput.ConsumedCapacity.GlobalSecondaryIndexes[
+              requestInput.IndexName
+            ].CapacityUnits =
+              (aggregatedScanOutput.ConsumedCapacity.GlobalSecondaryIndexes[
+                requestInput.IndexName
+              ].CapacityUnits ?? 0) +
+              (scanOutput.ConsumedCapacity.GlobalSecondaryIndexes?.[
+                requestInput.IndexName
+              ].CapacityUnits ?? 0);
+          }
+
+          if (requestInput.IndexName != undefined) {
+            aggregatedScanOutput.ConsumedCapacity.LocalSecondaryIndexes =
+              aggregatedScanOutput.ConsumedCapacity.LocalSecondaryIndexes || {
+                [requestInput.IndexName]: { CapacityUnits: 0 },
+              };
+            aggregatedScanOutput.ConsumedCapacity.LocalSecondaryIndexes[
+              requestInput.IndexName
+            ].CapacityUnits =
+              (aggregatedScanOutput.ConsumedCapacity.LocalSecondaryIndexes[
+                requestInput.IndexName
+              ].CapacityUnits ?? 0) +
+              (scanOutput.ConsumedCapacity.LocalSecondaryIndexes?.[
+                requestInput.IndexName
+              ].CapacityUnits ?? 0);
+          }
         } else {
-          aggregatedScanOutput.ConsumedCapacity = output.ConsumedCapacity;
+          aggregatedScanOutput.ConsumedCapacity = scanOutput.ConsumedCapacity;
         }
       }
     }

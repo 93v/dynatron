@@ -101,7 +101,7 @@ export class Query extends ListFetch {
     const FILTER_EXPRESSION_LIMIT_POWER_BASE = 5;
 
     let operationCompleted = false;
-    const aggregatedOutput: QueryOutput = {};
+    const aggregatedQueryOutput: QueryOutput = {};
 
     let keyAttributes: string[] = [];
 
@@ -133,51 +133,98 @@ export class Query extends ListFetch {
             keyAttributes = Object.keys(queryOutput.LastEvaluatedKey);
           }
           if (queryOutput.Items) {
-            aggregatedOutput.Items = [
-              ...(aggregatedOutput.Items ?? []),
+            aggregatedQueryOutput.Items = [
+              ...(aggregatedQueryOutput.Items ?? []),
               ...queryOutput.Items,
             ];
           }
           if (queryOutput.Count) {
-            aggregatedOutput.Count =
-              (aggregatedOutput.Count ?? 0) + queryOutput.Count;
+            aggregatedQueryOutput.Count =
+              (aggregatedQueryOutput.Count ?? 0) + queryOutput.Count;
           }
           if (queryOutput.ScannedCount) {
-            aggregatedOutput.ScannedCount =
-              (aggregatedOutput.ScannedCount ?? 0) + queryOutput.ScannedCount;
+            aggregatedQueryOutput.ScannedCount =
+              (aggregatedQueryOutput.ScannedCount ?? 0) +
+              queryOutput.ScannedCount;
           }
           if (queryOutput.ConsumedCapacity) {
-            if (aggregatedOutput.ConsumedCapacity) {
-              aggregatedOutput.ConsumedCapacity.CapacityUnits =
-                (aggregatedOutput.ConsumedCapacity.CapacityUnits ?? 0) +
+            if (aggregatedQueryOutput.ConsumedCapacity) {
+              aggregatedQueryOutput.ConsumedCapacity.CapacityUnits =
+                (aggregatedQueryOutput.ConsumedCapacity.CapacityUnits ?? 0) +
                 (queryOutput.ConsumedCapacity.CapacityUnits ?? 0);
+
+              aggregatedQueryOutput.ConsumedCapacity.Table =
+                aggregatedQueryOutput.ConsumedCapacity.Table || {
+                  CapacityUnits: 0,
+                };
+              aggregatedQueryOutput.ConsumedCapacity.Table.CapacityUnits =
+                (aggregatedQueryOutput.ConsumedCapacity.Table?.CapacityUnits ??
+                  0) + (queryOutput.ConsumedCapacity.Table?.CapacityUnits ?? 0);
+
+              if (requestInput.IndexName != undefined) {
+                aggregatedQueryOutput.ConsumedCapacity.GlobalSecondaryIndexes =
+                  aggregatedQueryOutput.ConsumedCapacity
+                    .GlobalSecondaryIndexes || {
+                    [requestInput.IndexName]: { CapacityUnits: 0 },
+                  };
+                aggregatedQueryOutput.ConsumedCapacity.GlobalSecondaryIndexes[
+                  requestInput.IndexName
+                ].CapacityUnits =
+                  (aggregatedQueryOutput.ConsumedCapacity
+                    .GlobalSecondaryIndexes[requestInput.IndexName]
+                    .CapacityUnits ?? 0) +
+                  (queryOutput.ConsumedCapacity.GlobalSecondaryIndexes?.[
+                    requestInput.IndexName
+                  ].CapacityUnits ?? 0);
+              }
+
+              if (requestInput.IndexName != undefined) {
+                aggregatedQueryOutput.ConsumedCapacity.LocalSecondaryIndexes =
+                  aggregatedQueryOutput.ConsumedCapacity
+                    .LocalSecondaryIndexes || {
+                    [requestInput.IndexName]: { CapacityUnits: 0 },
+                  };
+                aggregatedQueryOutput.ConsumedCapacity.LocalSecondaryIndexes[
+                  requestInput.IndexName
+                ].CapacityUnits =
+                  (aggregatedQueryOutput.ConsumedCapacity.LocalSecondaryIndexes[
+                    requestInput.IndexName
+                  ].CapacityUnits ?? 0) +
+                  (queryOutput.ConsumedCapacity.LocalSecondaryIndexes?.[
+                    requestInput.IndexName
+                  ].CapacityUnits ?? 0);
+              }
             } else {
-              aggregatedOutput.ConsumedCapacity = queryOutput.ConsumedCapacity;
+              aggregatedQueryOutput.ConsumedCapacity =
+                queryOutput.ConsumedCapacity;
             }
           }
           if (
             requestInput.Limit &&
-            aggregatedOutput.Items != undefined &&
-            aggregatedOutput.Items.length >= requestInput.Limit
+            aggregatedQueryOutput.Items != undefined &&
+            aggregatedQueryOutput.Items.length >= requestInput.Limit
           ) {
-            aggregatedOutput.Items = aggregatedOutput.Items.slice(
+            aggregatedQueryOutput.Items = aggregatedQueryOutput.Items.slice(
               0,
               requestInput.Limit,
             );
-            aggregatedOutput.Count = aggregatedOutput.Items.length;
+            aggregatedQueryOutput.Count = aggregatedQueryOutput.Items.length;
             const lastEvaluatedKey = {
-              ...aggregatedOutput.Items[aggregatedOutput.Items.length - 1],
+              ...aggregatedQueryOutput.Items[
+                aggregatedQueryOutput.Items.length - 1
+              ],
             };
             for (const key of Object.keys(lastEvaluatedKey)) {
               if (!keyAttributes.includes(key)) {
                 delete lastEvaluatedKey[key];
               }
             }
-            aggregatedOutput.LastEvaluatedKey = lastEvaluatedKey;
+            aggregatedQueryOutput.LastEvaluatedKey = lastEvaluatedKey;
             operationCompleted = true;
           }
           if (disableRecursion && queryOutput.LastEvaluatedKey != undefined) {
-            aggregatedOutput.LastEvaluatedKey = queryOutput.LastEvaluatedKey;
+            aggregatedQueryOutput.LastEvaluatedKey =
+              queryOutput.LastEvaluatedKey;
           }
         } catch (error) {
           if (isRetryableError(error)) {
@@ -191,7 +238,7 @@ export class Query extends ListFetch {
         }
       }
 
-      const { Items, ...output } = aggregatedOutput;
+      const { Items, ...output } = aggregatedQueryOutput;
 
       return {
         ...output,
