@@ -185,6 +185,28 @@ export const size = (attributePath: string): SizeCondition => ({
   attributePath,
 });
 
+export const isNullish = (attributePath: string): OrCondition => {
+  return or(
+    attributeNotExists(attributePath),
+    attributeType(attributePath, "null"),
+    // eslint-disable-next-line unicorn/no-null
+    equals(attributePath, null),
+  );
+};
+
+export const nullish = isNullish;
+
+export const isFalsy = (attributePath: string): OrCondition => {
+  return or(isNullish(attributePath), isIn(attributePath, [false, 0, -0, ""]));
+};
+
+export const falsy = isFalsy;
+
+export const isTruthy = (attributePath: string): NotCondition =>
+  not(isFalsy(attributePath));
+
+export const truthy = isTruthy;
+
 export const isConditionEmptyDeep = (
   conditions: (Condition | Condition[] | undefined)[],
 ): boolean =>

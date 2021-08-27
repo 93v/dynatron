@@ -8,12 +8,16 @@ import {
   contains,
   eq,
   equals,
+  falsy,
   greaterThan,
   greaterThanOrEquals,
   gt,
   gte,
   isConditionEmptyDeep,
+  isFalsy,
   isIn,
+  isNullish,
+  isTruthy,
   lessThan,
   lessThanOrEquals,
   lt,
@@ -21,8 +25,10 @@ import {
   ne,
   not,
   notEquals,
+  nullish,
   or,
   size,
+  truthy,
 } from "../src/condition-expression-builders";
 
 describe("Condition Expression Builders", () => {
@@ -210,5 +216,179 @@ describe("Condition Expression Builders", () => {
     expect(isConditionEmptyDeep([[or(), or()]])).toBe(true);
 
     expect(isConditionEmptyDeep([eq("path", "value")])).toBe(false);
+  });
+
+  test("should check 'isNullish'", () => {
+    expect(isNullish("name")).toEqual({
+      kind: "OR",
+      conditions: [
+        {
+          kind: "attribute_not_exists",
+          attributePath: "name",
+        },
+        {
+          kind: "attribute_type",
+          attributePath: "name",
+          value: "NULL",
+        },
+        {
+          kind: "=",
+          attributePath: "name",
+          // eslint-disable-next-line unicorn/no-null
+          value: null,
+        },
+      ],
+    });
+    expect(nullish("name")).toEqual({
+      kind: "OR",
+      conditions: [
+        {
+          kind: "attribute_not_exists",
+          attributePath: "name",
+        },
+        {
+          kind: "attribute_type",
+          attributePath: "name",
+          value: "NULL",
+        },
+        {
+          kind: "=",
+          attributePath: "name",
+          // eslint-disable-next-line unicorn/no-null
+          value: null,
+        },
+      ],
+    });
+  });
+
+  test("should check 'isFalsy'", () => {
+    expect(isFalsy("name")).toEqual({
+      kind: "OR",
+      conditions: [
+        {
+          kind: "OR",
+          conditions: [
+            {
+              kind: "attribute_not_exists",
+              attributePath: "name",
+            },
+            {
+              kind: "attribute_type",
+              attributePath: "name",
+              value: "NULL",
+            },
+            {
+              kind: "=",
+              attributePath: "name",
+              // eslint-disable-next-line unicorn/no-null
+              value: null,
+            },
+          ],
+        },
+        {
+          kind: "IN",
+          attributePath: "name",
+          values: [false, 0, -0, ""],
+        },
+      ],
+    });
+    expect(falsy("name")).toEqual({
+      kind: "OR",
+      conditions: [
+        {
+          kind: "OR",
+          conditions: [
+            {
+              kind: "attribute_not_exists",
+              attributePath: "name",
+            },
+            {
+              kind: "attribute_type",
+              attributePath: "name",
+              value: "NULL",
+            },
+            {
+              kind: "=",
+              attributePath: "name",
+              // eslint-disable-next-line unicorn/no-null
+              value: null,
+            },
+          ],
+        },
+        {
+          kind: "IN",
+          attributePath: "name",
+          values: [false, 0, -0, ""],
+        },
+      ],
+    });
+  });
+  test("should check 'isTruthy'", () => {
+    expect(isTruthy("name")).toEqual({
+      kind: "NOT",
+      condition: {
+        kind: "OR",
+        conditions: [
+          {
+            kind: "OR",
+            conditions: [
+              {
+                kind: "attribute_not_exists",
+                attributePath: "name",
+              },
+              {
+                kind: "attribute_type",
+                attributePath: "name",
+                value: "NULL",
+              },
+              {
+                kind: "=",
+                attributePath: "name",
+                // eslint-disable-next-line unicorn/no-null
+                value: null,
+              },
+            ],
+          },
+          {
+            kind: "IN",
+            attributePath: "name",
+            values: [false, 0, -0, ""],
+          },
+        ],
+      },
+    });
+    expect(truthy("name")).toEqual({
+      kind: "NOT",
+      condition: {
+        kind: "OR",
+        conditions: [
+          {
+            kind: "OR",
+            conditions: [
+              {
+                kind: "attribute_not_exists",
+                attributePath: "name",
+              },
+              {
+                kind: "attribute_type",
+                attributePath: "name",
+                value: "NULL",
+              },
+              {
+                kind: "=",
+                attributePath: "name",
+                // eslint-disable-next-line unicorn/no-null
+                value: null,
+              },
+            ],
+          },
+          {
+            kind: "IN",
+            attributePath: "name",
+            values: [false, 0, -0, ""],
+          },
+        ],
+      },
+    });
   });
 });

@@ -461,7 +461,7 @@ describe("Item BatchWrite", () => {
     );
     try {
       await instance.$();
-    } catch (error) {
+    } catch (error: unknown) {
       expect(error).toBeDefined();
     }
   });
@@ -481,7 +481,7 @@ describe("Item BatchWrite", () => {
     );
     try {
       await instance.$();
-    } catch (error) {
+    } catch (error: unknown) {
       expect(error).toBeDefined();
     }
   });
@@ -494,7 +494,7 @@ describe("Item BatchWrite", () => {
     const instance = new BatchWrite(databaseClient, []);
     try {
       await instance.$();
-    } catch (error) {
+    } catch (error: unknown) {
       expect(error).toBeDefined();
     }
   });
@@ -508,7 +508,7 @@ describe("Item BatchWrite", () => {
 
     try {
       await instance.$();
-    } catch (error) {
+    } catch (error: unknown) {
       expect(error).toBeDefined();
     }
   });

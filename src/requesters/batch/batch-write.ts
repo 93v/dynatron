@@ -73,13 +73,13 @@ export class BatchWrite extends Amend {
               ...ConsumedCapacity,
             ];
           }
-        } catch (error) {
+        } catch (error: unknown) {
           if (isRetryableError(error)) {
             throw error;
           }
           operationCompleted = true;
-          error.$input = requestInput;
-          bail(error);
+          (error as any).$input = requestInput;
+          bail(error as Error);
         } finally {
           shortCircuit.halt();
         }

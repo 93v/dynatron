@@ -69,7 +69,7 @@ describe("Item TransactWrite", () => {
     const instance = new TransactWrite(databaseClient, []);
     try {
       await instance.$();
-    } catch (error) {
+    } catch (error: unknown) {
       expect(error).toBeDefined();
     }
   });
@@ -83,7 +83,7 @@ describe("Item TransactWrite", () => {
 
     try {
       await instance.$();
-    } catch (error) {
+    } catch (error: unknown) {
       expect(error).toBeDefined();
     }
   });

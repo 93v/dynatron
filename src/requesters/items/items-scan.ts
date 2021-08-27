@@ -200,13 +200,13 @@ export class Scan extends ListFetch {
           if (disableRecursion && scanOutput.LastEvaluatedKey != undefined) {
             response.LastEvaluatedKey = scanOutput.LastEvaluatedKey;
           }
-        } catch (error) {
+        } catch (error: unknown) {
           if (isRetryableError(error)) {
             throw error;
           }
           operationCompleted = true;
-          error.$input = input;
-          bail(error);
+          (error as any).$input = input;
+          bail(error as Error);
         } finally {
           shortCircuit.halt();
         }

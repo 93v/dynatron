@@ -84,7 +84,7 @@ describe("Item TransactGet", () => {
     );
     try {
       await instance.$();
-    } catch (error) {
+    } catch (error: unknown) {
       expect(error).toBeDefined();
     }
     scope.persist(false);
@@ -103,7 +103,7 @@ describe("Item TransactGet", () => {
     );
     try {
       await instance.$();
-    } catch (error) {
+    } catch (error: unknown) {
       expect(error).toBeDefined();
     }
     scope.persist(false);
