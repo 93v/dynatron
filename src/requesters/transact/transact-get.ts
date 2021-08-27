@@ -74,12 +74,12 @@ export class TransactGet extends ItemRequest {
             (response) => response.Item && unmarshall(response.Item),
           ) as unknown as T,
         };
-      } catch (error) {
+      } catch (error: unknown) {
         if (isRetryableError(error)) {
           throw error;
         }
-        error.$input = requestInput;
-        bail(error);
+        (error as any).$input = requestInput;
+        bail(error as Error);
       } finally {
         shortCircuit.halt();
       }

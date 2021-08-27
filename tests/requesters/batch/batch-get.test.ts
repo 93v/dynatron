@@ -395,7 +395,7 @@ describe("Item BatchGet", () => {
     ]);
     try {
       await instance.$();
-    } catch (error) {
+    } catch (error: unknown) {
       expect(error).toBeDefined();
     }
   });
@@ -412,7 +412,7 @@ describe("Item BatchGet", () => {
 
     try {
       await instance.$();
-    } catch (error) {
+    } catch (error: unknown) {
       expect(error).toBeDefined();
     }
   });

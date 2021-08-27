@@ -65,7 +65,7 @@ describe("Item Delete", () => {
     );
     try {
       await instance.$();
-    } catch (error) {
+    } catch (error: unknown) {
       expect(error).toBeDefined();
     }
     scope.persist(false);
@@ -85,7 +85,7 @@ describe("Item Delete", () => {
     );
     try {
       await instance.$();
-    } catch (error) {
+    } catch (error: unknown) {
       expect(error).toBeDefined();
     }
     scope.persist(false);

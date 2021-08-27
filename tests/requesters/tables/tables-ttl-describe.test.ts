@@ -55,7 +55,7 @@ describe("Table TableTTLDescribe", () => {
 
     try {
       await instance.$();
-    } catch (error) {
+    } catch (error: unknown) {
       expect(error).toBeDefined();
     }
     scope.persist(false);
@@ -75,7 +75,7 @@ describe("Table TableTTLDescribe", () => {
 
     try {
       await instance.$();
-    } catch (error) {
+    } catch (error: unknown) {
       expect(error).toBeDefined();
     }
     scope.persist(false);

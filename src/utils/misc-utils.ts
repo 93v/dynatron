@@ -16,7 +16,7 @@ export const assertNever = (object: never): never => {
   throw new Error(`Unexpected value: ${JSON.stringify(object)}`);
 };
 
-export const isRetryableError = (error: Error) => {
+export const isRetryableError = (error: unknown) => {
   const errorMessages = [
     "ECONN",
     "Internal Server Error",
@@ -41,11 +41,13 @@ export const isRetryableError = (error: Error) => {
   );
 
   return (
-    error.message === TAKING_TOO_LONG_EXCEPTION ||
+    (error instanceof Error && error.message === TAKING_TOO_LONG_EXCEPTION) ||
     (Object.prototype.hasOwnProperty.call(error, "retryable") &&
       (error as any).retryable) ||
-    errorMessages.some((message) =>
-      error.toString().toUpperCase().includes(message.toUpperCase()),
+    errorMessages.some(
+      (message) =>
+        error instanceof Error &&
+        error.toString().toUpperCase().includes(message.toUpperCase()),
     ) ||
     (Object.prototype.hasOwnProperty.call(error, "code") &&
       errorCodes.has((error as any).code.toLowerCase())) ||

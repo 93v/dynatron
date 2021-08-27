@@ -61,12 +61,10 @@ export class Query extends ListFetch {
   [BUILD]() {
     return {
       ...super[BUILD](),
-      ...{
-        _KeyConditionExpression:
-          this.sortKeyCondition == undefined
-            ? and(this.partitionKeyCondition)
-            : and(this.partitionKeyCondition, this.sortKeyCondition),
-      },
+      _KeyConditionExpression:
+        this.sortKeyCondition == undefined
+          ? and(this.partitionKeyCondition)
+          : and(this.partitionKeyCondition, this.sortKeyCondition),
       ...(this.#ScanIndexForward != undefined && {
         ScanIndexForward: this.#ScanIndexForward,
       }),
@@ -226,13 +224,13 @@ export class Query extends ListFetch {
             aggregatedQueryOutput.LastEvaluatedKey =
               queryOutput.LastEvaluatedKey;
           }
-        } catch (error) {
+        } catch (error: unknown) {
           if (isRetryableError(error)) {
             throw error;
           }
           operationCompleted = true;
-          error.$input = input;
-          bail(error);
+          (error as any).$input = input;
+          bail(error as Error);
         } finally {
           shortCircuit.halt();
         }

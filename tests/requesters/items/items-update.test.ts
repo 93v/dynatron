@@ -123,7 +123,7 @@ describe("Item Update", () => {
     );
     try {
       await instance.$();
-    } catch (error) {
+    } catch (error: unknown) {
       expect(error).toBeDefined();
     }
     scope.persist(false);
@@ -143,7 +143,7 @@ describe("Item Update", () => {
     );
     try {
       await instance.$();
-    } catch (error) {
+    } catch (error: unknown) {
       expect(error).toBeDefined();
     }
     scope.persist(false);
@@ -162,7 +162,7 @@ describe("Item Update", () => {
     );
     try {
       await instance.$();
-    } catch (error) {
+    } catch (error: unknown) {
       expect(error).toBeDefined();
     }
     scope.persist(false);

@@ -60,12 +60,12 @@ export class Put extends Check {
           ...putOutput,
           data: requestInput.Item && (unmarshall(requestInput.Item) as T),
         };
-      } catch (error) {
+      } catch (error: unknown) {
         if (isRetryableError(error)) {
           throw error;
         }
-        error.$input = requestInput;
-        bail(error);
+        (error as any).$input = requestInput;
+        bail(error as Error);
       } finally {
         shortCircuit.halt();
       }

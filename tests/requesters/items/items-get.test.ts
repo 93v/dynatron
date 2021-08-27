@@ -64,7 +64,7 @@ describe("Item Get", () => {
     );
     try {
       await instance.$();
-    } catch (error) {
+    } catch (error: unknown) {
       expect(error).toBeDefined();
     }
     scope.persist(false);
@@ -84,7 +84,7 @@ describe("Item Get", () => {
     );
     try {
       await instance.$();
-    } catch (error) {
+    } catch (error: unknown) {
       expect(error).toBeDefined();
     }
     scope.persist(false);
