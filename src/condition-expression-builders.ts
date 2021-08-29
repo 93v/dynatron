@@ -29,6 +29,8 @@ export const and = (
   conditions: conditions.flatMap((c) => (Array.isArray(c) ? c : [c])),
 });
 
+export const all = and;
+
 export const attributeExists = (
   attributePath: string,
 ): AttributeExistsCondition => ({
@@ -180,6 +182,8 @@ export const or = (
   conditions: conditions.flatMap((c) => (Array.isArray(c) ? c : [c])),
 });
 
+export const any = or;
+
 export const size = (attributePath: string): SizeCondition => ({
   kind: "size",
   attributePath,
@@ -225,3 +229,135 @@ export const isConditionEmptyDeep = (
 
     return false;
   });
+
+export const attribute = (attributePath: string) => {
+  return {
+    attributeExists: attributeExists(attributePath),
+    exists: () => attributeExists(attributePath),
+    attributeNotExists: () => attributeNotExists(attributePath),
+    notExists: () => attributeNotExists(attributePath),
+    doesNotExist: () => attributeNotExists(attributePath),
+    attributeType: (typeName: AttributeType) =>
+      attributeType(attributePath, typeName),
+    type: (typeName: AttributeType) => attributeType(attributePath, typeName),
+    isOfType: (typeName: AttributeType) =>
+      attributeType(attributePath, typeName),
+    isBinary: () => attributeType(attributePath, "binary"),
+    isBinarySet: () => attributeType(attributePath, "binarySet"),
+    isBoolean: () => attributeType(attributePath, "boolean"),
+    isList: () => attributeType(attributePath, "list"),
+    isMap: () => attributeType(attributePath, "map"),
+    isNull: () => attributeType(attributePath, "null"),
+    isNumber: () => attributeType(attributePath, "number"),
+    isNumberSet: () => attributeType(attributePath, "numberSet"),
+    isString: () => attributeType(attributePath, "string"),
+    isStringSet: () => attributeType(attributePath, "stringSet"),
+    isUndefined: () => attributeNotExists(attributePath),
+    beginsWith: (substr: string) => beginsWith(attributePath, substr),
+    between: (bounds: [NativeAttributeValue, NativeAttributeValue]) =>
+      between(attributePath, bounds),
+    isBetween: (bounds: [NativeAttributeValue, NativeAttributeValue]) =>
+      between(attributePath, bounds),
+    contains: (substr: string | number) => contains(attributePath, substr),
+    equals: (value: NativeAttributeValue) => equals(attributePath, value),
+    eq: (value: NativeAttributeValue) => equals(attributePath, value),
+    isEqualTo: (value: NativeAttributeValue) => equals(attributePath, value),
+    greaterThan: (value: NativeAttributeValue) =>
+      greaterThan(attributePath, value),
+    gt: (value: NativeAttributeValue) => greaterThan(attributePath, value),
+    isGreaterThan: (value: NativeAttributeValue) =>
+      greaterThan(attributePath, value),
+    greaterThanOrEquals: (value: NativeAttributeValue) =>
+      greaterThanOrEquals(attributePath, value),
+    gte: (value: NativeAttributeValue) =>
+      greaterThanOrEquals(attributePath, value),
+    isGreaterThanOrEquals: (value: NativeAttributeValue) =>
+      greaterThanOrEquals(attributePath, value),
+    isIn: (
+      values: {
+        0: NativeAttributeValue;
+      } & NativeAttributeValue[],
+    ) => isIn(attributePath, values),
+    in: (
+      values: {
+        0: NativeAttributeValue;
+      } & NativeAttributeValue[],
+    ) => isIn(attributePath, values),
+    lessThan: (value: NativeAttributeValue) => lessThan(attributePath, value),
+    lt: (value: NativeAttributeValue) => lessThan(attributePath, value),
+    isLessThan: (value: NativeAttributeValue) => lessThan(attributePath, value),
+    lessThanOrEquals: (value: NativeAttributeValue) =>
+      lessThanOrEquals(attributePath, value),
+    lte: (value: NativeAttributeValue) =>
+      lessThanOrEquals(attributePath, value),
+    isLessThanOrEquals: (value: NativeAttributeValue) =>
+      lessThanOrEquals(attributePath, value),
+    notEquals: (value: NativeAttributeValue) => notEquals(attributePath, value),
+    ne: (value: NativeAttributeValue) => notEquals(attributePath, value),
+    isNotEqualTo: (value: NativeAttributeValue) =>
+      notEquals(attributePath, value),
+    size: () => {
+      return {
+        between: (bounds: [NativeAttributeValue, NativeAttributeValue]) =>
+          between(size(attributePath), bounds),
+        isBetween: (bounds: [NativeAttributeValue, NativeAttributeValue]) =>
+          between(size(attributePath), bounds),
+        equals: (value: NativeAttributeValue) =>
+          equals(size(attributePath), value),
+        eq: (value: NativeAttributeValue) => equals(size(attributePath), value),
+        isEqualTo: (value: NativeAttributeValue) =>
+          equals(size(attributePath), value),
+        greaterThan: (value: NativeAttributeValue) =>
+          greaterThan(size(attributePath), value),
+        gt: (value: NativeAttributeValue) =>
+          greaterThan(size(attributePath), value),
+        isGreaterThan: (value: NativeAttributeValue) =>
+          greaterThan(size(attributePath), value),
+        greaterThanOrEquals: (value: NativeAttributeValue) =>
+          greaterThanOrEquals(size(attributePath), value),
+        gte: (value: NativeAttributeValue) =>
+          greaterThanOrEquals(size(attributePath), value),
+        isGreaterThanOrEquals: (value: NativeAttributeValue) =>
+          greaterThanOrEquals(size(attributePath), value),
+        isIn: (
+          values: {
+            0: NativeAttributeValue;
+          } & NativeAttributeValue[],
+        ) => isIn(size(attributePath), values),
+        in: (
+          values: {
+            0: NativeAttributeValue;
+          } & NativeAttributeValue[],
+        ) => isIn(size(attributePath), values),
+        lessThan: (value: NativeAttributeValue) =>
+          lessThan(size(attributePath), value),
+        lt: (value: NativeAttributeValue) =>
+          lessThan(size(attributePath), value),
+        isLessThan: (value: NativeAttributeValue) =>
+          lessThan(size(attributePath), value),
+        lessThanOrEquals: (value: NativeAttributeValue) =>
+          lessThanOrEquals(size(attributePath), value),
+        lte: (value: NativeAttributeValue) =>
+          lessThanOrEquals(size(attributePath), value),
+        isLessThanOrEquals: (value: NativeAttributeValue) =>
+          lessThanOrEquals(size(attributePath), value),
+        notEquals: (value: NativeAttributeValue) =>
+          notEquals(size(attributePath), value),
+        ne: (value: NativeAttributeValue) =>
+          notEquals(size(attributePath), value),
+        isNotEqualTo: (value: NativeAttributeValue) =>
+          notEquals(size(attributePath), value),
+      };
+    },
+    isNullish: () => isNullish(attributePath),
+    nullish: () => isNullish(attributePath),
+    isFalsy: () => isFalsy(attributePath),
+    falsy: () => isFalsy(attributePath),
+    isTruthy: () => isTruthy(attributePath),
+    truthy: () => isTruthy(attributePath),
+  };
+};
+
+export const a = attribute;
+export const an = attribute;
+export const the = attribute;

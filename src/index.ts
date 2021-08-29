@@ -3,7 +3,12 @@ export type { DynatronClientConfig } from "./dynatron";
 export { Dynatron, DynatronClient } from "./dynatron";
 
 export {
+  a,
+  all,
+  an,
   and,
+  any,
+  attribute,
   attributeExists,
   attributeNotExists,
   attributeType,
@@ -33,6 +38,7 @@ export {
   nullish,
   or,
   size,
+  the,
   truthy,
   type,
 } from "./condition-expression-builders";
