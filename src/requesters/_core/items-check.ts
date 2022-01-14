@@ -4,7 +4,6 @@ import { Condition } from "../../../types/conditions";
 import { isConditionEmptyDeep } from "../../condition-expression-builders";
 import { NativeValue } from "../../dynatron";
 import { BUILD, validateKey } from "../../utils/misc-utils";
-import { Update } from "../items/items-update";
 import { Amend } from "./items-amend";
 
 export class Check extends Amend {
@@ -68,7 +67,8 @@ export class Check extends Amend {
         _ConditionExpressions: this.#ConditionExpressions,
       }),
       ReturnValues:
-        this.#ReturnValues || (this instanceof Update ? "ALL_NEW" : "NONE"),
+        this.#ReturnValues ||
+        (this.constructor.name === "Update" ? "ALL_NEW" : "NONE"),
     };
   }
 }
