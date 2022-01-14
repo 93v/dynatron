@@ -119,17 +119,14 @@ export class BatchWrite extends Amend {
         requestInput.RequestItems ??= {};
         requestInput.RequestItems[TableName] ??= [];
 
-        switch (item.constructor.name) {
-          case "Delete":
-            requestInput.RequestItems[TableName]?.push({
-              DeleteRequest: { Key },
-            });
-            break;
-          case "Put":
-            requestInput.RequestItems[TableName]?.push({
-              PutRequest: { Item },
-            });
-            break;
+        if (item instanceof Delete) {
+          requestInput.RequestItems[TableName]?.push({
+            DeleteRequest: { Key },
+          });
+        } else if (item instanceof Put) {
+          requestInput.RequestItems[TableName]?.push({
+            PutRequest: { Item },
+          });
         }
       }
 

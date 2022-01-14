@@ -95,22 +95,20 @@ export class TransactWrite extends Amend {
             }),
         };
 
-        switch (item.constructor.name) {
-          case "Delete":
-            return { Delete: { ...baseRequestInput, Key } };
-          case "Put":
-            return { Put: { ...baseRequestInput, Item } };
-          case "Update":
-            return {
-              Update: {
-                Key,
-                ...baseRequestInput,
-                ...(UpdateExpression && { UpdateExpression }),
-              },
-            };
-          // Default to Check
-          default:
-            return { ConditionCheck: { Key, ...baseRequestInput } };
+        if (item instanceof Delete) {
+          return { Delete: { ...baseRequestInput, Key } };
+        } else if (item instanceof Put) {
+          return { Put: { ...baseRequestInput, Item } };
+        } else if (item instanceof Update) {
+          return {
+            Update: {
+              Key,
+              ...baseRequestInput,
+              ...(UpdateExpression && { UpdateExpression }),
+            },
+          };
+        } else {
+          return { ConditionCheck: { Key, ...baseRequestInput } };
         }
       }),
     };
