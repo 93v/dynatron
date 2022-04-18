@@ -205,7 +205,7 @@ export class Dynatron {
     const { readFileSync } = require("fs");
     const credentialsFile = readFileSync(
       path.join(homeDirectory(), ".aws", "credentials"),
-      "utf-8",
+      "utf8",
     );
 
     const profile = require("ini").parse(credentialsFile)[profileName];
