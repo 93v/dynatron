@@ -1,5 +1,6 @@
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import nock from "nock";
+
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 
 import { Check } from "../../../src/requesters/_core/items-check";
 import { Put } from "../../../src/requesters/items/items-put";

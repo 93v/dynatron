@@ -1,8 +1,9 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+
+import { Dynatron, DynatronClient } from "../../../src";
 import { Amend } from "../../../src/requesters/_core/items-amend";
 import { BatchWrite } from "../../../src/requesters/batch/batch-write";
 import { BUILD } from "../../../src/utils/misc-utils";
-import { DynatronClient, Dynatron } from "../../../src";
 
 const initialSend = DynamoDBClient.prototype.send;
 

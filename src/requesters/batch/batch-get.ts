@@ -1,3 +1,5 @@
+import AsyncRetry from "async-retry";
+
 import {
   BatchGetItemCommand,
   BatchGetItemCommandInput,
@@ -6,8 +8,8 @@ import {
   GetItemCommandInput,
 } from "@aws-sdk/client-dynamodb";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
-import AsyncRetry from "async-retry";
 
+import { Fetch } from "../_core/items-fetch";
 import { NativeValue } from "../../dynatron";
 import {
   BUILD,
@@ -18,7 +20,6 @@ import {
   TAKING_TOO_LONG_EXCEPTION,
 } from "../../utils/misc-utils";
 import { marshallRequestParameters } from "../../utils/request-marshaller";
-import { Fetch } from "../_core/items-fetch";
 import { Get } from "../items/items-get";
 
 const BATCH_GET_LIMIT = 100;

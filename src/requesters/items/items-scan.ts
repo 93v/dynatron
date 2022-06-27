@@ -1,3 +1,5 @@
+import AsyncRetry from "async-retry";
+
 import {
   ScanCommand,
   ScanCommandInput,
@@ -5,8 +7,8 @@ import {
   ScanOutput,
 } from "@aws-sdk/client-dynamodb";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
-import AsyncRetry from "async-retry";
 
+import { ListFetch } from "../_core/items-list-fetch";
 import { NativeValue } from "../../dynatron";
 import {
   BUILD,
@@ -17,7 +19,6 @@ import {
   TAKING_TOO_LONG_EXCEPTION,
 } from "../../utils/misc-utils";
 import { marshallRequestParameters } from "../../utils/request-marshaller";
-import { ListFetch } from "../_core/items-list-fetch";
 
 const MIN_TOTAL_SEGMENTS = 1;
 const MAX_TOTAL_SEGMENTS = 1_000_000;

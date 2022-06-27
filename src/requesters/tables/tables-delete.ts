@@ -1,10 +1,12 @@
+import AsyncRetry from "async-retry";
+
 import {
   DeleteTableCommand,
   DeleteTableInput,
   DynamoDBClient,
 } from "@aws-sdk/client-dynamodb";
-import AsyncRetry from "async-retry";
 
+import { Request } from "../_core/request";
 import {
   BUILD,
   createShortCircuit,
@@ -13,7 +15,6 @@ import {
   RETRY_OPTIONS,
   TAKING_TOO_LONG_EXCEPTION,
 } from "../../utils/misc-utils";
-import { Request } from "../_core/request";
 
 export class TableDelete extends Request {
   constructor(

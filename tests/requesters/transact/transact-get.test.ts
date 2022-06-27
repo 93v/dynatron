@@ -1,5 +1,6 @@
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import nock from "nock";
+
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 
 import { Dynatron, DynatronClient } from "../../../src";
 import { ItemRequest } from "../../../src/requesters/_core/items-request";

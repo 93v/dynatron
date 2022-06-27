@@ -1,11 +1,13 @@
+import AsyncRetry from "async-retry";
+
 import {
   UpdateItemCommand,
   UpdateItemCommandInput,
   UpdateItemOutput,
 } from "@aws-sdk/client-dynamodb";
 import { NativeAttributeValue, unmarshall } from "@aws-sdk/util-dynamodb";
-import AsyncRetry from "async-retry";
 
+import { Check } from "../_core/items-check";
 import { NativeValue } from "../../dynatron";
 import {
   BUILD,
@@ -16,7 +18,6 @@ import {
   TAKING_TOO_LONG_EXCEPTION,
 } from "../../utils/misc-utils";
 import { marshallRequestParameters } from "../../utils/request-marshaller";
-import { Check } from "../_core/items-check";
 
 export type UpdateAdd = {
   kind: "add";

@@ -1,15 +1,13 @@
 import { Dynatron, DynatronClient } from "../src";
-import { Get } from "../src/requesters/items/items-get";
+import { Check } from "../src/requesters/_core/items-check";
 import { BatchGet } from "../src/requesters/batch/batch-get";
+import { BatchWrite } from "../src/requesters/batch/batch-write";
+import { Delete } from "../src/requesters/items/items-delete";
+import { Get } from "../src/requesters/items/items-get";
+import { Put } from "../src/requesters/items/items-put";
 import { Query } from "../src/requesters/items/items-query";
 import { Scan } from "../src/requesters/items/items-scan";
-import { Check } from "../src/requesters/_core/items-check";
-import { Delete } from "../src/requesters/items/items-delete";
-import { Put } from "../src/requesters/items/items-put";
 import { Update } from "../src/requesters/items/items-update";
-import { BatchWrite } from "../src/requesters/batch/batch-write";
-import { TransactWrite } from "../src/requesters/transact/transact-write";
-import { TransactGet } from "../src/requesters/transact/transact-get";
 import { TableCreate } from "../src/requesters/tables/tables-create";
 import { TableDelete } from "../src/requesters/tables/tables-delete";
 import { TableDescribe } from "../src/requesters/tables/tables-describe";
@@ -17,6 +15,8 @@ import { TableList } from "../src/requesters/tables/tables-list";
 import { TableTTLDescribe } from "../src/requesters/tables/tables-ttl-describe";
 import { TableTTLUpdate } from "../src/requesters/tables/tables-ttl-update";
 import { TableUpdate } from "../src/requesters/tables/tables-update";
+import { TransactGet } from "../src/requesters/transact/transact-get";
+import { TransactWrite } from "../src/requesters/transact/transact-write";
 
 describe("Database Client", () => {
   test("should return an instance of Dynatron", () => {

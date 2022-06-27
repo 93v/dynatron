@@ -1,3 +1,5 @@
+import AsyncRetry from "async-retry";
+
 import {
   BatchWriteItemCommand,
   BatchWriteItemCommandInput,
@@ -5,8 +7,8 @@ import {
   DynamoDBClient,
 } from "@aws-sdk/client-dynamodb";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
-import AsyncRetry from "async-retry";
 
+import { Amend } from "../_core/items-amend";
 import { NativeValue } from "../../dynatron";
 import {
   BUILD,
@@ -17,7 +19,6 @@ import {
   TAKING_TOO_LONG_EXCEPTION,
 } from "../../utils/misc-utils";
 import { marshallRequestParameters } from "../../utils/request-marshaller";
-import { Amend } from "../_core/items-amend";
 import { Delete } from "../items/items-delete";
 import { Put } from "../items/items-put";
 

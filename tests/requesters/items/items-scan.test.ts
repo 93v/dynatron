@@ -1,7 +1,8 @@
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import nock from "nock";
-import { beginsWith } from "../../../src";
 
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+
+import { beginsWith } from "../../../src";
 import { ListFetch } from "../../../src/requesters/_core/items-list-fetch";
 import { Scan } from "../../../src/requesters/items/items-scan";
 import { BUILD } from "../../../src/utils/misc-utils";

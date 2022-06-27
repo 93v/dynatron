@@ -1,10 +1,13 @@
+import AsyncRetry from "async-retry";
+
 import {
   DynamoDBClient,
   TransactWriteItemsCommand,
   TransactWriteItemsCommandInput,
 } from "@aws-sdk/client-dynamodb";
-import AsyncRetry from "async-retry";
 
+import { Amend } from "../_core/items-amend";
+import { Check } from "../_core/items-check";
 import {
   BUILD,
   createShortCircuit,
@@ -14,8 +17,6 @@ import {
   TAKING_TOO_LONG_EXCEPTION,
 } from "../../utils/misc-utils";
 import { marshallRequestParameters } from "../../utils/request-marshaller";
-import { Amend } from "../_core/items-amend";
-import { Check } from "../_core/items-check";
 import { Delete } from "../items/items-delete";
 import { Put } from "../items/items-put";
 import { Update } from "../items/items-update";

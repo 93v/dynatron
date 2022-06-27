@@ -1,7 +1,7 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 
-import { ItemRequest } from "../../../src/requesters/_core/items-request";
 import { Fetch } from "../../../src/requesters/_core/items-fetch";
+import { ItemRequest } from "../../../src/requesters/_core/items-request";
 import { BUILD } from "../../../src/utils/misc-utils";
 
 describe("Fetch", () => {

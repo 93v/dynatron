@@ -1,3 +1,5 @@
+import AsyncRetry from "async-retry";
+
 import {
   DynamoDBClient,
   GetItemCommandInput,
@@ -6,8 +8,8 @@ import {
   TransactGetItemsOutput,
 } from "@aws-sdk/client-dynamodb";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
-import AsyncRetry from "async-retry";
 
+import { ItemRequest } from "../_core/items-request";
 import { NativeValue } from "../../dynatron";
 import {
   BUILD,
@@ -18,7 +20,6 @@ import {
   TAKING_TOO_LONG_EXCEPTION,
 } from "../../utils/misc-utils";
 import { marshallRequestParameters } from "../../utils/request-marshaller";
-import { ItemRequest } from "../_core/items-request";
 import { Get } from "../items/items-get";
 
 export class TransactGet extends ItemRequest {

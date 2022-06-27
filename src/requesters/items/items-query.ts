@@ -1,3 +1,5 @@
+import AsyncRetry from "async-retry";
+
 import {
   DynamoDBClient,
   QueryCommand,
@@ -5,8 +7,8 @@ import {
   QueryOutput,
 } from "@aws-sdk/client-dynamodb";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
-import AsyncRetry from "async-retry";
 
+import { ListFetch } from "../_core/items-list-fetch";
 import { EqualsCondition, KeyCondition } from "../../../types/conditions";
 import { and } from "../../condition-expression-builders";
 import { NativeValue } from "../../dynatron";
@@ -19,7 +21,6 @@ import {
   TAKING_TOO_LONG_EXCEPTION,
 } from "../../utils/misc-utils";
 import { marshallRequestParameters } from "../../utils/request-marshaller";
-import { ListFetch } from "../_core/items-list-fetch";
 
 export class Query extends ListFetch {
   #ScanIndexForward?: boolean;

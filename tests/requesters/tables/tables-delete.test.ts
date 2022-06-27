@@ -1,5 +1,6 @@
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import nock from "nock";
+
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 
 import { Request } from "../../../src/requesters/_core/request";
 import { TableDelete } from "../../../src/requesters/tables/tables-delete";
