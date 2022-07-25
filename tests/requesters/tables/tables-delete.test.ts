@@ -1,7 +1,6 @@
 import nock from "nock";
 
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-
+import { DynatronClient } from "../../../src";
 import { Request } from "../../../src/requesters/_core/request";
 import { TableDelete } from "../../../src/requesters/tables/tables-delete";
 import { BUILD } from "../../../src/utils/misc-utils";
@@ -14,7 +13,7 @@ afterEach(() => {
 describe("Table Delete", () => {
   test("should return an instance of Request", () => {
     const instance = new TableDelete(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       "tableName",
     );
     expect(instance).toBeInstanceOf(Request);
@@ -22,7 +21,7 @@ describe("Table Delete", () => {
 
   test("should build correctly", () => {
     const instance = new TableDelete(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       "tableName",
     );
     expect(instance[BUILD]()).toEqual({ TableName: "tableName" });
@@ -34,7 +33,7 @@ describe("Table Delete", () => {
       .reply(200, { TableDescription: {} });
 
     const instance = new TableDelete(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       "tableName",
     );
 
@@ -50,7 +49,7 @@ describe("Table Delete", () => {
       .replyWithError("ECONN: Connection error");
 
     const instance = new TableDelete(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       "tableName",
     );
 
@@ -70,7 +69,7 @@ describe("Table Delete", () => {
       .replyWithError("Unknown");
 
     const instance = new TableDelete(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       "tableName",
     );
 

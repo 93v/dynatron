@@ -1,7 +1,5 @@
 import nock from "nock";
 
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-
 import { Dynatron, DynatronClient } from "../../../src";
 import { ItemRequest } from "../../../src/requesters/_core/items-request";
 import { TransactGet } from "../../../src/requesters/transact/transact-get";
@@ -23,7 +21,7 @@ beforeAll(() => {
 describe("Item TransactGet", () => {
   test("should return an instance of ItemRequest", () => {
     const instance = new TransactGet(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       [],
     );
     expect(instance).toBeInstanceOf(ItemRequest);
@@ -31,13 +29,13 @@ describe("Item TransactGet", () => {
 
   test("should build correctly", () => {
     const instance = new TransactGet(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       [],
     );
     expect(instance).toBeInstanceOf(TransactGet);
     expect(instance[BUILD]()).toEqual({
       TableName: undefined,
-      ReturnConsumedCapacity: "INDEXES",
+      ReturnConsumedCapacity: "NONE",
     });
   });
 
@@ -47,7 +45,7 @@ describe("Item TransactGet", () => {
       .post("/")
       .reply(200, {});
 
-    const instance = new TransactGet(new DynamoDBClient({ region: "local" }), [
+    const instance = new TransactGet(new DynatronClient({ region: "local" }), [
       database.Items("tableName1").get({ id: "uuid1" }).select("value"),
     ]);
     expect(await instance.$()).toEqual({});
@@ -62,7 +60,7 @@ describe("Item TransactGet", () => {
       .post("/")
       .reply(200, { Responses: [{ Item: { id: { S: "uuid" } } }] });
 
-    const instance = new TransactGet(new DynamoDBClient({ region: "local" }), [
+    const instance = new TransactGet(new DynatronClient({ region: "local" }), [
       database.Items("tableName1").get({ id: "uuid1" }).select("value"),
     ]);
     expect(await instance.$()).toEqual({ data: [{ id: "uuid" }] });
@@ -80,7 +78,7 @@ describe("Item TransactGet", () => {
       .replyWithError("ECONN: Connection error");
 
     const instance = new TransactGet(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       [],
     );
     try {
@@ -99,7 +97,7 @@ describe("Item TransactGet", () => {
       .replyWithError("Unknown");
 
     const instance = new TransactGet(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       [],
     );
     try {

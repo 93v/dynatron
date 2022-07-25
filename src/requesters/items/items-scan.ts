@@ -261,7 +261,7 @@ export class Scan extends ListFetch {
       }
     }
 
-    let outputs: ScanOutput[];
+    let outputs;
     if (requestInput.Segment != undefined) {
       const segmentParameters = { ...requestInput };
       segmentParameters.TotalSegments = segmentParameters.TotalSegments || 1;

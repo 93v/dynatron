@@ -1,7 +1,6 @@
 import AsyncRetry from "async-retry";
 
 import {
-  DynamoDBClient,
   QueryCommand,
   QueryCommandInput,
   QueryOutput,
@@ -11,7 +10,7 @@ import { unmarshall } from "@aws-sdk/util-dynamodb";
 import { ListFetch } from "../_core/items-list-fetch";
 import { EqualsCondition, KeyCondition } from "../../../types/conditions";
 import { and } from "../../condition-expression-builders";
-import { NativeValue } from "../../dynatron";
+import { DynatronClient, NativeValue } from "../../dynatron";
 import {
   BUILD,
   createShortCircuit,
@@ -28,7 +27,7 @@ export class Query extends ListFetch {
   private sortKeyCondition?: KeyCondition;
 
   constructor(
-    databaseClient: DynamoDBClient,
+    databaseClient: DynatronClient,
     tableName: string,
     private partitionKeyCondition: EqualsCondition,
   ) {
@@ -237,10 +236,13 @@ export class Query extends ListFetch {
         }
       }
 
-      const { Items, ...output } = aggregatedQueryOutput;
+      const { Items, LastEvaluatedKey, ...output } = aggregatedQueryOutput;
 
       return {
         ...output,
+        ...(LastEvaluatedKey
+          ? { LastEvaluatedKey: unmarshall(LastEvaluatedKey) }
+          : {}),
         data: Items?.map((item) => unmarshall(item)) as unknown as T,
       };
     }, RETRY_OPTIONS);

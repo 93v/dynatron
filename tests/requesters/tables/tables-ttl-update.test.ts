@@ -1,7 +1,6 @@
 import nock from "nock";
 
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-
+import { DynatronClient } from "../../../src";
 import { Request } from "../../../src/requesters/_core/request";
 import { TableTTLUpdate } from "../../../src/requesters/tables/tables-ttl-update";
 
@@ -13,7 +12,7 @@ afterEach(() => {
 describe("Table TTL Update", () => {
   test("should return an instance of Request", () => {
     const instance = new TableTTLUpdate(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       {
         TableName: "tableName",
         TimeToLiveSpecification: {
@@ -31,7 +30,7 @@ describe("Table TTL Update", () => {
       .reply(200, { TimeToLiveSpecification: {} });
 
     const instance = new TableTTLUpdate(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       {
         TableName: "tableName",
         TimeToLiveSpecification: {
@@ -52,7 +51,7 @@ describe("Table TTL Update", () => {
       .replyWithError("ECONN: Connection error");
 
     const instance = new TableTTLUpdate(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       {
         TableName: "tableName",
         TimeToLiveSpecification: {
@@ -78,7 +77,7 @@ describe("Table TTL Update", () => {
       .replyWithError("Unknown");
 
     const instance = new TableTTLUpdate(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       {
         TableName: "tableName",
         TimeToLiveSpecification: {

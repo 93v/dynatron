@@ -29,7 +29,7 @@ describe("Item BatchWrite", () => {
     const instance = new BatchWrite(databaseClient, []);
 
     expect(instance[BUILD]()).toEqual({
-      ReturnConsumedCapacity: "INDEXES",
+      ReturnConsumedCapacity: "NONE",
       TableName: undefined,
     });
   });
@@ -38,7 +38,7 @@ describe("Item BatchWrite", () => {
     const instance = new BatchWrite(databaseClient, []);
 
     expect(instance[BUILD]()).toEqual({
-      ReturnConsumedCapacity: "INDEXES",
+      ReturnConsumedCapacity: "NONE",
       TableName: undefined,
     });
   });

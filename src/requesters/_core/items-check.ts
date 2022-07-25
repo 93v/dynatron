@@ -1,8 +1,8 @@
-import { DynamoDBClient, ReturnValue } from "@aws-sdk/client-dynamodb";
+import { ReturnValue } from "@aws-sdk/client-dynamodb";
 
 import { Condition } from "../../../types/conditions";
 import { isConditionEmptyDeep } from "../../condition-expression-builders";
-import { NativeValue } from "../../dynatron";
+import { DynatronClient, NativeValue } from "../../dynatron";
 import { BUILD, validateKey } from "../../utils/misc-utils";
 import { Amend } from "./items-amend";
 
@@ -11,7 +11,7 @@ export class Check extends Amend {
   #ReturnValues?: ReturnValue;
 
   constructor(
-    databaseClient: DynamoDBClient,
+    databaseClient: DynatronClient,
     tableName: string,
     protected key?: NativeValue,
   ) {

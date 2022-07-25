@@ -1,19 +1,19 @@
-import {
-  DynamoDBClient,
-  ReturnConsumedCapacity,
-} from "@aws-sdk/client-dynamodb";
+import { ReturnConsumedCapacity } from "@aws-sdk/client-dynamodb";
+import { DynatronClient } from "../../dynatron";
 
 import { BUILD } from "../../utils/misc-utils";
 import { Request } from "./request";
 
 export class ItemRequest extends Request {
-  protected ReturnConsumedCapacity: ReturnConsumedCapacity = "INDEXES";
-
+  protected ReturnConsumedCapacity: ReturnConsumedCapacity;
   constructor(
-    protected readonly databaseClient: DynamoDBClient,
+    protected readonly databaseClient: DynatronClient,
     protected tableName?: string,
   ) {
     super();
+    this.ReturnConsumedCapacity = this.databaseClient.returnMetrics
+      ? "INDEXES"
+      : "NONE";
   }
 
   /**

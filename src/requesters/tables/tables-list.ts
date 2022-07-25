@@ -1,13 +1,13 @@
 import AsyncRetry from "async-retry";
 
 import {
-  DynamoDBClient,
   ListTablesCommand,
   ListTablesInput,
   ListTablesOutput,
 } from "@aws-sdk/client-dynamodb";
 
 import { Request } from "../_core/request";
+import { DynatronClient } from "../../dynatron";
 import {
   BUILD,
   createShortCircuit,
@@ -21,7 +21,7 @@ export class TableList extends Request {
   #Limit?: number;
   #ExclusiveStartTableName?: string;
 
-  constructor(protected readonly client: DynamoDBClient) {
+  constructor(protected readonly client: DynatronClient) {
     super();
   }
 

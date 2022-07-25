@@ -35,7 +35,7 @@ describe("Item BatchGet", () => {
     ]);
     expect(instance[BUILD]()).toEqual({
       TableName: undefined,
-      ReturnConsumedCapacity: "INDEXES",
+      ReturnConsumedCapacity: "NONE",
     });
   });
 

@@ -1,7 +1,6 @@
 import nock from "nock";
 
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-
+import { DynatronClient } from "../../../src";
 import { Request } from "../../../src/requesters/_core/request";
 import { TableTTLDescribe } from "../../../src/requesters/tables/tables-ttl-describe";
 import { BUILD } from "../../../src/utils/misc-utils";
@@ -14,7 +13,7 @@ afterEach(() => {
 describe("Table TableTTLDescribe", () => {
   test("should return an instance of Request", () => {
     const instance = new TableTTLDescribe(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       "tableName",
     );
     expect(instance).toBeInstanceOf(Request);
@@ -22,7 +21,7 @@ describe("Table TableTTLDescribe", () => {
 
   test("should build correctly", () => {
     const instance = new TableTTLDescribe(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       "tableName",
     );
     expect(instance[BUILD]()).toEqual({ TableName: "tableName" });
@@ -34,7 +33,7 @@ describe("Table TableTTLDescribe", () => {
       .reply(200, { TimeToLiveDescription: {} });
 
     const instance = new TableTTLDescribe(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       "tableName",
     );
 
@@ -50,7 +49,7 @@ describe("Table TableTTLDescribe", () => {
       .replyWithError("ECONN: Connection error");
 
     const instance = new TableTTLDescribe(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       "tableName",
     );
 
@@ -70,7 +69,7 @@ describe("Table TableTTLDescribe", () => {
       .replyWithError("Unknown");
 
     const instance = new TableTTLDescribe(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       "tableName",
     );
 

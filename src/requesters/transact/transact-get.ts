@@ -1,16 +1,16 @@
 import AsyncRetry from "async-retry";
 
 import {
-  DynamoDBClient,
   GetItemCommandInput,
   TransactGetItemsCommand,
   TransactGetItemsCommandInput,
+  TransactGetItemsInput,
   TransactGetItemsOutput,
 } from "@aws-sdk/client-dynamodb";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
 
 import { ItemRequest } from "../_core/items-request";
-import { NativeValue } from "../../dynatron";
+import { DynatronClient, NativeValue } from "../../dynatron";
 import {
   BUILD,
   createShortCircuit,
@@ -23,7 +23,7 @@ import { marshallRequestParameters } from "../../utils/request-marshaller";
 import { Get } from "../items/items-get";
 
 export class TransactGet extends ItemRequest {
-  constructor(databaseClient: DynamoDBClient, private items: Get[]) {
+  constructor(databaseClient: DynatronClient, private items: Get[]) {
     super(databaseClient);
   }
 
@@ -33,7 +33,8 @@ export class TransactGet extends ItemRequest {
   $ = async <T = NativeValue[] | undefined>(): Promise<
     { data: T | undefined } & Omit<TransactGetItemsOutput, "Responses">
   > => {
-    const { ReturnConsumedCapacity } = marshallRequestParameters(this[BUILD]());
+    const { ReturnConsumedCapacity } =
+      marshallRequestParameters<TransactGetItemsInput>(this[BUILD]());
 
     const requestInput: TransactGetItemsCommandInput = {
       ...(ReturnConsumedCapacity && { ReturnConsumedCapacity }),

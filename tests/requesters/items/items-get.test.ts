@@ -1,7 +1,6 @@
 import nock from "nock";
 
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-
+import { DynatronClient } from "../../../src";
 import { Fetch } from "../../../src/requesters/_core/items-fetch";
 import { Get } from "../../../src/requesters/items/items-get";
 import { BUILD } from "../../../src/utils/misc-utils";
@@ -14,7 +13,7 @@ afterEach(() => {
 describe("Item Get", () => {
   test("should return an instance of Fetch", () => {
     const instance = new Get(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       "tableName",
       { id: "uuid" },
     );
@@ -23,12 +22,12 @@ describe("Item Get", () => {
 
   test("should build with minimal properties", () => {
     const instance = new Get(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       "tableName",
       { id: "uuid" },
     );
     expect(instance[BUILD]()).toEqual({
-      ReturnConsumedCapacity: "INDEXES",
+      ReturnConsumedCapacity: "NONE",
       TableName: "tableName",
       _Key: { id: "uuid" },
     });
@@ -41,7 +40,7 @@ describe("Item Get", () => {
       .reply(200, { Item: { id: { S: "uuid" } } });
 
     const instance = new Get(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       "tableName",
       { id: "uuid" },
     );
@@ -59,7 +58,7 @@ describe("Item Get", () => {
       .replyWithError("ECONN: Connection error");
 
     const instance = new Get(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       "tableName",
       { id: "uuid" },
     );
@@ -79,7 +78,7 @@ describe("Item Get", () => {
       .replyWithError("Unknown");
 
     const instance = new Get(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       "tableName",
       { id: "uuid" },
     );

@@ -1,13 +1,14 @@
 import AsyncRetry from "async-retry";
 
 import {
-  DynamoDBClient,
   TransactWriteItemsCommand,
   TransactWriteItemsCommandInput,
+  TransactWriteItemsInput,
 } from "@aws-sdk/client-dynamodb";
 
 import { Amend } from "../_core/items-amend";
 import { Check } from "../_core/items-check";
+import { DynatronClient } from "../../dynatron";
 import {
   BUILD,
   createShortCircuit,
@@ -25,7 +26,7 @@ export class TransactWrite extends Amend {
   #ClientRequestToken?: string;
 
   constructor(
-    databaseClient: DynamoDBClient,
+    databaseClient: DynatronClient,
     private items: (Check | Put | Delete | Update)[],
   ) {
     super(databaseClient);
@@ -66,7 +67,7 @@ export class TransactWrite extends Amend {
       ClientRequestToken,
       ReturnConsumedCapacity,
       ReturnItemCollectionMetrics,
-    } = marshallRequestParameters(this[BUILD]());
+    } = marshallRequestParameters<TransactWriteItemsInput>(this[BUILD]());
 
     const requestInput: TransactWriteItemsCommandInput = {
       ...(ClientRequestToken && { ClientRequestToken }),

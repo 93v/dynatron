@@ -1,24 +1,22 @@
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-
-import { and, eq, or } from "../../../src";
+import { and, DynatronClient, eq, or } from "../../../src";
 import { Fetch } from "../../../src/requesters/_core/items-fetch";
 import { ListFetch } from "../../../src/requesters/_core/items-list-fetch";
 import { BUILD } from "../../../src/utils/misc-utils";
 
 describe("ListFetch", () => {
   test("should return an instance of Fetch", () => {
-    const instance = new ListFetch(new DynamoDBClient({}), "");
+    const instance = new ListFetch(new DynatronClient({}), "");
     expect(instance).toBeInstanceOf(Fetch);
   });
 
   test("should build with index, limit and start provided", () => {
-    const instance = new ListFetch(new DynamoDBClient({}), "");
+    const instance = new ListFetch(new DynatronClient({}), "");
 
     expect(
       instance.indexName("index").limit(2).start().start({ id: "id" }),
     ).toBe(instance);
     expect(instance[BUILD]()).toEqual({
-      ReturnConsumedCapacity: "INDEXES",
+      ReturnConsumedCapacity: "NONE",
       TableName: "",
       IndexName: "index",
       Limit: 2,
@@ -27,7 +25,7 @@ describe("ListFetch", () => {
   });
 
   test("should build with filter conditions", () => {
-    const instance = new ListFetch(new DynamoDBClient({}), "");
+    const instance = new ListFetch(new DynatronClient({}), "");
 
     expect(
       instance
@@ -38,7 +36,7 @@ describe("ListFetch", () => {
         .where([and([]), or(eq("id", "uuid"))]),
     ).toBe(instance);
     expect(instance[BUILD]()).toEqual({
-      ReturnConsumedCapacity: "INDEXES",
+      ReturnConsumedCapacity: "NONE",
       TableName: "",
       _FilterExpressions: [
         { conditions: [], kind: "AND" },

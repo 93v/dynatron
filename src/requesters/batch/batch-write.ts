@@ -3,13 +3,13 @@ import AsyncRetry from "async-retry";
 import {
   BatchWriteItemCommand,
   BatchWriteItemCommandInput,
+  BatchWriteItemInput,
   BatchWriteItemOutput,
-  DynamoDBClient,
 } from "@aws-sdk/client-dynamodb";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
 
 import { Amend } from "../_core/items-amend";
-import { NativeValue } from "../../dynatron";
+import { DynatronClient, NativeValue } from "../../dynatron";
 import {
   BUILD,
   createShortCircuit,
@@ -25,7 +25,7 @@ import { Put } from "../items/items-put";
 const BATCH_WRITE_LIMIT = 25;
 
 export class BatchWrite extends Amend {
-  constructor(databaseClient: DynamoDBClient, private items: (Put | Delete)[]) {
+  constructor(databaseClient: DynatronClient, private items: (Put | Delete)[]) {
     super(databaseClient);
   }
 
@@ -96,7 +96,7 @@ export class BatchWrite extends Amend {
     { data: T | undefined } & BatchWriteItemOutput
   > => {
     const { ReturnConsumedCapacity, ReturnItemCollectionMetrics } =
-      marshallRequestParameters(this[BUILD]());
+      marshallRequestParameters<BatchWriteItemInput>(this[BUILD]());
 
     const requestInputs: BatchWriteItemCommandInput[] = [];
 

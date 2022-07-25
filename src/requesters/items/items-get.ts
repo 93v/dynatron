@@ -1,7 +1,6 @@
 import AsyncRetry from "async-retry";
 
 import {
-  DynamoDBClient,
   GetItemCommand,
   GetItemCommandInput,
   GetItemOutput,
@@ -9,7 +8,7 @@ import {
 import { unmarshall } from "@aws-sdk/util-dynamodb";
 
 import { Fetch } from "../_core/items-fetch";
-import { NativeValue } from "../../dynatron";
+import { DynatronClient, NativeValue } from "../../dynatron";
 import {
   BUILD,
   createShortCircuit,
@@ -23,7 +22,7 @@ import { marshallRequestParameters } from "../../utils/request-marshaller";
 
 export class Get extends Fetch {
   constructor(
-    databaseClient: DynamoDBClient,
+    databaseClient: DynatronClient,
     tableName: string,
     private key: NativeValue,
   ) {
