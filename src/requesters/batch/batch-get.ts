@@ -87,7 +87,7 @@ export class BatchGet extends Fetch {
   /**
    * Execute the BatchGet request
    */
-  $ = async <T extends  Record<string, unknown[]> | undefined>(): Promise<
+  $ = async <T extends  Record<string, NativeValue[]> | undefined>(): Promise<
     { data: T | undefined } & Omit<BatchGetItemOutput, "Responses">
   > => {
     const {
