@@ -1,7 +1,6 @@
 import nock from "nock";
 
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-
+import { DynatronClient } from "../../../src";
 import { Request } from "../../../src/requesters/_core/request";
 import { TableCreate } from "../../../src/requesters/tables/tables-create";
 import { BUILD } from "../../../src/utils/misc-utils";
@@ -13,7 +12,7 @@ afterEach(() => {
 
 describe("Table Create", () => {
   test("should return an instance of Request", () => {
-    const instance = new TableCreate(new DynamoDBClient({ region: "local" }), {
+    const instance = new TableCreate(new DynatronClient({ region: "local" }), {
       AttributeDefinitions: [],
       KeySchema: [],
       TableName: "tableName",
@@ -22,7 +21,7 @@ describe("Table Create", () => {
   });
 
   test("should build correctly", () => {
-    const instance = new TableCreate(new DynamoDBClient({ region: "local" }), {
+    const instance = new TableCreate(new DynatronClient({ region: "local" }), {
       AttributeDefinitions: [],
       KeySchema: [],
       TableName: "tableName",
@@ -40,7 +39,7 @@ describe("Table Create", () => {
       .post("/")
       .reply(200, { TableDescription: {} });
 
-    const instance = new TableCreate(new DynamoDBClient({ region: "local" }), {
+    const instance = new TableCreate(new DynatronClient({ region: "local" }), {
       AttributeDefinitions: [],
       KeySchema: [],
       TableName: "tableName",
@@ -56,7 +55,7 @@ describe("Table Create", () => {
       .post("/")
       .replyWithError("ECONN: Connection error");
 
-    const instance = new TableCreate(new DynamoDBClient({ region: "local" }), {
+    const instance = new TableCreate(new DynatronClient({ region: "local" }), {
       AttributeDefinitions: [],
       KeySchema: [],
       TableName: "tableName",
@@ -77,7 +76,7 @@ describe("Table Create", () => {
       .post("/")
       .replyWithError("Unknown");
 
-    const instance = new TableCreate(new DynamoDBClient({ region: "local" }), {
+    const instance = new TableCreate(new DynatronClient({ region: "local" }), {
       AttributeDefinitions: [],
       KeySchema: [],
       TableName: "tableName",

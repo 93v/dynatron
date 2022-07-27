@@ -4,13 +4,12 @@ import {
   BatchGetItemCommand,
   BatchGetItemCommandInput,
   BatchGetItemOutput,
-  DynamoDBClient,
   GetItemCommandInput,
 } from "@aws-sdk/client-dynamodb";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
 
 import { Fetch } from "../_core/items-fetch";
-import { NativeValue } from "../../dynatron";
+import { DynatronClient, NativeValue } from "../../dynatron";
 import {
   BUILD,
   createShortCircuit,
@@ -25,7 +24,7 @@ import { Get } from "../items/items-get";
 const BATCH_GET_LIMIT = 100;
 
 export class BatchGet extends Fetch {
-  constructor(databaseClient: DynamoDBClient, private items: Get[]) {
+  constructor(databaseClient: DynatronClient, private items: Get[]) {
     super(databaseClient);
   }
 
@@ -88,7 +87,7 @@ export class BatchGet extends Fetch {
   /**
    * Execute the BatchGet request
    */
-  $ = async <T = Record<string, NativeValue[]> | undefined>(): Promise<
+  $ = async <T extends  Record<string, NativeValue[]> | undefined>(): Promise<
     { data: T | undefined } & Omit<BatchGetItemOutput, "Responses">
   > => {
     const {

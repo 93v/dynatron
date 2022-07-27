@@ -35,11 +35,14 @@ export type NativeValue = Record<string, NativeAttributeValue>;
 export type DynatronClientConfig = DynamoDBClientConfig & {
   timeout?: number;
   maxSockets?: number;
+  returnMetrics?: boolean;
 };
 
 export class DynatronClient extends DynamoDBClient {
+  readonly returnMetrics: boolean = false;
   constructor(readonly configuration: DynatronClientConfig) {
     super(configuration);
+    this.returnMetrics = !!configuration.returnMetrics;
   }
 }
 

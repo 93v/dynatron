@@ -1,8 +1,6 @@
 import nock from "nock";
 
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-
-import { beginsWith, equals } from "../../../src";
+import { beginsWith, DynatronClient, equals } from "../../../src";
 import { ListFetch } from "../../../src/requesters/_core/items-list-fetch";
 import { Query } from "../../../src/requesters/items/items-query";
 import { BUILD } from "../../../src/utils/misc-utils";
@@ -15,7 +13,7 @@ afterEach(() => {
 describe("Query", () => {
   test("should return an instance of ListFetch", () => {
     const instance = new Query(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       "",
       equals("id", "uuid1"),
     );
@@ -24,7 +22,7 @@ describe("Query", () => {
 
   test("should build correctly", () => {
     const instance = new Query(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       "",
       equals("id", "uuid1"),
     );
@@ -33,7 +31,7 @@ describe("Query", () => {
       instance.having(equals("id2", "uuid2")).sort("ASC").sort("DSC")[BUILD](),
     ).toEqual({
       TableName: "",
-      ReturnConsumedCapacity: "INDEXES",
+      ReturnConsumedCapacity: "NONE",
       ScanIndexForward: false,
       _KeyConditionExpression: {
         kind: "AND",
@@ -52,7 +50,7 @@ describe("Query", () => {
       .reply(200, { Items: [{ id: { S: "uuid1" } }, { id: { S: "uuid2" } }] });
 
     const instance = new Query(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       "tableName",
       equals("id", "uuid1"),
     );
@@ -73,7 +71,10 @@ describe("Query", () => {
       .reply(200, { Items: [{ id: { S: "uuid1" } }, { id: { S: "uuid2" } }] });
 
     const instance = new Query(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({
+        region: "local",
+        returnMetrics: true,
+      }),
       "tableName",
       equals("id", "uuid1"),
     );
@@ -99,11 +100,16 @@ describe("Query", () => {
       });
 
     const instance = new Query(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({
+        region: "local",
+        returnMetrics: true,
+      }),
       "tableName",
       equals("id", "uuid1"),
     );
     expect(await instance.limit(1).$(true)).toEqual({
+      data: [{ id: "uuid1" }],
+      LastEvaluatedKey: { id: "uuid1" },
       ConsumedCapacity: {
         CapacityUnits: 1,
         GlobalSecondaryIndexes: undefined,
@@ -114,8 +120,6 @@ describe("Query", () => {
         WriteCapacityUnits: undefined,
       },
       Count: 1,
-      data: [{ id: "uuid1" }],
-      LastEvaluatedKey: { id: { S: "uuid1" } },
       ScannedCount: 1,
     });
     scope.persist(false);
@@ -135,13 +139,17 @@ describe("Query", () => {
       });
 
     const instance = new Query(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({
+        region: "local",
+      }),
       "tableName",
       equals("id", "uuid1"),
     );
     expect(
       await instance.limit(1).where(beginsWith("name", "A")).$(false),
     ).toEqual({
+      data: [{ id: "uuid1" }],
+      LastEvaluatedKey: { id: "uuid1" },
       ConsumedCapacity: {
         CapacityUnits: 1,
         GlobalSecondaryIndexes: undefined,
@@ -152,12 +160,6 @@ describe("Query", () => {
         WriteCapacityUnits: undefined,
       },
       Count: 1,
-      data: [{ id: "uuid1" }],
-      LastEvaluatedKey: {
-        id: {
-          S: "uuid1",
-        },
-      },
       ScannedCount: 1,
     });
     scope.persist(false);
@@ -171,7 +173,7 @@ describe("Query", () => {
       .replyWithError("ECONN: Connection error");
 
     const instance = new Query(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       "tableName",
       equals("id", "uuid1"),
     );
@@ -191,7 +193,7 @@ describe("Query", () => {
       .replyWithError("Unknown");
 
     const instance = new Query(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       "tableName",
       equals("id", "uuid1"),
     );

@@ -1,8 +1,6 @@
 import nock from "nock";
 
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-
-import { beginsWith } from "../../../src";
+import { beginsWith, DynatronClient } from "../../../src";
 import { ListFetch } from "../../../src/requesters/_core/items-list-fetch";
 import { Scan } from "../../../src/requesters/items/items-scan";
 import { BUILD } from "../../../src/utils/misc-utils";
@@ -15,7 +13,7 @@ afterEach(() => {
 describe("Scan", () => {
   test("should return an instance of ListFetch", () => {
     const instance = new Scan(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       "tableName",
     );
     expect(instance).toBeInstanceOf(ListFetch);
@@ -23,19 +21,19 @@ describe("Scan", () => {
 
   test("should build correctly", () => {
     const instance = new Scan(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       "tableName",
     );
     instance.totalSegments();
     expect(instance[BUILD]()).toEqual({
-      ReturnConsumedCapacity: "INDEXES",
+      ReturnConsumedCapacity: "NONE",
       TableName: "tableName",
       TotalSegments: 10,
     });
 
     instance.totalSegments(100);
     expect(instance[BUILD]()).toEqual({
-      ReturnConsumedCapacity: "INDEXES",
+      ReturnConsumedCapacity: "NONE",
       TableName: "tableName",
       TotalSegments: 100,
     });
@@ -43,12 +41,12 @@ describe("Scan", () => {
 
   test("should return an instance of Scan", () => {
     const instance = new Scan(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       "tableName",
     );
     instance.segment(100);
     expect(instance[BUILD]()).toEqual({
-      ReturnConsumedCapacity: "INDEXES",
+      ReturnConsumedCapacity: "NONE",
       Segment: 100,
       TableName: "tableName",
       TotalSegments: 10,
@@ -57,12 +55,12 @@ describe("Scan", () => {
 
   test("should return an instance of Scan", () => {
     const instance = new Scan(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       "tableName",
     );
     instance.disableSegments();
     expect(instance[BUILD]()).toEqual({
-      ReturnConsumedCapacity: "INDEXES",
+      ReturnConsumedCapacity: "NONE",
       TableName: "tableName",
     });
   });
@@ -74,14 +72,13 @@ describe("Scan", () => {
       .reply(200, {});
 
     const instance = new Scan(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       "tableName",
     );
     expect(await instance.$(true)).toEqual({
       Count: 0,
-      data: [],
-      LastEvaluatedKey: undefined,
       ScannedCount: 0,
+      data: [],
     });
     scope.persist(false);
     nock.cleanAll();
@@ -96,15 +93,14 @@ describe("Scan", () => {
       });
 
     const instance = new Scan(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       "tableName",
     );
     instance.totalSegments(1);
     expect(await instance.$(true)).toEqual({
       Count: 0,
-      data: [{ id: "uuid1" }, { id: "uuid2" }],
-      LastEvaluatedKey: undefined,
       ScannedCount: 0,
+      data: [{ id: "uuid1" }, { id: "uuid2" }],
     });
     scope.persist(false);
     nock.cleanAll();
@@ -118,7 +114,10 @@ describe("Scan", () => {
         Items: [{ id: { S: "uuid1" } }, { id: { S: "uuid2" } }],
       });
     const instance = new Scan(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({
+        region: "local",
+        returnMetrics: true,
+      }),
       "tableName",
     );
     instance.totalSegments(1);
@@ -142,7 +141,10 @@ describe("Scan", () => {
       });
 
     const instance = new Scan(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({
+        region: "local",
+        returnMetrics: true,
+      }),
       "tableName",
     );
     instance.totalSegments(1);
@@ -166,7 +168,10 @@ describe("Scan", () => {
       });
 
     const instance = new Scan(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({
+        region: "local",
+        returnMetrics: true,
+      }),
       "tableName",
     );
     instance.totalSegments(1);
@@ -191,7 +196,10 @@ describe("Scan", () => {
       });
 
     const instance = new Scan(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({
+        region: "local",
+        returnMetrics: true,
+      }),
       "tableName",
     );
     instance.totalSegments(1);
@@ -213,7 +221,10 @@ describe("Scan", () => {
       .reply(200, {});
 
     const instance = new Scan(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({
+        region: "local",
+        returnMetrics: true,
+      }),
       "tableName",
     );
     instance.totalSegments(1);
@@ -246,15 +257,26 @@ describe("Scan", () => {
       });
 
     const instance = new Scan(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({
+        region: "local",
+        returnMetrics: true,
+      }),
       "tableName",
     );
     instance.totalSegments(1);
     expect(await instance.$(false)).toEqual({
-      data: [],
+      ConsumedCapacity: {
+        CapacityUnits: 1,
+        GlobalSecondaryIndexes: undefined,
+        LocalSecondaryIndexes: undefined,
+        ReadCapacityUnits: undefined,
+        Table: undefined,
+        TableName: undefined,
+        WriteCapacityUnits: undefined,
+      },
       Count: 2,
       ScannedCount: 1,
-      ConsumedCapacity: { CapacityUnits: 1 },
+      data: [],
     });
     scope.persist(false);
     nock.cleanAll();
@@ -267,7 +289,7 @@ describe("Scan", () => {
       .replyWithError("ECONN: Connection error");
 
     const instance = new Scan(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       "tableName",
     );
     try {
@@ -286,7 +308,7 @@ describe("Scan", () => {
       .replyWithError("Unknown");
 
     const instance = new Scan(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       "tableName",
     );
     try {

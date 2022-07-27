@@ -1,12 +1,12 @@
 import AsyncRetry from "async-retry";
 
 import {
-  DynamoDBClient,
   UpdateTimeToLiveCommand,
   UpdateTimeToLiveInput,
 } from "@aws-sdk/client-dynamodb";
 
 import { Request } from "../_core/request";
+import { DynatronClient } from "../../dynatron";
 import {
   BUILD,
   createShortCircuit,
@@ -18,7 +18,7 @@ import {
 
 export class TableTTLUpdate extends Request {
   constructor(
-    protected readonly client: DynamoDBClient,
+    protected readonly client: DynatronClient,
     protected parameters: UpdateTimeToLiveInput,
   ) {
     super();

@@ -1,7 +1,6 @@
 import nock from "nock";
 
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-
+import { DynatronClient } from "../../../src";
 import { Check } from "../../../src/requesters/_core/items-check";
 import { Update } from "../../../src/requesters/items/items-update";
 import { BUILD } from "../../../src/utils/misc-utils";
@@ -14,7 +13,7 @@ afterEach(() => {
 describe("Item Update", () => {
   test("should return an instance of Check", () => {
     const instance = new Update(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       "tableName",
       { id: "uuid" },
     );
@@ -23,7 +22,7 @@ describe("Item Update", () => {
 
   test("should correctly build all update options", () => {
     const instance = new Update(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       "tableName",
       { id: "uuid" },
     );
@@ -45,7 +44,7 @@ describe("Item Update", () => {
         .drop("value9"),
     ).toBeInstanceOf(Update);
     expect(instance[BUILD]()).toEqual({
-      ReturnConsumedCapacity: "INDEXES",
+      ReturnConsumedCapacity: "NONE",
       ReturnValues: "ALL_NEW",
       TableName: "tableName",
       _Key: { id: "uuid" },
@@ -100,7 +99,7 @@ describe("Item Update", () => {
       .reply(200, { Attributes: { id: { S: "uuid" } } });
 
     const instance = new Update(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       "tableName",
       { id: "uuid" },
     );
@@ -118,7 +117,7 @@ describe("Item Update", () => {
       .replyWithError("ECONN: Connection error");
 
     const instance = new Update(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       "tableName",
       { id: "uuid" },
     );
@@ -138,7 +137,7 @@ describe("Item Update", () => {
       .replyWithError("Unknown");
 
     const instance = new Update(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       "tableName",
       { id: "uuid" },
     );
@@ -158,7 +157,7 @@ describe("Item Update", () => {
       .replyWithError("Unknown");
 
     const instance = new Update(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       "tableName",
     );
     try {

@@ -1,7 +1,6 @@
 import AsyncRetry from "async-retry";
 
 import {
-  DynamoDBClient,
   PutItemCommand,
   PutItemCommandInput,
   PutItemOutput,
@@ -9,7 +8,7 @@ import {
 import { unmarshall } from "@aws-sdk/util-dynamodb";
 
 import { Check } from "../_core/items-check";
-import { NativeValue } from "../../dynatron";
+import { DynatronClient, NativeValue } from "../../dynatron";
 import {
   BUILD,
   createShortCircuit,
@@ -22,7 +21,7 @@ import { marshallRequestParameters } from "../../utils/request-marshaller";
 
 export class Put extends Check {
   constructor(
-    databaseClient: DynamoDBClient,
+    databaseClient: DynatronClient,
     tableName: string,
     private item: NativeValue,
   ) {

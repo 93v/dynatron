@@ -1,7 +1,6 @@
 import nock from "nock";
 
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-
+import { DynatronClient } from "../../../src";
 import { Request } from "../../../src/requesters/_core/request";
 import { TableDescribe } from "../../../src/requesters/tables/tables-describe";
 import { BUILD } from "../../../src/utils/misc-utils";
@@ -14,7 +13,7 @@ afterEach(() => {
 describe("Table Describe", () => {
   test("should return an instance of Request", () => {
     const instance = new TableDescribe(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       "tableName",
     );
     expect(instance).toBeInstanceOf(Request);
@@ -22,7 +21,7 @@ describe("Table Describe", () => {
 
   test("should build correctly", () => {
     const instance = new TableDescribe(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       "tableName",
     );
     expect(instance[BUILD]()).toEqual({ TableName: "tableName" });
@@ -34,7 +33,7 @@ describe("Table Describe", () => {
       .reply(200, { Table: {} });
 
     const instance = new TableDescribe(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       "tableName",
     );
 
@@ -50,7 +49,7 @@ describe("Table Describe", () => {
       .replyWithError("ECONN: Connection error");
 
     const instance = new TableDescribe(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       "tableName",
     );
 
@@ -70,7 +69,7 @@ describe("Table Describe", () => {
       .replyWithError("Unknown");
 
     const instance = new TableDescribe(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       "tableName",
     );
 

@@ -1,7 +1,6 @@
 import nock from "nock";
 
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-
+import { DynatronClient } from "../../../src";
 import { Check } from "../../../src/requesters/_core/items-check";
 import { Delete } from "../../../src/requesters/items/items-delete";
 import { BUILD } from "../../../src/utils/misc-utils";
@@ -14,7 +13,7 @@ afterEach(() => {
 describe("Item Delete", () => {
   test("should return an instance of Check", () => {
     const instance = new Delete(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       "tableName",
       { id: "uuid" },
     );
@@ -23,12 +22,12 @@ describe("Item Delete", () => {
 
   test("should build with minimal properties", () => {
     const instance = new Delete(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       "tableName",
       { id: "uuid" },
     );
     expect(instance[BUILD]()).toEqual({
-      ReturnConsumedCapacity: "INDEXES",
+      ReturnConsumedCapacity: "NONE",
       ReturnValues: "NONE",
       TableName: "tableName",
       _Key: { id: "uuid" },
@@ -42,7 +41,7 @@ describe("Item Delete", () => {
       .reply(200, { Attributes: { id: { S: "uuid" } } });
 
     const instance = new Delete(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       "tableName",
       { id: "uuid" },
     );
@@ -60,7 +59,7 @@ describe("Item Delete", () => {
       .replyWithError("ECONN: Connection error");
 
     const instance = new Delete(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       "tableName",
       { id: "uuid" },
     );
@@ -80,7 +79,7 @@ describe("Item Delete", () => {
       .replyWithError("Unknown");
 
     const instance = new Delete(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       "tableName",
       { id: "uuid" },
     );

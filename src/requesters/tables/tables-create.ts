@@ -1,12 +1,9 @@
 import AsyncRetry from "async-retry";
 
-import {
-  CreateTableCommand,
-  CreateTableInput,
-  DynamoDBClient,
-} from "@aws-sdk/client-dynamodb";
+import { CreateTableCommand, CreateTableInput } from "@aws-sdk/client-dynamodb";
 
 import { Request } from "../_core/request";
+import { DynatronClient } from "../../dynatron";
 import {
   BUILD,
   createShortCircuit,
@@ -18,7 +15,7 @@ import {
 
 export class TableCreate extends Request {
   constructor(
-    protected readonly client: DynamoDBClient,
+    protected readonly client: DynatronClient,
     protected parameters: CreateTableInput,
   ) {
     super();

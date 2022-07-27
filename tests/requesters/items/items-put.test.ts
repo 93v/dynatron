@@ -1,7 +1,6 @@
 import nock from "nock";
 
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-
+import { DynatronClient } from "../../../src";
 import { Check } from "../../../src/requesters/_core/items-check";
 import { Put } from "../../../src/requesters/items/items-put";
 import { BUILD } from "../../../src/utils/misc-utils";
@@ -14,7 +13,7 @@ afterEach(() => {
 describe("Item Put", () => {
   test("should return an instance of Check", () => {
     const instance = new Put(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       "tableName",
       { id: "uuid" },
     );
@@ -23,13 +22,13 @@ describe("Item Put", () => {
 
   test("should build with minimal properties", () => {
     const instance = new Put(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       "tableName",
       { id: "uuid" },
     );
 
     expect(instance[BUILD]()).toEqual({
-      ReturnConsumedCapacity: "INDEXES",
+      ReturnConsumedCapacity: "NONE",
       ReturnValues: "NONE",
       TableName: "tableName",
       _Item: { id: "uuid" },
@@ -43,7 +42,7 @@ describe("Item Put", () => {
       .reply(200, { Item: { id: { S: "uuid" } } });
 
     const instance = new Put(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       "tableName",
       { id: "uuid" },
     );
@@ -61,7 +60,7 @@ describe("Item Put", () => {
       .replyWithError("ECONN: Connection error");
 
     const instance = new Put(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       "tableName",
       { id: "uuid" },
     );
@@ -81,7 +80,7 @@ describe("Item Put", () => {
       .replyWithError("Unknown");
 
     const instance = new Put(
-      new DynamoDBClient({ region: "local" }),
+      new DynatronClient({ region: "local" }),
       "tableName",
       { id: "uuid" },
     );

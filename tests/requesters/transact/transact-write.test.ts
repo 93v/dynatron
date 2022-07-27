@@ -38,7 +38,7 @@ describe("Item TransactWrite", () => {
     expect(instance[BUILD]()).toEqual({
       TableName: undefined,
       ClientRequestToken: "token",
-      ReturnConsumedCapacity: "INDEXES",
+      ReturnConsumedCapacity: "NONE",
       ReturnItemCollectionMetrics: "SIZE",
     });
   });

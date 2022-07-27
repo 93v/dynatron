@@ -1,7 +1,6 @@
 import nock from "nock";
 
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-
+import { DynatronClient } from "../../../src";
 import { Request } from "../../../src/requesters/_core/request";
 import { TableList } from "../../../src/requesters/tables/tables-list";
 import { BUILD } from "../../../src/utils/misc-utils";
@@ -13,17 +12,17 @@ afterEach(() => {
 
 describe("Table List", () => {
   test("should return an instance of Request", () => {
-    const instance = new TableList(new DynamoDBClient({ region: "local" }));
+    const instance = new TableList(new DynatronClient({ region: "local" }));
     expect(instance).toBeInstanceOf(Request);
   });
 
   test("should throw on negative limit", () => {
-    const instance = new TableList(new DynamoDBClient({ region: "local" }));
+    const instance = new TableList(new DynatronClient({ region: "local" }));
     expect(() => instance.limit(-1)).toThrow();
   });
 
   test("should correctly build", () => {
-    const instance = new TableList(new DynamoDBClient({ region: "local" }));
+    const instance = new TableList(new DynatronClient({ region: "local" }));
     instance.limit(1).start().start("startTableName");
     expect(instance).toBeInstanceOf(TableList);
     expect(instance[BUILD]()).toEqual({
@@ -47,7 +46,7 @@ describe("Table List", () => {
       .post("/")
       .reply(200, { TableNames: ["table3", "table4"] });
 
-    const instance = new TableList(new DynamoDBClient({ region: "local" }));
+    const instance = new TableList(new DynatronClient({ region: "local" }));
 
     expect(await instance.limit(3).$()).toEqual({
       data: ["table1", "table2", "table3"],
@@ -62,7 +61,7 @@ describe("Table List", () => {
       .post("/")
       .replyWithError("ECONN: Connection error");
 
-    const instance = new TableList(new DynamoDBClient({ region: "local" }));
+    const instance = new TableList(new DynatronClient({ region: "local" }));
 
     try {
       await instance.$();
@@ -79,7 +78,7 @@ describe("Table List", () => {
       .post("/")
       .replyWithError("Unknown");
 
-    const instance = new TableList(new DynamoDBClient({ region: "local" }));
+    const instance = new TableList(new DynatronClient({ region: "local" }));
 
     try {
       await instance.$();
