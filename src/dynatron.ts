@@ -7,7 +7,6 @@ import {
   UpdateTableInput,
   UpdateTimeToLiveInput,
 } from "@aws-sdk/client-dynamodb";
-import { Credentials } from "@aws-sdk/types";
 import { NativeAttributeValue } from "@aws-sdk/util-dynamodb";
 
 import { equals } from "./condition-expression-builders";
@@ -168,62 +167,5 @@ export class Dynatron {
       updateTTL: (input: UpdateTimeToLiveInput) =>
         new TableTTLUpdate(this.client, input),
     };
-  }
-
-  /**
-   * Loads and returns Credentials from the special credentials file
-   * @param profileName string
-   * @returns Credential
-   */
-  static loadProfileCredentials(profileName: string): Credentials | undefined {
-    if (typeof process !== "object") {
-      return undefined;
-    }
-
-    const path = require("path");
-
-    /**
-     * Returns the path of the home directory of the OS
-     * @returns string
-     */
-    const homeDirectory = (): string => {
-      if (typeof process !== "object") {
-        return "";
-      }
-
-      const {
-        HOME,
-        USERPROFILE,
-        HOMEPATH,
-        HOMEDRIVE = `C:${path.sep}`,
-      } = process.env;
-
-      if (HOME) return HOME;
-      if (USERPROFILE) return USERPROFILE;
-      if (HOMEPATH) return `${HOMEDRIVE}${HOMEPATH}`;
-
-      return require("os").homedir();
-    };
-
-    const { readFileSync } = require("fs");
-    const credentialsFile = readFileSync(
-      path.join(homeDirectory(), ".aws", "credentials"),
-      "utf8",
-    );
-
-    const profile = require("ini").parse(credentialsFile)[profileName];
-
-    return (
-      profile && {
-        accessKeyId: profile.aws_access_key_id ?? "",
-        secretAccessKey: profile.aws_secret_access_key ?? "",
-        ...(profile.aws_session_token && {
-          sessionToken: profile.aws_session_token,
-        }),
-        ...(profile.aws_expiration && {
-          expiration: new Date(profile.aws_expiration),
-        }),
-      }
-    );
   }
 }

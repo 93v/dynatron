@@ -48,15 +48,6 @@ describe("Database Client", () => {
     const dynatron = new Dynatron(client);
     expect(dynatron).toBeInstanceOf(Dynatron);
   });
-
-  test("should return have static method loadProfileCredentials", () => {
-    expect(Dynatron.loadProfileCredentials).toBeDefined();
-  });
-
-  test("should load credentials", async () => {
-    const profile = Dynatron.loadProfileCredentials("MISSING PROFILE");
-    expect(profile).toBeUndefined();
-  });
 });
 
 describe("Dynatron instance", () => {
