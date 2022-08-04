@@ -31,7 +31,7 @@ module.exports = {
   },
   externals: [
     nodeExternals({
-      allowlist: ["@aws-sdk/util-dynamodb", "async-retry", "ini"],
+      allowlist: ["@aws-sdk/util-dynamodb", "async-retry"],
     }),
   ],
   externalsPresets: { node: true, web: true },
