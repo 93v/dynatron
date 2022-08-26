@@ -5,6 +5,8 @@ import {
   BatchWriteItemCommandInput,
   BatchWriteItemInput,
   BatchWriteItemOutput,
+  DeleteItemCommandInput,
+  PutItemCommandInput,
 } from "@aws-sdk/client-dynamodb";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
 
@@ -113,9 +115,13 @@ export class BatchWrite extends Amend {
       };
 
       for (const item of batchGroupItems) {
-        const { Item, Key, TableName } = marshallRequestParameters(
-          item[BUILD](),
-        );
+        const { Item, Key, TableName } = marshallRequestParameters<
+          DeleteItemCommandInput & PutItemCommandInput
+        >(item[BUILD]());
+
+        if (TableName == undefined) {
+          continue;
+        }
 
         requestInput.RequestItems ??= {};
         requestInput.RequestItems[TableName] ??= [];

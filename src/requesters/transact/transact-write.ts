@@ -1,9 +1,12 @@
 import AsyncRetry from "async-retry";
 
 import {
+  DeleteItemCommandInput,
+  PutItemCommandInput,
   TransactWriteItemsCommand,
   TransactWriteItemsCommandInput,
   TransactWriteItemsInput,
+  UpdateItemCommandInput,
 } from "@aws-sdk/client-dynamodb";
 
 import { Amend } from "../_core/items-amend";
@@ -83,7 +86,9 @@ export class TransactWrite extends Amend {
           ReturnValues,
           TableName,
           UpdateExpression,
-        } = marshallRequestParameters(item[BUILD]());
+        } = marshallRequestParameters<
+          DeleteItemCommandInput & PutItemCommandInput & UpdateItemCommandInput
+        >(item[BUILD]());
 
         const baseRequestInput = {
           TableName,
@@ -102,15 +107,11 @@ export class TransactWrite extends Amend {
         } else if (item instanceof Put) {
           return { Put: { ...baseRequestInput, Item } };
         } else if (item instanceof Update) {
-          return {
-            Update: {
-              Key,
-              ...baseRequestInput,
-              ...(UpdateExpression && { UpdateExpression }),
-            },
-          };
+          return { Update: { Key, ...baseRequestInput, UpdateExpression } };
         } else {
-          return { ConditionCheck: { Key, ...baseRequestInput } };
+          return {
+            ConditionCheck: { Key, ...baseRequestInput, ConditionExpression },
+          };
         }
       }),
     };

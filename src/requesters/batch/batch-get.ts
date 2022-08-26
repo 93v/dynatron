@@ -87,7 +87,7 @@ export class BatchGet extends Fetch {
   /**
    * Execute the BatchGet request
    */
-  $ = async <T extends  Record<string, NativeValue[]> | undefined>(): Promise<
+  $ = async <T extends Record<string, NativeValue[]> | undefined>(): Promise<
     { data: T | undefined } & Omit<BatchGetItemOutput, "Responses">
   > => {
     const {
@@ -95,7 +95,9 @@ export class BatchGet extends Fetch {
       ExpressionAttributeNames: globalExpressionAttributeNames,
       ProjectionExpression: globalProjectionExpression,
       ConsistentRead: globalConsistentRead,
-    } = marshallRequestParameters(this[BUILD]());
+    } = marshallRequestParameters<
+      BatchGetItemCommandInput & GetItemCommandInput
+    >(this[BUILD]());
 
     const requestInputs: BatchGetItemCommandInput[] = [];
 
@@ -133,8 +135,11 @@ export class BatchGet extends Fetch {
         const expressionsSets: [Record<string, string>, string][] = [
           // Globals should come first for the replaceAll to happen correctly
           // Otherwise replace may happen inside a partial string
-          [globalExpressionAttributeNames, globalProjectionExpression],
-          [ExpressionAttributeNames, ProjectionExpression],
+          [
+            globalExpressionAttributeNames || {},
+            globalProjectionExpression || "",
+          ],
+          [ExpressionAttributeNames || {}, ProjectionExpression || ""],
         ];
 
         for (const [exprAttributeNames, projExpr] of expressionsSets) {

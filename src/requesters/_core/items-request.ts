@@ -1,6 +1,6 @@
 import { ReturnConsumedCapacity } from "@aws-sdk/client-dynamodb";
-import { DynatronClient } from "../../dynatron";
 
+import { DynatronClient } from "../../dynatron";
 import { BUILD } from "../../utils/misc-utils";
 import { Request } from "./request";
 
