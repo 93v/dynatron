@@ -122,7 +122,6 @@ describe("Scan", () => {
     );
     instance.totalSegments(1);
     expect(await instance.limit(1).where(beginsWith("name", "A")).$()).toEqual({
-      LastEvaluatedKey: {},
       data: [{ id: "uuid1" }],
       Count: 1,
       ScannedCount: 0,
