@@ -89,7 +89,7 @@ export class Scan extends ListFetch {
     let filterExpressionComplexity = 0;
     if (requestInput.Limit && requestInput.FilterExpression) {
       filterExpressionComplexity =
-        (requestInput.FilterExpression.match(/AND|OR/g) || []).length + 1;
+        (requestInput.FilterExpression.match(/AND|OR/g) ?? []).length + 1;
     }
     // Then the complexity is used with the following base number to request
     // for more elements when the filter is more complex for a faster resolution
@@ -139,15 +139,13 @@ export class Scan extends ListFetch {
                 (response.ConsumedCapacity.CapacityUnits ?? 0) +
                 (scanOutput.ConsumedCapacity.CapacityUnits ?? 0);
 
-              response.ConsumedCapacity.Table = response.ConsumedCapacity
-                .Table || { CapacityUnits: 0 };
+              response.ConsumedCapacity.Table ??= { CapacityUnits: 0 };
               response.ConsumedCapacity.Table.CapacityUnits =
                 (response.ConsumedCapacity.Table?.CapacityUnits ?? 0) +
                 (scanOutput.ConsumedCapacity.Table?.CapacityUnits ?? 0);
 
               if (input.IndexName != undefined) {
-                response.ConsumedCapacity.GlobalSecondaryIndexes = response
-                  .ConsumedCapacity.GlobalSecondaryIndexes || {
+                response.ConsumedCapacity.GlobalSecondaryIndexes ??= {
                   [input.IndexName]: { CapacityUnits: 0 },
                 };
                 response.ConsumedCapacity.GlobalSecondaryIndexes[
@@ -162,8 +160,7 @@ export class Scan extends ListFetch {
               }
 
               if (input.IndexName != undefined) {
-                response.ConsumedCapacity.LocalSecondaryIndexes = response
-                  .ConsumedCapacity.LocalSecondaryIndexes || {
+                response.ConsumedCapacity.LocalSecondaryIndexes ??= {
                   [input.IndexName]: { CapacityUnits: 0 },
                 };
                 response.ConsumedCapacity.LocalSecondaryIndexes[
@@ -195,7 +192,10 @@ export class Scan extends ListFetch {
                 delete lastEvaluatedKey[key];
               }
             }
-            response.LastEvaluatedKey = lastEvaluatedKey;
+            response.LastEvaluatedKey =
+              Object.keys(lastEvaluatedKey).length > 0
+                ? lastEvaluatedKey
+                : scanOutput.LastEvaluatedKey;
             operationCompleted = true;
           }
           if (disableRecursion && scanOutput.LastEvaluatedKey != undefined) {
@@ -249,12 +249,11 @@ export class Scan extends ListFetch {
       );
 
       if (requestInput.Limit) {
-        const totalSegmentsBasedOnLimit = Math.ceil(requestInput.Limit * 0.2);
-        requestInput.TotalSegments = Math.min(
-          requestInput.TotalSegments,
-          totalSegmentsBasedOnLimit,
-        );
         initialLimit = requestInput.Limit;
+        requestInput.TotalSegments = Math.min(
+          requestInput.Limit,
+          requestInput.TotalSegments,
+        );
         requestInput.Limit = Math.ceil(
           requestInput.Limit / requestInput.TotalSegments,
         );
@@ -264,7 +263,7 @@ export class Scan extends ListFetch {
     let outputs: ScanOutput[];
     if (requestInput.Segment != undefined) {
       const segmentParameters = { ...requestInput };
-      segmentParameters.TotalSegments = segmentParameters.TotalSegments || 1;
+      segmentParameters.TotalSegments ||= 1;
       outputs = [await this.scanSegment(requestInput, disableRecursion)];
     } else {
       outputs = await Promise.all(
@@ -295,8 +294,7 @@ export class Scan extends ListFetch {
         (aggregatedScanOutput.ScannedCount ?? 0) +
         (scanOutput.ScannedCount ?? 0);
 
-      aggregatedScanOutput.LastEvaluatedKey =
-        aggregatedScanOutput.LastEvaluatedKey ?? scanOutput.LastEvaluatedKey;
+      aggregatedScanOutput.LastEvaluatedKey ??= scanOutput.LastEvaluatedKey;
 
       if (scanOutput.ConsumedCapacity) {
         if (aggregatedScanOutput.ConsumedCapacity) {
@@ -304,19 +302,15 @@ export class Scan extends ListFetch {
             (aggregatedScanOutput.ConsumedCapacity.CapacityUnits ?? 0) +
             (scanOutput.ConsumedCapacity.CapacityUnits ?? 0);
 
-          aggregatedScanOutput.ConsumedCapacity.Table = aggregatedScanOutput
-            .ConsumedCapacity.Table || {
-            CapacityUnits: 0,
-          };
+          aggregatedScanOutput.ConsumedCapacity.Table ??= { CapacityUnits: 0 };
           aggregatedScanOutput.ConsumedCapacity.Table.CapacityUnits =
             (aggregatedScanOutput.ConsumedCapacity.Table?.CapacityUnits ?? 0) +
             (scanOutput.ConsumedCapacity.Table?.CapacityUnits ?? 0);
 
           if (requestInput.IndexName != undefined) {
-            aggregatedScanOutput.ConsumedCapacity.GlobalSecondaryIndexes =
-              aggregatedScanOutput.ConsumedCapacity.GlobalSecondaryIndexes || {
-                [requestInput.IndexName]: { CapacityUnits: 0 },
-              };
+            aggregatedScanOutput.ConsumedCapacity.GlobalSecondaryIndexes ??= {
+              [requestInput.IndexName]: { CapacityUnits: 0 },
+            };
             aggregatedScanOutput.ConsumedCapacity.GlobalSecondaryIndexes[
               requestInput.IndexName
             ].CapacityUnits =
@@ -329,10 +323,9 @@ export class Scan extends ListFetch {
           }
 
           if (requestInput.IndexName != undefined) {
-            aggregatedScanOutput.ConsumedCapacity.LocalSecondaryIndexes =
-              aggregatedScanOutput.ConsumedCapacity.LocalSecondaryIndexes || {
-                [requestInput.IndexName]: { CapacityUnits: 0 },
-              };
+            aggregatedScanOutput.ConsumedCapacity.LocalSecondaryIndexes ??= {
+              [requestInput.IndexName]: { CapacityUnits: 0 },
+            };
             aggregatedScanOutput.ConsumedCapacity.LocalSecondaryIndexes[
               requestInput.IndexName
             ].CapacityUnits =

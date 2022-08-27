@@ -136,10 +136,10 @@ export class BatchGet extends Fetch {
           // Globals should come first for the replaceAll to happen correctly
           // Otherwise replace may happen inside a partial string
           [
-            globalExpressionAttributeNames || {},
-            globalProjectionExpression || "",
+            globalExpressionAttributeNames ?? {},
+            globalProjectionExpression ?? "",
           ],
-          [ExpressionAttributeNames || {}, ProjectionExpression || ""],
+          [ExpressionAttributeNames ?? {}, ProjectionExpression ?? ""],
         ];
 
         for (const [exprAttributeNames, projExpr] of expressionsSets) {
@@ -158,7 +158,7 @@ export class BatchGet extends Fetch {
             }
 
             requestInput.RequestItems[TableName].ProjectionExpression =
-              (requestInput.RequestItems[TableName].ProjectionExpression ||
+              (requestInput.RequestItems[TableName].ProjectionExpression ??
                 "") +
               (requestInput.RequestItems[TableName].ProjectionExpression
                 ? ", "
@@ -200,7 +200,7 @@ export class BatchGet extends Fetch {
     const consumedCapacityMap = {};
 
     for (const output of outputs) {
-      aggregatedOutput.Responses = aggregatedOutput.Responses ?? {};
+      aggregatedOutput.Responses ??= {};
 
       if (output.Responses != undefined) {
         for (const tableName of Object.keys(output.Responses)) {
@@ -214,8 +214,7 @@ export class BatchGet extends Fetch {
       if (output.ConsumedCapacity != undefined) {
         for (const cc of output.ConsumedCapacity) {
           if (cc?.TableName) {
-            consumedCapacityMap[cc.TableName] =
-              consumedCapacityMap[cc.TableName] || 0;
+            consumedCapacityMap[cc.TableName] ??= 0;
             consumedCapacityMap[cc.TableName] += cc.CapacityUnits;
           }
         }

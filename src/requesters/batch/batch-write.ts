@@ -60,8 +60,7 @@ export class BatchWrite extends Amend {
 
           if (ItemCollectionMetrics != undefined) {
             for (const tableName of Object.keys(ItemCollectionMetrics)) {
-              batchWriteItemOutput.ItemCollectionMetrics =
-                batchWriteItemOutput.ItemCollectionMetrics ?? {};
+              batchWriteItemOutput.ItemCollectionMetrics ??= {};
               batchWriteItemOutput.ItemCollectionMetrics[tableName] = [
                 ...(batchWriteItemOutput.ItemCollectionMetrics[tableName] ??
                   []),
@@ -151,8 +150,7 @@ export class BatchWrite extends Amend {
       if (ConsumedCapacity != undefined) {
         for (const cc of ConsumedCapacity) {
           if (cc.TableName) {
-            consumedCapacityMap[cc.TableName] =
-              consumedCapacityMap[cc.TableName] || 0;
+            consumedCapacityMap[cc.TableName] ??= 0;
             consumedCapacityMap[cc.TableName] += cc.CapacityUnits;
           }
         }
@@ -160,8 +158,7 @@ export class BatchWrite extends Amend {
 
       if (ItemCollectionMetrics != undefined) {
         for (const tableName of Object.keys(ItemCollectionMetrics)) {
-          aggregatedOutput.ItemCollectionMetrics =
-            aggregatedOutput.ItemCollectionMetrics ?? {};
+          aggregatedOutput.ItemCollectionMetrics ??= {};
           aggregatedOutput.ItemCollectionMetrics[tableName] = [
             ...(aggregatedOutput.ItemCollectionMetrics[tableName] ?? []),
             ...ItemCollectionMetrics[tableName],
@@ -180,9 +177,9 @@ export class BatchWrite extends Amend {
     const responses: Record<string, any> = {};
 
     for (const requestInput of requestInputs) {
-      for (const tableName of Object.keys(requestInput.RequestItems || {})) {
+      for (const tableName of Object.keys(requestInput.RequestItems ?? {})) {
         responses[tableName] ??= [];
-        for (const item of (requestInput.RequestItems || {})[tableName]) {
+        for (const item of (requestInput.RequestItems ?? {})[tableName]) {
           if (item.PutRequest?.Item) {
             responses[tableName].push(unmarshall(item.PutRequest.Item));
           }

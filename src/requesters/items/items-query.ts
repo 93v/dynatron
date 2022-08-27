@@ -92,14 +92,14 @@ export class Query extends ListFetch {
     let filterExpressionComplexity = 0;
     if (requestInput.Limit && requestInput.FilterExpression) {
       filterExpressionComplexity =
-        (requestInput.FilterExpression.match(/AND|OR/g) || []).length + 1;
+        (requestInput.FilterExpression.match(/AND|OR/g) ?? []).length + 1;
     }
     // Then the complexity is used with the following base number to request
     // for more elements when the filter is more complex for a faster resolution
     const FILTER_EXPRESSION_LIMIT_POWER_BASE = 5;
 
     let operationCompleted = false;
-    const aggregatedQueryOutput: QueryOutput = {};
+    const response: QueryOutput = {};
 
     let keyAttributes: string[] = [];
 
@@ -131,61 +131,49 @@ export class Query extends ListFetch {
             keyAttributes = Object.keys(queryOutput.LastEvaluatedKey);
           }
           if (queryOutput.Items) {
-            aggregatedQueryOutput.Items = [
-              ...(aggregatedQueryOutput.Items ?? []),
-              ...queryOutput.Items,
-            ];
+            response.Items = [...(response.Items ?? []), ...queryOutput.Items];
           }
           if (queryOutput.Count) {
-            aggregatedQueryOutput.Count =
-              (aggregatedQueryOutput.Count ?? 0) + queryOutput.Count;
+            response.Count = (response.Count ?? 0) + queryOutput.Count;
           }
           if (queryOutput.ScannedCount) {
-            aggregatedQueryOutput.ScannedCount =
-              (aggregatedQueryOutput.ScannedCount ?? 0) +
-              queryOutput.ScannedCount;
+            response.ScannedCount =
+              (response.ScannedCount ?? 0) + queryOutput.ScannedCount;
           }
           if (queryOutput.ConsumedCapacity) {
-            if (aggregatedQueryOutput.ConsumedCapacity) {
-              aggregatedQueryOutput.ConsumedCapacity.CapacityUnits =
-                (aggregatedQueryOutput.ConsumedCapacity.CapacityUnits ?? 0) +
+            if (response.ConsumedCapacity) {
+              response.ConsumedCapacity.CapacityUnits =
+                (response.ConsumedCapacity.CapacityUnits ?? 0) +
                 (queryOutput.ConsumedCapacity.CapacityUnits ?? 0);
 
-              aggregatedQueryOutput.ConsumedCapacity.Table =
-                aggregatedQueryOutput.ConsumedCapacity.Table || {
-                  CapacityUnits: 0,
-                };
-              aggregatedQueryOutput.ConsumedCapacity.Table.CapacityUnits =
-                (aggregatedQueryOutput.ConsumedCapacity.Table?.CapacityUnits ??
-                  0) + (queryOutput.ConsumedCapacity.Table?.CapacityUnits ?? 0);
+              response.ConsumedCapacity.Table ??= { CapacityUnits: 0 };
+              response.ConsumedCapacity.Table.CapacityUnits =
+                (response.ConsumedCapacity.Table?.CapacityUnits ?? 0) +
+                (queryOutput.ConsumedCapacity.Table?.CapacityUnits ?? 0);
 
               if (requestInput.IndexName != undefined) {
-                aggregatedQueryOutput.ConsumedCapacity.GlobalSecondaryIndexes =
-                  aggregatedQueryOutput.ConsumedCapacity
-                    .GlobalSecondaryIndexes || {
-                    [requestInput.IndexName]: { CapacityUnits: 0 },
-                  };
-                aggregatedQueryOutput.ConsumedCapacity.GlobalSecondaryIndexes[
+                response.ConsumedCapacity.GlobalSecondaryIndexes ??= {
+                  [requestInput.IndexName]: { CapacityUnits: 0 },
+                };
+                response.ConsumedCapacity.GlobalSecondaryIndexes[
                   requestInput.IndexName
                 ].CapacityUnits =
-                  (aggregatedQueryOutput.ConsumedCapacity
-                    .GlobalSecondaryIndexes[requestInput.IndexName]
-                    .CapacityUnits ?? 0) +
+                  (response.ConsumedCapacity.GlobalSecondaryIndexes[
+                    requestInput.IndexName
+                  ].CapacityUnits ?? 0) +
                   (queryOutput.ConsumedCapacity.GlobalSecondaryIndexes?.[
                     requestInput.IndexName
                   ].CapacityUnits ?? 0);
               }
 
               if (requestInput.IndexName != undefined) {
-                aggregatedQueryOutput.ConsumedCapacity.LocalSecondaryIndexes =
-                  aggregatedQueryOutput.ConsumedCapacity
-                    .LocalSecondaryIndexes || {
-                    [requestInput.IndexName]: { CapacityUnits: 0 },
-                  };
-                aggregatedQueryOutput.ConsumedCapacity.LocalSecondaryIndexes[
+                response.ConsumedCapacity.LocalSecondaryIndexes ??= {
+                  [requestInput.IndexName]: { CapacityUnits: 0 },
+                };
+                response.ConsumedCapacity.LocalSecondaryIndexes[
                   requestInput.IndexName
                 ].CapacityUnits =
-                  (aggregatedQueryOutput.ConsumedCapacity.LocalSecondaryIndexes[
+                  (response.ConsumedCapacity.LocalSecondaryIndexes[
                     requestInput.IndexName
                   ].CapacityUnits ?? 0) +
                   (queryOutput.ConsumedCapacity.LocalSecondaryIndexes?.[
@@ -193,36 +181,32 @@ export class Query extends ListFetch {
                   ].CapacityUnits ?? 0);
               }
             } else {
-              aggregatedQueryOutput.ConsumedCapacity =
-                queryOutput.ConsumedCapacity;
+              response.ConsumedCapacity = queryOutput.ConsumedCapacity;
             }
           }
           if (
             requestInput.Limit &&
-            aggregatedQueryOutput.Items != undefined &&
-            aggregatedQueryOutput.Items.length >= requestInput.Limit
+            response.Items != undefined &&
+            response.Items.length >= requestInput.Limit
           ) {
-            aggregatedQueryOutput.Items = aggregatedQueryOutput.Items.slice(
-              0,
-              requestInput.Limit,
-            );
-            aggregatedQueryOutput.Count = aggregatedQueryOutput.Items.length;
+            response.Items = response.Items.slice(0, requestInput.Limit);
+            response.Count = response.Items.length;
             const lastEvaluatedKey = {
-              ...aggregatedQueryOutput.Items[
-                aggregatedQueryOutput.Items.length - 1
-              ],
+              ...response.Items[response.Items.length - 1],
             };
             for (const key of Object.keys(lastEvaluatedKey)) {
               if (!keyAttributes.includes(key)) {
                 delete lastEvaluatedKey[key];
               }
             }
-            aggregatedQueryOutput.LastEvaluatedKey = lastEvaluatedKey;
+            response.LastEvaluatedKey =
+              Object.keys(lastEvaluatedKey).length > 0
+                ? lastEvaluatedKey
+                : queryOutput.LastEvaluatedKey;
             operationCompleted = true;
           }
           if (disableRecursion && queryOutput.LastEvaluatedKey != undefined) {
-            aggregatedQueryOutput.LastEvaluatedKey =
-              queryOutput.LastEvaluatedKey;
+            response.LastEvaluatedKey = queryOutput.LastEvaluatedKey;
           }
         } catch (error: unknown) {
           if (isRetryableError(error)) {
@@ -236,7 +220,7 @@ export class Query extends ListFetch {
         }
       }
 
-      const { Items, LastEvaluatedKey, ...output } = aggregatedQueryOutput;
+      const { Items, LastEvaluatedKey, ...output } = response;
 
       return {
         ...output,

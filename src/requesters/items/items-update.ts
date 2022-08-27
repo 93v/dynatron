@@ -225,7 +225,7 @@ export class Update extends Check {
       ...(this.#UpdateExpressions.length > 0 && {
         _UpdateExpressions: this.#UpdateExpressions.filter(
           (expression) =>
-            !Object.keys(this.key || {}).includes(expression.attributePath),
+            !Object.keys(this.key ?? {}).includes(expression.attributePath),
         ),
       }),
     };

@@ -365,13 +365,11 @@ const serializeAttributePath = (attributePath: string, prefix: string) => {
       continue;
     }
     const pathElementName = pathElement.name;
-    attributeNamesMap[pathElementName] =
-      attributeNamesMap[pathElementName] ??
-      `#${
-        typeof attributeNamesMap[pathElementName] === "number"
-          ? attributeNamesMap[pathElementName]
-          : `${prefix}${nextAlpha.getNext()}`
-      }`;
+    attributeNamesMap[pathElementName] ??= `#${
+      typeof attributeNamesMap[pathElementName] === "number"
+        ? attributeNamesMap[pathElementName]
+        : `${prefix}${nextAlpha.getNext()}`
+    }`;
     if (expressionString !== "") {
       expressionString += ".";
     }
