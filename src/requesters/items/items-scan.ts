@@ -264,7 +264,16 @@ export class Scan extends ListFetch {
     if (requestInput.Segment != undefined) {
       const segmentParameters = { ...requestInput };
       segmentParameters.TotalSegments ||= 1;
-      outputs = [await this.scanSegment(requestInput, disableRecursion)];
+      if ((segmentParameters.Segment ?? 0) >= segmentParameters.TotalSegments) {
+        throw new Error(
+          `A segment with index ${
+            segmentParameters.Segment
+          } does not exist. The segment index can be between 0 and ${
+            segmentParameters.TotalSegments - 1
+          } for ${segmentParameters.TotalSegments} total segments.`,
+        );
+      }
+      outputs = [await this.scanSegment(segmentParameters, disableRecursion)];
     } else {
       outputs = await Promise.all(
         Array.from({ length: requestInput.TotalSegments ?? 1 }).map(
