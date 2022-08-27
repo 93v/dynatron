@@ -80,7 +80,6 @@ describe("Query", () => {
     );
     expect(await instance.limit(1).$()).toEqual({
       Count: 1,
-      LastEvaluatedKey: {},
       data: [{ id: "uuid1" }],
     });
     scope.persist(false);
