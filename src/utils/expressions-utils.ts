@@ -145,7 +145,7 @@ const serializeUpdateExpression = (
 
   switch (update.kind) {
     case "add":
-    case "delete":
+    case "delete": {
       return {
         Type: update.kind === "add" ? "ADD" : "DELETE",
         expressionString: `${expressionString} ${attributeValue.name}`,
@@ -154,6 +154,7 @@ const serializeUpdateExpression = (
           [attributeValue.name]: attributeValue.value,
         },
       };
+    }
     case "append":
     case "prepend": {
       const fullExpressionString = update.createIfAttributePathDoesNotExist
@@ -175,7 +176,7 @@ const serializeUpdateExpression = (
         },
       };
     }
-    case "increment":
+    case "increment": {
       return {
         Type: "SET",
         expressionString: `${expressionString}=${expressionString}+${attributeValue.name}`,
@@ -184,13 +185,15 @@ const serializeUpdateExpression = (
           [attributeValue.name]: attributeValue.value,
         },
       };
-    case "remove":
+    }
+    case "remove": {
       return {
         Type: "REMOVE",
         expressionString: `${expressionString}`,
         expressionAttributeNames: expressionAttributeNames,
       };
-    case "set":
+    }
+    case "set": {
       return {
         Type: "SET",
         expressionString: `${expressionString}=${
@@ -201,8 +204,10 @@ const serializeUpdateExpression = (
           [attributeValue.name]: attributeValue.value,
         },
       };
-    default:
+    }
+    default: {
       throw assertNever(update);
+    }
   }
 };
 
@@ -243,9 +248,9 @@ const serializeConditionExpression = (
 
       return {
         expressionString: `${
-          typeof condition.attributePath !== "string" ? "size(" : ""
+          typeof condition.attributePath === "string" ? "" : "size("
         }${attributePath.expressionString}${
-          typeof condition.attributePath !== "string" ? ")" : ""
+          typeof condition.attributePath === "string" ? "" : ")"
         } ${condition.kind} ${attributeValues
           .map((v) => v.name)
           .filter((t) => t.trim() !== "")
@@ -273,9 +278,9 @@ const serializeConditionExpression = (
       const attributeValue = serializeExpressionValue(condition.value, prefix);
       return {
         expressionString: `${
-          typeof condition.attributePath !== "string" ? "size(" : ""
+          typeof condition.attributePath === "string" ? "" : "size("
         }${attributePath.expressionString}${
-          typeof condition.attributePath !== "string" ? ")" : ""
+          typeof condition.attributePath === "string" ? "" : ")"
         }${condition.kind}${attributeValue.name}`,
         expressionAttributeNames: attributePath.expressionAttributeNames,
         expressionAttributeValues: {
@@ -294,9 +299,9 @@ const serializeConditionExpression = (
       );
       return {
         expressionString: `${
-          typeof condition.attributePath !== "string" ? "size(" : ""
+          typeof condition.attributePath === "string" ? "" : "size("
         }${attributePath.expressionString}${
-          typeof condition.attributePath !== "string" ? ")" : ""
+          typeof condition.attributePath === "string" ? "" : ")"
         } ${condition.kind}(${attributeValues
           .map((v) => v.name)
           // .filter((t) => t.trim() !== "")
@@ -350,8 +355,9 @@ const serializeConditionExpression = (
         ),
       };
     }
-    default:
+    default: {
       throw assertNever(condition);
+    }
   }
 };
 

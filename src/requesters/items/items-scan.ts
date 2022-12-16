@@ -261,7 +261,19 @@ export class Scan extends ListFetch {
     }
 
     let outputs: ScanOutput[];
-    if (requestInput.Segment != undefined) {
+    if (requestInput.Segment == undefined) {
+      outputs = await Promise.all(
+        Array.from({ length: requestInput.TotalSegments ?? 1 }).map(
+          async (_, segment) => {
+            const segmentParameters = { ...requestInput };
+            if (segmentParameters.TotalSegments) {
+              segmentParameters.Segment = segment;
+            }
+            return this.scanSegment(segmentParameters, disableRecursion);
+          },
+        ),
+      );
+    } else {
       const segmentParameters = { ...requestInput };
       segmentParameters.TotalSegments ||= 1;
       if ((segmentParameters.Segment ?? 0) >= segmentParameters.TotalSegments) {
@@ -274,18 +286,6 @@ export class Scan extends ListFetch {
         );
       }
       outputs = [await this.scanSegment(segmentParameters, disableRecursion)];
-    } else {
-      outputs = await Promise.all(
-        Array.from({ length: requestInput.TotalSegments ?? 1 }).map(
-          async (_, segment) => {
-            const segmentParameters = { ...requestInput };
-            if (segmentParameters.TotalSegments) {
-              segmentParameters.Segment = segment;
-            }
-            return this.scanSegment(segmentParameters, disableRecursion);
-          },
-        ),
-      );
     }
 
     const aggregatedScanOutput: ScanOutput = {};

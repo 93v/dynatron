@@ -147,13 +147,13 @@ export class BatchGet extends Fetch {
             let projectionExpression = projExpr;
 
             for (const [key, value] of Object.entries(exprAttributeNames)) {
-              if (!expressionAttributeNamesReverseMap[value]) {
-                expressionAttributeNamesReverseMap[value] = key;
-              } else {
+              if (expressionAttributeNamesReverseMap[value]) {
                 projectionExpression = projectionExpression.replace(
                   new RegExp(key, "g"),
                   expressionAttributeNamesReverseMap[value],
                 );
+              } else {
+                expressionAttributeNamesReverseMap[value] = key;
               }
             }
 
