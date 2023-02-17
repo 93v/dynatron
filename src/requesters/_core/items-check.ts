@@ -37,7 +37,7 @@ export class Check extends Amend {
    * @param returnValues NONE | ALL_OLD | UPDATED_OLD | ALL_NEW | UPDATED_NEW
    * @returns Check
    */
-  returnValues = (returnValues: ReturnValue = "ALL_NEW") => {
+  returnValues = (returnValues: ReturnValue = ReturnValue.ALL_NEW) => {
     this.#ReturnValues = returnValues;
     return this;
   };
@@ -68,7 +68,9 @@ export class Check extends Amend {
       }),
       ReturnValues:
         this.#ReturnValues ||
-        (this.constructor.name === "Update" ? "ALL_NEW" : "NONE"),
+        (this.constructor.name === "Update"
+          ? ReturnValue.ALL_NEW
+          : ReturnValue.NONE),
     };
   }
 }

@@ -12,8 +12,8 @@ export class ItemRequest extends Request {
   ) {
     super();
     this.ReturnConsumedCapacity = this.databaseClient.returnMetrics
-      ? "INDEXES"
-      : "NONE";
+      ? ReturnConsumedCapacity.INDEXES
+      : ReturnConsumedCapacity.NONE;
   }
 
   /**
@@ -21,7 +21,7 @@ export class ItemRequest extends Request {
    * @param returnConsumedCapacity "INDEXES" | "TOTAL" | "NONE"
    */
   returnConsumedCapacity = (
-    returnConsumedCapacity: ReturnConsumedCapacity = "TOTAL",
+    returnConsumedCapacity: ReturnConsumedCapacity = ReturnConsumedCapacity.TOTAL,
   ) => {
     this.ReturnConsumedCapacity = returnConsumedCapacity;
     return this;

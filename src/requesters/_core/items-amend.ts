@@ -13,7 +13,7 @@ export class Amend extends ItemRequest {
    * @param returnItemCollectionMetrics ReturnItemCollectionMetrics
    */
   returnItemCollectionMetrics = (
-    returnItemCollectionMetrics: ReturnItemCollectionMetrics = "SIZE",
+    returnItemCollectionMetrics: ReturnItemCollectionMetrics = ReturnItemCollectionMetrics.SIZE,
   ) => {
     this.#ReturnItemCollectionMetrics = returnItemCollectionMetrics;
     return this;
