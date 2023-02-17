@@ -13,7 +13,10 @@ afterEach(() => {
 describe("Query", () => {
   test("should return an instance of ListFetch", () => {
     const instance = new Query(
-      new DynatronClient({ region: "local" }),
+      new DynatronClient({
+        region: "local",
+        endpoint: "http://127.0.0.1:8000",
+      }),
       "",
       equals("id", "uuid1"),
     );
@@ -22,7 +25,10 @@ describe("Query", () => {
 
   test("should build correctly", () => {
     const instance = new Query(
-      new DynatronClient({ region: "local" }),
+      new DynatronClient({
+        region: "local",
+        endpoint: "http://127.0.0.1:8000",
+      }),
       "",
       equals("id", "uuid1"),
     );
@@ -44,13 +50,16 @@ describe("Query", () => {
   });
 
   test("should handle the raw response flag", async () => {
-    const scope = nock("https://localhost:8000")
+    const scope = nock("http://127.0.0.1:8000")
       .persist(true)
       .post("/")
       .reply(200, { Items: [{ id: { S: "uuid1" } }, { id: { S: "uuid2" } }] });
 
     const instance = new Query(
-      new DynatronClient({ region: "local" }),
+      new DynatronClient({
+        region: "local",
+        endpoint: "http://127.0.0.1:8000",
+      }),
       "tableName",
       equals("id", "uuid1"),
     );
@@ -65,7 +74,7 @@ describe("Query", () => {
   });
 
   test("should return limited items", async () => {
-    const scope = nock("https://localhost:8000")
+    const scope = nock("http://127.0.0.1:8000")
       .persist(true)
       .post("/")
       .reply(200, { Items: [{ id: { S: "uuid1" } }, { id: { S: "uuid2" } }] });
@@ -73,6 +82,7 @@ describe("Query", () => {
     const instance = new Query(
       new DynatronClient({
         region: "local",
+        endpoint: "http://127.0.0.1:8000",
         returnMetrics: true,
       }),
       "tableName",
@@ -87,7 +97,7 @@ describe("Query", () => {
   });
 
   test("should return an instance of Query", async () => {
-    const scope = nock("https://localhost:8000")
+    const scope = nock("http://127.0.0.1:8000")
       .persist(true)
       .post("/")
       .reply(200, {
@@ -101,6 +111,7 @@ describe("Query", () => {
     const instance = new Query(
       new DynatronClient({
         region: "local",
+        endpoint: "http://127.0.0.1:8000",
         returnMetrics: true,
       }),
       "tableName",
@@ -126,7 +137,7 @@ describe("Query", () => {
   });
 
   test("should return an instance of Query", async () => {
-    const scope = nock("https://localhost:8000")
+    const scope = nock("http://127.0.0.1:8000")
       .persist(true)
       .post("/")
       .reply(200, {
@@ -140,6 +151,7 @@ describe("Query", () => {
     const instance = new Query(
       new DynatronClient({
         region: "local",
+        endpoint: "http://127.0.0.1:8000",
       }),
       "tableName",
       equals("id", "uuid1"),
@@ -166,13 +178,16 @@ describe("Query", () => {
   });
 
   test("should retry on retryable error", async () => {
-    const scope = nock("https://localhost:8000")
+    const scope = nock("http://127.0.0.1:8000")
       .persist(true)
       .post("/")
       .replyWithError("ECONN: Connection error");
 
     const instance = new Query(
-      new DynatronClient({ region: "local" }),
+      new DynatronClient({
+        region: "local",
+        endpoint: "http://127.0.0.1:8000",
+      }),
       "tableName",
       equals("id", "uuid1"),
     );
@@ -186,13 +201,16 @@ describe("Query", () => {
   });
 
   test("should fail on non-retryable error", async () => {
-    const scope = nock("https://localhost:8000")
+    const scope = nock("http://127.0.0.1:8000")
       .persist(true)
       .post("/")
       .replyWithError("Unknown");
 
     const instance = new Query(
-      new DynatronClient({ region: "local" }),
+      new DynatronClient({
+        region: "local",
+        endpoint: "http://127.0.0.1:8000",
+      }),
       "tableName",
       equals("id", "uuid1"),
     );

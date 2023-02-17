@@ -38,13 +38,20 @@ describe("Database Client", () => {
   });
 
   test("should return an instance of Dynatron", () => {
-    const client = new DynatronClient({ region: "local" });
+    const client = new DynatronClient({
+      region: "local",
+      endpoint: "http://127.0.0.1:8000",
+    });
     const dynatron = new Dynatron(client);
     expect(dynatron).toBeInstanceOf(Dynatron);
   });
 
   test("should return an instance of Dynatron", () => {
-    const client = new DynatronClient({ region: "local", timeout: 100 });
+    const client = new DynatronClient({
+      region: "local",
+      endpoint: "http://127.0.0.1:8000",
+      timeout: 100,
+    });
     const dynatron = new Dynatron(client);
     expect(dynatron).toBeInstanceOf(Dynatron);
   });

@@ -13,7 +13,10 @@ afterEach(() => {
 describe("Item Update", () => {
   test("should return an instance of Check", () => {
     const instance = new Update(
-      new DynatronClient({ region: "local" }),
+      new DynatronClient({
+        region: "local",
+        endpoint: "http://127.0.0.1:8000",
+      }),
       "tableName",
       { id: "uuid" },
     );
@@ -22,7 +25,10 @@ describe("Item Update", () => {
 
   test("should correctly build all update options", () => {
     const instance = new Update(
-      new DynatronClient({ region: "local" }),
+      new DynatronClient({
+        region: "local",
+        endpoint: "http://127.0.0.1:8000",
+      }),
       "tableName",
       { id: "uuid" },
     );
@@ -93,13 +99,16 @@ describe("Item Update", () => {
   });
 
   test("should correctly handle raw response flag", async () => {
-    const scope = nock("https://localhost:8000")
+    const scope = nock("http://127.0.0.1:8000")
       .persist(true)
       .post("/")
       .reply(200, { Attributes: { id: { S: "uuid" } } });
 
     const instance = new Update(
-      new DynatronClient({ region: "local" }),
+      new DynatronClient({
+        region: "local",
+        endpoint: "http://127.0.0.1:8000",
+      }),
       "tableName",
       { id: "uuid" },
     );
@@ -111,13 +120,16 @@ describe("Item Update", () => {
   });
 
   test("should retry on retryable error", async () => {
-    const scope = nock("https://localhost:8000")
+    const scope = nock("http://127.0.0.1:8000")
       .persist(true)
       .post("/")
       .replyWithError("ECONN: Connection error");
 
     const instance = new Update(
-      new DynatronClient({ region: "local" }),
+      new DynatronClient({
+        region: "local",
+        endpoint: "http://127.0.0.1:8000",
+      }),
       "tableName",
       { id: "uuid" },
     );
@@ -131,13 +143,16 @@ describe("Item Update", () => {
   });
 
   test("should fail on non-retryable error", async () => {
-    const scope = nock("https://localhost:8000")
+    const scope = nock("http://127.0.0.1:8000")
       .persist(true)
       .post("/")
       .replyWithError("Unknown");
 
     const instance = new Update(
-      new DynatronClient({ region: "local" }),
+      new DynatronClient({
+        region: "local",
+        endpoint: "http://127.0.0.1:8000",
+      }),
       "tableName",
       { id: "uuid" },
     );
@@ -151,13 +166,16 @@ describe("Item Update", () => {
   });
 
   test("should correctly handle no key", async () => {
-    const scope = nock("https://localhost:8000")
+    const scope = nock("http://127.0.0.1:8000")
       .persist(true)
       .post("/")
       .replyWithError("Unknown");
 
     const instance = new Update(
-      new DynatronClient({ region: "local" }),
+      new DynatronClient({
+        region: "local",
+        endpoint: "http://127.0.0.1:8000",
+      }),
       "tableName",
     );
     try {

@@ -13,7 +13,10 @@ afterEach(() => {
 describe("Item Delete", () => {
   test("should return an instance of Check", () => {
     const instance = new Delete(
-      new DynatronClient({ region: "local" }),
+      new DynatronClient({
+        region: "local",
+        endpoint: "http://127.0.0.1:8000",
+      }),
       "tableName",
       { id: "uuid" },
     );
@@ -22,7 +25,10 @@ describe("Item Delete", () => {
 
   test("should build with minimal properties", () => {
     const instance = new Delete(
-      new DynatronClient({ region: "local" }),
+      new DynatronClient({
+        region: "local",
+        endpoint: "http://127.0.0.1:8000",
+      }),
       "tableName",
       { id: "uuid" },
     );
@@ -35,13 +41,16 @@ describe("Item Delete", () => {
   });
 
   test("should correctly handle raw response flag", async () => {
-    const scope = nock("https://localhost:8000")
+    const scope = nock("http://127.0.0.1:8000")
       .persist(true)
       .post("/")
       .reply(200, { Attributes: { id: { S: "uuid" } } });
 
     const instance = new Delete(
-      new DynatronClient({ region: "local" }),
+      new DynatronClient({
+        region: "local",
+        endpoint: "http://127.0.0.1:8000",
+      }),
       "tableName",
       { id: "uuid" },
     );
@@ -53,13 +62,16 @@ describe("Item Delete", () => {
   });
 
   test("should retry on retryable error", async () => {
-    const scope = nock("https://localhost:8000")
+    const scope = nock("http://127.0.0.1:8000")
       .persist(true)
       .post("/")
       .replyWithError("ECONN: Connection error");
 
     const instance = new Delete(
-      new DynatronClient({ region: "local" }),
+      new DynatronClient({
+        region: "local",
+        endpoint: "http://127.0.0.1:8000",
+      }),
       "tableName",
       { id: "uuid" },
     );
@@ -73,13 +85,16 @@ describe("Item Delete", () => {
   });
 
   test("should fail on non-retryable error", async () => {
-    const scope = nock("https://localhost:8000")
+    const scope = nock("http://127.0.0.1:8000")
       .persist(true)
       .post("/")
       .replyWithError("Unknown");
 
     const instance = new Delete(
-      new DynatronClient({ region: "local" }),
+      new DynatronClient({
+        region: "local",
+        endpoint: "http://127.0.0.1:8000",
+      }),
       "tableName",
       { id: "uuid" },
     );

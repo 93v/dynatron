@@ -12,7 +12,10 @@ afterEach(() => {
 describe("Table TTL Update", () => {
   test("should return an instance of Request", () => {
     const instance = new TableTTLUpdate(
-      new DynatronClient({ region: "local" }),
+      new DynatronClient({
+        region: "local",
+        endpoint: "http://127.0.0.1:8000",
+      }),
       {
         TableName: "tableName",
         TimeToLiveSpecification: {
@@ -25,12 +28,15 @@ describe("Table TTL Update", () => {
   });
 
   test("should return a response with the specification", async () => {
-    const scope = nock("https://localhost:8000")
+    const scope = nock("http://127.0.0.1:8000")
       .post("/")
       .reply(200, { TimeToLiveSpecification: {} });
 
     const instance = new TableTTLUpdate(
-      new DynatronClient({ region: "local" }),
+      new DynatronClient({
+        region: "local",
+        endpoint: "http://127.0.0.1:8000",
+      }),
       {
         TableName: "tableName",
         TimeToLiveSpecification: {
@@ -45,13 +51,16 @@ describe("Table TTL Update", () => {
   });
 
   test("should retry on retryable error", async () => {
-    const scope = nock("https://localhost:8000")
+    const scope = nock("http://127.0.0.1:8000")
       .persist(true)
       .post("/")
       .replyWithError("ECONN: Connection error");
 
     const instance = new TableTTLUpdate(
-      new DynatronClient({ region: "local" }),
+      new DynatronClient({
+        region: "local",
+        endpoint: "http://127.0.0.1:8000",
+      }),
       {
         TableName: "tableName",
         TimeToLiveSpecification: {
@@ -71,13 +80,16 @@ describe("Table TTL Update", () => {
   });
 
   test("should fail on non-retryable error", async () => {
-    const scope = nock("https://localhost:8000")
+    const scope = nock("http://127.0.0.1:8000")
       .persist(true)
       .post("/")
       .replyWithError("Unknown");
 
     const instance = new TableTTLUpdate(
-      new DynatronClient({ region: "local" }),
+      new DynatronClient({
+        region: "local",
+        endpoint: "http://127.0.0.1:8000",
+      }),
       {
         TableName: "tableName",
         TimeToLiveSpecification: {

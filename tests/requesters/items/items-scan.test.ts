@@ -13,7 +13,10 @@ afterEach(() => {
 describe("Scan", () => {
   test("should return an instance of ListFetch", () => {
     const instance = new Scan(
-      new DynatronClient({ region: "local" }),
+      new DynatronClient({
+        region: "local",
+        endpoint: "http://127.0.0.1:8000",
+      }),
       "tableName",
     );
     expect(instance).toBeInstanceOf(ListFetch);
@@ -21,7 +24,10 @@ describe("Scan", () => {
 
   test("should build correctly", () => {
     const instance = new Scan(
-      new DynatronClient({ region: "local" }),
+      new DynatronClient({
+        region: "local",
+        endpoint: "http://127.0.0.1:8000",
+      }),
       "tableName",
     );
     instance.totalSegments();
@@ -41,7 +47,10 @@ describe("Scan", () => {
 
   test("should return an instance of Scan", () => {
     const instance = new Scan(
-      new DynatronClient({ region: "local" }),
+      new DynatronClient({
+        region: "local",
+        endpoint: "http://127.0.0.1:8000",
+      }),
       "tableName",
     );
     instance.segment(100);
@@ -55,7 +64,10 @@ describe("Scan", () => {
 
   test("should return an instance of Scan", () => {
     const instance = new Scan(
-      new DynatronClient({ region: "local" }),
+      new DynatronClient({
+        region: "local",
+        endpoint: "http://127.0.0.1:8000",
+      }),
       "tableName",
     );
     instance.disableSegments();
@@ -66,13 +78,16 @@ describe("Scan", () => {
   });
 
   test("should return an instance of Scan", async () => {
-    const scope = nock("https://localhost:8000")
+    const scope = nock("http://127.0.0.1:8000")
       .persist(true)
       .post("/")
       .reply(200, {});
 
     const instance = new Scan(
-      new DynatronClient({ region: "local" }),
+      new DynatronClient({
+        region: "local",
+        endpoint: "http://127.0.0.1:8000",
+      }),
       "tableName",
     );
     expect(await instance.$(true)).toEqual({
@@ -85,7 +100,7 @@ describe("Scan", () => {
   });
 
   test("should return an instance of Scan", async () => {
-    const scope = nock("https://localhost:8000")
+    const scope = nock("http://127.0.0.1:8000")
       .persist(true)
       .post("/")
       .reply(200, {
@@ -93,7 +108,10 @@ describe("Scan", () => {
       });
 
     const instance = new Scan(
-      new DynatronClient({ region: "local" }),
+      new DynatronClient({
+        region: "local",
+        endpoint: "http://127.0.0.1:8000",
+      }),
       "tableName",
     );
     instance.totalSegments(1);
@@ -107,7 +125,7 @@ describe("Scan", () => {
   });
 
   test("should return an instance of Scan", async () => {
-    const scope = nock("https://localhost:8000")
+    const scope = nock("http://127.0.0.1:8000")
       .persist(true)
       .post("/")
       .reply(200, {
@@ -116,6 +134,7 @@ describe("Scan", () => {
     const instance = new Scan(
       new DynatronClient({
         region: "local",
+        endpoint: "http://127.0.0.1:8000",
         returnMetrics: true,
       }),
       "tableName",
@@ -131,7 +150,7 @@ describe("Scan", () => {
   });
 
   test("should return an instance of Scan", async () => {
-    const scope = nock("https://localhost:8000")
+    const scope = nock("http://127.0.0.1:8000")
       .persist(true)
       .post("/")
       .reply(200, {
@@ -142,6 +161,7 @@ describe("Scan", () => {
     const instance = new Scan(
       new DynatronClient({
         region: "local",
+        endpoint: "http://127.0.0.1:8000",
         returnMetrics: true,
       }),
       "tableName",
@@ -158,7 +178,7 @@ describe("Scan", () => {
   });
 
   test("should return an instance of Scan", async () => {
-    const scope = nock("https://localhost:8000")
+    const scope = nock("http://127.0.0.1:8000")
       .persist(true)
       .post("/")
       .reply(200, {
@@ -169,6 +189,7 @@ describe("Scan", () => {
     const instance = new Scan(
       new DynatronClient({
         region: "local",
+        endpoint: "http://127.0.0.1:8000",
         returnMetrics: true,
       }),
       "tableName",
@@ -187,7 +208,7 @@ describe("Scan", () => {
   });
 
   test("should return an instance of Scan", async () => {
-    const scope = nock("https://localhost:8000")
+    const scope = nock("http://127.0.0.1:8000")
       .persist(true)
       .post("/")
       .reply(200, {
@@ -197,6 +218,7 @@ describe("Scan", () => {
     const instance = new Scan(
       new DynatronClient({
         region: "local",
+        endpoint: "http://127.0.0.1:8000",
         returnMetrics: true,
       }),
       "tableName",
@@ -214,7 +236,7 @@ describe("Scan", () => {
   });
 
   test("should return an instance of Scan", async () => {
-    const scope = nock("https://localhost:8000")
+    const scope = nock("http://127.0.0.1:8000")
       .persist(true)
       .post("/")
       .reply(200, {
@@ -227,6 +249,7 @@ describe("Scan", () => {
     const instance = new Scan(
       new DynatronClient({
         region: "local",
+        endpoint: "http://127.0.0.1:8000",
         returnMetrics: true,
       }),
       "tableName",
@@ -242,13 +265,16 @@ describe("Scan", () => {
   });
 
   test("should retry on retryable error", async () => {
-    const scope = nock("https://localhost:8000")
+    const scope = nock("http://127.0.0.1:8000")
       .persist(true)
       .post("/")
       .replyWithError("ECONN: Connection error");
 
     const instance = new Scan(
-      new DynatronClient({ region: "local" }),
+      new DynatronClient({
+        region: "local",
+        endpoint: "http://127.0.0.1:8000",
+      }),
       "tableName",
     );
     try {
@@ -261,13 +287,16 @@ describe("Scan", () => {
   });
 
   test("should fail on non-retryable error", async () => {
-    const scope = nock("https://localhost:8000")
+    const scope = nock("http://127.0.0.1:8000")
       .persist(true)
       .post("/")
       .replyWithError("Unknown");
 
     const instance = new Scan(
-      new DynatronClient({ region: "local" }),
+      new DynatronClient({
+        region: "local",
+        endpoint: "http://127.0.0.1:8000",
+      }),
       "tableName",
     );
     try {

@@ -21,7 +21,10 @@ beforeAll(() => {
 describe("Item TransactGet", () => {
   test("should return an instance of ItemRequest", () => {
     const instance = new TransactGet(
-      new DynatronClient({ region: "local" }),
+      new DynatronClient({
+        region: "local",
+        endpoint: "http://127.0.0.1:8000",
+      }),
       [],
     );
     expect(instance).toBeInstanceOf(ItemRequest);
@@ -29,7 +32,10 @@ describe("Item TransactGet", () => {
 
   test("should build correctly", () => {
     const instance = new TransactGet(
-      new DynatronClient({ region: "local" }),
+      new DynatronClient({
+        region: "local",
+        endpoint: "http://127.0.0.1:8000",
+      }),
       [],
     );
     expect(instance).toBeInstanceOf(TransactGet);
@@ -40,14 +46,18 @@ describe("Item TransactGet", () => {
   });
 
   test("should handle no response correctly", async () => {
-    const scope = nock("https://localhost:8000")
+    const scope = nock("http://127.0.0.1:8000")
       .persist(true)
       .post("/")
       .reply(200, {});
 
-    const instance = new TransactGet(new DynatronClient({ region: "local" }), [
-      database.Items("tableName1").get({ id: "uuid1" }).select("value"),
-    ]);
+    const instance = new TransactGet(
+      new DynatronClient({
+        region: "local",
+        endpoint: "http://127.0.0.1:8000",
+      }),
+      [database.Items("tableName1").get({ id: "uuid1" }).select("value")],
+    );
     expect(await instance.$()).toEqual({});
     expect(await instance.$()).toEqual({});
     scope.persist(false);
@@ -55,14 +65,18 @@ describe("Item TransactGet", () => {
   });
 
   test("should handle raw response flag correctly", async () => {
-    const scope = nock("https://localhost:8000")
+    const scope = nock("http://127.0.0.1:8000")
       .persist(true)
       .post("/")
       .reply(200, { Responses: [{ Item: { id: { S: "uuid" } } }] });
 
-    const instance = new TransactGet(new DynatronClient({ region: "local" }), [
-      database.Items("tableName1").get({ id: "uuid1" }).select("value"),
-    ]);
+    const instance = new TransactGet(
+      new DynatronClient({
+        region: "local",
+        endpoint: "http://127.0.0.1:8000",
+      }),
+      [database.Items("tableName1").get({ id: "uuid1" }).select("value")],
+    );
     expect(await instance.$()).toEqual({ data: [{ id: "uuid" }] });
     expect(await instance.$()).toEqual({
       data: [{ id: "uuid" }],
@@ -72,13 +86,16 @@ describe("Item TransactGet", () => {
   });
 
   test("should retry on retryable error", async () => {
-    const scope = nock("https://localhost:8000")
+    const scope = nock("http://127.0.0.1:8000")
       .persist(true)
       .post("/")
       .replyWithError("ECONN: Connection error");
 
     const instance = new TransactGet(
-      new DynatronClient({ region: "local" }),
+      new DynatronClient({
+        region: "local",
+        endpoint: "http://127.0.0.1:8000",
+      }),
       [],
     );
     try {
@@ -91,13 +108,16 @@ describe("Item TransactGet", () => {
   });
 
   test("should fail on non-retryable error", async () => {
-    const scope = nock("https://localhost:8000")
+    const scope = nock("http://127.0.0.1:8000")
       .persist(true)
       .post("/")
       .replyWithError("Unknown");
 
     const instance = new TransactGet(
-      new DynatronClient({ region: "local" }),
+      new DynatronClient({
+        region: "local",
+        endpoint: "http://127.0.0.1:8000",
+      }),
       [],
     );
     try {

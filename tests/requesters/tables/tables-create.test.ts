@@ -12,20 +12,32 @@ afterEach(() => {
 
 describe("Table Create", () => {
   test("should return an instance of Request", () => {
-    const instance = new TableCreate(new DynatronClient({ region: "local" }), {
-      AttributeDefinitions: [],
-      KeySchema: [],
-      TableName: "tableName",
-    });
+    const instance = new TableCreate(
+      new DynatronClient({
+        region: "local",
+        endpoint: "http://127.0.0.1:8000",
+      }),
+      {
+        AttributeDefinitions: [],
+        KeySchema: [],
+        TableName: "tableName",
+      },
+    );
     expect(instance).toBeInstanceOf(Request);
   });
 
   test("should build correctly", () => {
-    const instance = new TableCreate(new DynatronClient({ region: "local" }), {
-      AttributeDefinitions: [],
-      KeySchema: [],
-      TableName: "tableName",
-    });
+    const instance = new TableCreate(
+      new DynatronClient({
+        region: "local",
+        endpoint: "http://127.0.0.1:8000",
+      }),
+      {
+        AttributeDefinitions: [],
+        KeySchema: [],
+        TableName: "tableName",
+      },
+    );
     expect(instance[BUILD]()).toEqual({
       AttributeDefinitions: [],
       KeySchema: [],
@@ -34,32 +46,44 @@ describe("Table Create", () => {
   });
 
   test("should return a response", async () => {
-    const scope = nock("https://localhost:8000")
+    const scope = nock("http://127.0.0.1:8000")
       .persist(true)
       .post("/")
       .reply(200, { TableDescription: {} });
 
-    const instance = new TableCreate(new DynatronClient({ region: "local" }), {
-      AttributeDefinitions: [],
-      KeySchema: [],
-      TableName: "tableName",
-    });
+    const instance = new TableCreate(
+      new DynatronClient({
+        region: "local",
+        endpoint: "http://127.0.0.1:8000",
+      }),
+      {
+        AttributeDefinitions: [],
+        KeySchema: [],
+        TableName: "tableName",
+      },
+    );
     expect(await instance.$()).toEqual({ data: {} });
     scope.persist(false);
     nock.cleanAll();
   });
 
   test("should retry on retryable error", async () => {
-    const scope = nock("https://localhost:8000")
+    const scope = nock("http://127.0.0.1:8000")
       .persist(true)
       .post("/")
       .replyWithError("ECONN: Connection error");
 
-    const instance = new TableCreate(new DynatronClient({ region: "local" }), {
-      AttributeDefinitions: [],
-      KeySchema: [],
-      TableName: "tableName",
-    });
+    const instance = new TableCreate(
+      new DynatronClient({
+        region: "local",
+        endpoint: "http://127.0.0.1:8000",
+      }),
+      {
+        AttributeDefinitions: [],
+        KeySchema: [],
+        TableName: "tableName",
+      },
+    );
 
     try {
       await instance.$();
@@ -71,16 +95,22 @@ describe("Table Create", () => {
   });
 
   test("should fail on non-retryable error", async () => {
-    const scope = nock("https://localhost:8000")
+    const scope = nock("http://127.0.0.1:8000")
       .persist(true)
       .post("/")
       .replyWithError("Unknown");
 
-    const instance = new TableCreate(new DynatronClient({ region: "local" }), {
-      AttributeDefinitions: [],
-      KeySchema: [],
-      TableName: "tableName",
-    });
+    const instance = new TableCreate(
+      new DynatronClient({
+        region: "local",
+        endpoint: "http://127.0.0.1:8000",
+      }),
+      {
+        AttributeDefinitions: [],
+        KeySchema: [],
+        TableName: "tableName",
+      },
+    );
 
     try {
       await instance.$();

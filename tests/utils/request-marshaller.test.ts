@@ -1,3 +1,8 @@
+import {
+  ReturnConsumedCapacity,
+  ReturnItemCollectionMetrics,
+  ReturnValue,
+} from "@aws-sdk/client-dynamodb";
 import { marshall } from "@aws-sdk/util-dynamodb";
 
 import { and, eq } from "../../src";
@@ -57,14 +62,20 @@ describe("Request Marshaller", () => {
     });
 
     expect(
-      marshallRequestParameters({ ReturnConsumedCapacity: "INDEXES" }),
+      marshallRequestParameters({
+        ReturnConsumedCapacity: ReturnConsumedCapacity.INDEXES,
+      }),
     ).toEqual({ ReturnConsumedCapacity: "INDEXES" });
 
     expect(
-      marshallRequestParameters({ ReturnItemCollectionMetrics: "SIZE" }),
+      marshallRequestParameters({
+        ReturnItemCollectionMetrics: ReturnItemCollectionMetrics.SIZE,
+      }),
     ).toEqual({ ReturnItemCollectionMetrics: "SIZE" });
 
-    expect(marshallRequestParameters({ ReturnValues: "ALL_NEW" })).toEqual({
+    expect(
+      marshallRequestParameters({ ReturnValues: ReturnValue.ALL_NEW }),
+    ).toEqual({
       ReturnValues: "ALL_NEW",
     });
 

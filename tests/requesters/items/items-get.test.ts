@@ -13,7 +13,10 @@ afterEach(() => {
 describe("Item Get", () => {
   test("should return an instance of Fetch", () => {
     const instance = new Get(
-      new DynatronClient({ region: "local" }),
+      new DynatronClient({
+        region: "local",
+        endpoint: "http://127.0.0.1:8000",
+      }),
       "tableName",
       { id: "uuid" },
     );
@@ -22,7 +25,10 @@ describe("Item Get", () => {
 
   test("should build with minimal properties", () => {
     const instance = new Get(
-      new DynatronClient({ region: "local" }),
+      new DynatronClient({
+        region: "local",
+        endpoint: "http://127.0.0.1:8000",
+      }),
       "tableName",
       { id: "uuid" },
     );
@@ -34,13 +40,16 @@ describe("Item Get", () => {
   });
 
   test("should correctly handle raw response flag", async () => {
-    const scope = nock("https://localhost:8000")
+    const scope = nock("http://127.0.0.1:8000")
       .persist(true)
       .post("/")
       .reply(200, { Item: { id: { S: "uuid" } } });
 
     const instance = new Get(
-      new DynatronClient({ region: "local" }),
+      new DynatronClient({
+        region: "local",
+        endpoint: "http://127.0.0.1:8000",
+      }),
       "tableName",
       { id: "uuid" },
     );
@@ -52,13 +61,16 @@ describe("Item Get", () => {
   });
 
   test("should retry on retryable error", async () => {
-    const scope = nock("https://localhost:8000")
+    const scope = nock("http://127.0.0.1:8000")
       .persist(true)
       .post("/")
       .replyWithError("ECONN: Connection error");
 
     const instance = new Get(
-      new DynatronClient({ region: "local" }),
+      new DynatronClient({
+        region: "local",
+        endpoint: "http://127.0.0.1:8000",
+      }),
       "tableName",
       { id: "uuid" },
     );
@@ -72,13 +84,16 @@ describe("Item Get", () => {
   });
 
   test("should fail on non-retryable error", async () => {
-    const scope = nock("https://localhost:8000")
+    const scope = nock("http://127.0.0.1:8000")
       .persist(true)
       .post("/")
       .replyWithError("Unknown");
 
     const instance = new Get(
-      new DynatronClient({ region: "local" }),
+      new DynatronClient({
+        region: "local",
+        endpoint: "http://127.0.0.1:8000",
+      }),
       "tableName",
       { id: "uuid" },
     );
