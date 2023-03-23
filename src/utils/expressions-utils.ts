@@ -1,6 +1,6 @@
 import { NativeAttributeValue } from "@aws-sdk/util-dynamodb";
 
-import { Condition } from "../../types/conditions";
+import { Condition } from "../";
 import { and } from "../condition-expression-builders";
 import { NativeValue } from "../dynatron";
 import { UpdateType } from "../requesters/items/items-update";

@@ -6,7 +6,7 @@ import {
 } from "@aws-sdk/client-dynamodb";
 import { marshall, marshallOptions } from "@aws-sdk/util-dynamodb";
 
-import { AndCondition, Condition } from "../../types/conditions";
+import { AndCondition, Condition } from "../";
 import { NativeValue } from "../dynatron";
 import { UpdateType } from "../requesters/items/items-update";
 import {

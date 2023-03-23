@@ -1,6 +1,6 @@
 import { ReturnValue } from "@aws-sdk/client-dynamodb";
 
-import { Condition } from "../../../types/conditions";
+import { Condition } from "../..";
 import { isConditionEmptyDeep } from "../../condition-expression-builders";
 import { DynatronClient, NativeValue } from "../../dynatron";
 import { BUILD, validateKey } from "../../utils/misc-utils";

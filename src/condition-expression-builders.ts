@@ -20,7 +20,7 @@ import {
   NotEqualsCondition,
   OrCondition,
   SizeCondition,
-} from "../types/conditions";
+} from "./";
 
 export const and = (
   ...conditions: (Condition | Condition[])[]

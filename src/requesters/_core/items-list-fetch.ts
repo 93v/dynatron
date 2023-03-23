@@ -1,4 +1,4 @@
-import { Condition } from "../../../types/conditions";
+import { Condition } from "../..";
 import { isConditionEmptyDeep } from "../../condition-expression-builders";
 import { NativeValue } from "../../dynatron";
 import { BUILD } from "../../utils/misc-utils";

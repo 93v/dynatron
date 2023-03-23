@@ -8,7 +8,7 @@ import {
 import { unmarshall } from "@aws-sdk/util-dynamodb";
 
 import { ListFetch } from "../_core/items-list-fetch";
-import { EqualsCondition, KeyCondition } from "../../../types/conditions";
+import { EqualsCondition, KeyCondition } from "../..";
 import { and } from "../../condition-expression-builders";
 import { DynatronClient, NativeValue } from "../../dynatron";
 import {
